@@ -287,6 +287,50 @@ public class PeSTO
 				+ Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.QUEEN))) * QUEEN_PHASE;
 		// @formatter:on
 	}
+	
+	private static int middleGameMaterialEval(Board board)
+	{
+
+		Side ourSide = board.getSideToMove();
+		Side opposite = board.getSideToMove().flip();
+		// @formatter:off
+		return Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) * MG_PAWN_VALUE
+				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.KNIGHT))) * MG_KNIGHT_VALUE
+				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.BISHOP))) * MG_BISHOP_VALUE
+				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.ROOK))) * MG_ROOK_VALUE
+				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.QUEEN))) * MG_QUEEN_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.PAWN))) * MG_PAWN_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.KNIGHT))) * MG_KNIGHT_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.BISHOP))) * MG_BISHOP_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.ROOK))) * MG_ROOK_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.QUEEN))) * MG_QUEEN_VALUE;
+		// @formatter:on
+	}
+	
+	private static int endGameMaterialEval(Board board)
+	{
+
+		Side ourSide = board.getSideToMove();
+		Side opposite = board.getSideToMove().flip();
+		// @formatter:off
+		return Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) * EG_PAWN_VALUE
+				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.KNIGHT))) * EG_KNIGHT_VALUE
+				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.BISHOP))) * EG_BISHOP_VALUE
+				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.ROOK))) * EG_ROOK_VALUE
+				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.QUEEN))) * EG_QUEEN_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.PAWN))) * EG_PAWN_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.KNIGHT))) * EG_KNIGHT_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.BISHOP))) * EG_BISHOP_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.ROOK))) * EG_ROOK_VALUE
+				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.QUEEN))) * EG_QUEEN_VALUE;
+		// @formatter:on
+	}
+	
+	public static int materialEval(Board board)
+	{
+		int gamePhase = Math.min(MAX_PHASE, gamePhase(board));
+		return middleGameMaterialEval(board) * gamePhase + endGameMaterialEval(board) * (MAX_PHASE - gamePhase);
+	}
 
 	public static int evaluate(Board board)
 	{
