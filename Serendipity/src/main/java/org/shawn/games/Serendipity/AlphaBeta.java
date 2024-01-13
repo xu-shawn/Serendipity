@@ -2,8 +2,6 @@ package org.shawn.games.Serendipity;
 
 import java.util.*;
 
-import org.shawn.games.Serendipity.TranspositionTable.NodeType;
-
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
 
@@ -27,18 +25,6 @@ public class AlphaBeta
 	private long timeLimit;
 	
 	private Move[][] pv;
-
-	private class MoveWithScore
-	{
-		public final Move move;
-		public final int score;
-
-		public MoveWithScore(Move move, int score)
-		{
-			this.move = move;
-			this.score = score;
-		}
-	}
 
 	public AlphaBeta()
 	{
