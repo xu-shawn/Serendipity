@@ -18,11 +18,15 @@ public class AlphaBeta
 	private final int MIN_EVAL = -1000000000;
 	private final int MATE_EVAL = 500000000;
 	private final int DRAW_EVAL = 0;
+	
+	private final int MAX_PLY = 256;
 
 	private final TranspositionTable tt;
 
 	private int nodesCount;
 	private long timeLimit;
+	
+	private Move[][] pv;
 
 	private class MoveWithScore
 	{
@@ -40,6 +44,13 @@ public class AlphaBeta
 	{
 		this.tt = new TranspositionTable(8388608);
 		this.nodesCount = 0;
+		this.pv = new Move[MAX_PLY][MAX_PLY];
+	}
+	
+	private void updatePV(Move move, int ply)
+	{
+		pv[ply][0] = move;
+		System.arraycopy(pv[ply + 1], 0, pv[ply], 1, MAX_PLY - 1);
 	}
 
 	private int pieceValue(Piece p)
@@ -177,23 +188,28 @@ public class AlphaBeta
 			throws TimeOutException
 	{
 		this.nodesCount++;
+		this.pv[ply][0] = null;
 
 		if ((nodesCount & 1023) == 0 && isTimeUp())
 		{
 			throw new TimeOutException();
 		}
 
-		if (board.isMated())
+		final List<Move> legalMoves = board.legalMoves();
+
+		if (legalMoves.isEmpty())
 		{
-			return -MATE_EVAL + ply;
+			if(board.isKingAttacked())
+			{
+				return -MATE_EVAL + ply;
+			}
+			else
+			{
+				return -DRAW_EVAL;
+			}
 		}
 
-		if (board.isDraw())
-		{
-			return -DRAW_EVAL;
-		}
-
-		if (depth <= 0)
+		if (depth <= 0 || ply >= MAX_PLY)
 		{
 			return quiesce(board, alpha, beta, ply + 1);
 		}
@@ -243,30 +259,33 @@ public class AlphaBeta
 			}
 		}
 
-		final List<Move> legalMoves = board.legalMoves();
 		int oldAlpha = alpha;
 
 		sortMoves(legalMoves, board, true);
 
 		for (Move move : legalMoves)
 		{
-			board.doMove(move);
-
 			int newdepth = depth - 1;
+			
+			board.doMove(move);
 
 			int thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
 
-			alpha = Math.max(alpha, thisMoveEval);
-
-			if (alpha >= beta)
-			{
-				board.undoMove();
-				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND,
-						depth, alpha);
-				return beta;
-			}
-
 			board.undoMove();
+
+			if(thisMoveEval > alpha)
+			{
+				alpha = thisMoveEval;
+				
+				if (alpha >= beta)
+				{
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND,
+							depth, alpha);
+					return beta;
+				}
+				
+				updatePV(move, ply);
+			}
 		}
 
 		if (alpha == oldAlpha)
@@ -284,41 +303,10 @@ public class AlphaBeta
 		return alpha;
 	}
 
-	private MoveWithScore rootSearch(Board board, int depth) throws TimeOutException
-	{
-		final List<Move> legalMoves = board.legalMoves();
-
-		sortMoves(legalMoves, board, true);
-
-		Move bestMove = legalMoves.get(0);
-
-		int rootAlpha = MIN_EVAL;
-		int rootBeta = MAX_EVAL;
-
-		for (Move move : legalMoves)
-		{
-			board.doMove(move);
-			int thisMoveEval;
-
-			thisMoveEval = -mainSearch(board, depth - 1, -rootBeta, -rootAlpha, 1, true);
-
-			board.undoMove();
-
-			if (thisMoveEval > rootAlpha)
-			{
-				bestMove = move;
-				rootAlpha = thisMoveEval;
-			}
-		}
-
-		tt.write(board.getIncrementalHashKey(), NodeType.EXACT, depth, rootAlpha);
-
-		return new MoveWithScore(bestMove, rootAlpha);
-	}
-
 	public Move nextMove(Board board, int targetDepth, long msLeft)
 	{
-		MoveWithScore currentMove = null;
+		int currentScore;
+		Move[] lastCompletePV = null;
 		this.nodesCount = 0;
 		long startTime = System.nanoTime();
 		this.timeLimit = System.nanoTime() + msLeft * 1000000L;
@@ -327,19 +315,16 @@ public class AlphaBeta
 		{
 			for (int i = 1; i <= targetDepth; i++)
 			{
-				currentMove = rootSearch(board, i);
-				UCI.report(i, nodesCount, currentMove.score / PeSTO.MAX_PHASE,
-						(System.nanoTime() - startTime) / 1000000, Arrays.asList(currentMove.move));
+				currentScore = mainSearch(board, i, MIN_EVAL, MAX_EVAL, 0, true);
+				lastCompletePV = pv[0].clone();
+				UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
+						(System.nanoTime() - startTime) / 1000000, lastCompletePV);
 			}
 		}
 
-		catch (TimeOutException e)
-		{
-			UCI.reportBestMove(currentMove.move);
-			return currentMove.move;
-		}
+		catch (TimeOutException e) {}
 
-		UCI.reportBestMove(currentMove.move);
-		return currentMove.move;
+		UCI.reportBestMove(lastCompletePV[0]);
+		return lastCompletePV[0];
 	}
 }

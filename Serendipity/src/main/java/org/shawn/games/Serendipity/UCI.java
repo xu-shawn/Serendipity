@@ -18,11 +18,11 @@ public class UCI
 		UCIMainLoop();
 	}
 
-	public static void report(int depth, int nodes, int score, long ms, List<Move> pv)
+	public static void report(int depth, int nodes, int score, long ms, Move[] pv)
 	{
 		System.out.printf("info depth %d nodes %d score cp %d time %d pv %s\n", depth, nodes, score,
-				ms,
-				String.join(" ", pv.stream().map(Object::toString).collect(Collectors.toList())));
+				ms, String.join(" ", Arrays.stream(pv).takeWhile(x -> x != null).map(Object::toString)
+						.collect(Collectors.toList())));
 	}
 
 	public static void reportBestMove(Move bestMove)
@@ -98,7 +98,7 @@ public class UCI
 								? wtime / 20 + winc / 2
 								: btime / 20 + binc / 2;
 
-						engine.nextMove(internalBoard, depth, timeGiven - 100);
+						engine.nextMove(internalBoard.clone(), depth, timeGiven - 100);
 						break;
 					case "position":
 						for (int i = 1; i < fullCommand.length; i++)
