@@ -173,7 +173,7 @@ public class AlphaBeta
 		return alpha;
 	}
 
-	private int mainSearch(Board board, int depth, int alpha, int beta, int ply)
+	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed)
 			throws TimeOutException
 	{
 		this.nodesCount++;
@@ -226,6 +226,23 @@ public class AlphaBeta
 			}
 		}
 
+		if (nullAllowed && beta < MATE_EVAL - 1024 && !board.isKingAttacked()
+				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING)) | board
+						.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
+						.getBitboard(board.getSideToMove()) && PeSTO.evaluate(board) >= beta)
+		{
+			board.doNullMove();
+			int nullEval = -mainSearch(board, depth - 3, -beta, -beta + 1, ply + 1, false);
+			board.undoMove();
+			
+			if(nullEval >= beta)
+			{
+				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND,
+						depth, nullEval);
+				return nullEval;
+			}
+		}
+
 		final List<Move> legalMoves = board.legalMoves();
 		int oldAlpha = alpha;
 
@@ -237,7 +254,7 @@ public class AlphaBeta
 
 			int newdepth = depth - 1;
 
-			int thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1);
+			int thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
 
 			alpha = Math.max(alpha, thisMoveEval);
 
@@ -282,21 +299,9 @@ public class AlphaBeta
 		{
 			board.doMove(move);
 			int thisMoveEval;
-			
-			try
-			{
-				thisMoveEval = -mainSearch(board, depth - 1, -rootBeta, -rootAlpha, 1);
-			}
-			catch(TimeOutException e)
-			{
-				if(depth <= 0)
-				{
-					return new MoveWithScore(bestMove, rootAlpha);
-				}
-				
-				throw e;
-			}
-			
+
+			thisMoveEval = -mainSearch(board, depth - 1, -rootBeta, -rootAlpha, 1, true);
+
 			board.undoMove();
 
 			if (thisMoveEval > rootAlpha)
