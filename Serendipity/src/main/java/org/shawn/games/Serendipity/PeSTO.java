@@ -150,11 +150,17 @@ public class PeSTO
 	};
 	// @formatter:on
 
-	final static int PAWN_VALUE = 100;
-	final static int KNIGHT_VALUE = 300;
-	final static int BISHOP_VALUE = 300;
-	final static int ROOK_VALUE = 500;
-	final static int QUEEN_VALUE = 900;
+	final static int MG_PAWN_VALUE = 82;
+	final static int MG_KNIGHT_VALUE = 337;
+	final static int MG_BISHOP_VALUE = 365;
+	final static int MG_ROOK_VALUE = 477;
+	final static int MG_QUEEN_VALUE = 1025;
+
+	final static int EG_PAWN_VALUE = 94;
+	final static int EG_KNIGHT_VALUE = 281;
+	final static int EG_BISHOP_VALUE = 297;
+	final static int EG_ROOK_VALUE = 512;
+	final static int EG_QUEEN_VALUE = 936;
 
 	final static int PAWN_PHASE = 0;
 	final static int KNIGHT_PHASE = 1;
@@ -175,15 +181,15 @@ public class PeSTO
 		switch (piece.getPieceType())
 		{
 			case PAWN:
-				return MG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + PAWN_VALUE;
+				return MG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + MG_PAWN_VALUE;
 			case KNIGHT:
-				return MG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + KNIGHT_VALUE;
+				return MG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + MG_KNIGHT_VALUE;
 			case BISHOP:
-				return MG_BISHOP_TABLE[getIndex(piece.getPieceSide(), square)] + BISHOP_VALUE;
+				return MG_BISHOP_TABLE[getIndex(piece.getPieceSide(), square)] + MG_BISHOP_VALUE;
 			case ROOK:
-				return MG_ROOK_TABLE[getIndex(piece.getPieceSide(), square)] + ROOK_VALUE;
+				return MG_ROOK_TABLE[getIndex(piece.getPieceSide(), square)] + MG_ROOK_VALUE;
 			case QUEEN:
-				return MG_QUEEN_TABLE[getIndex(piece.getPieceSide(), square)] + QUEEN_VALUE;
+				return MG_QUEEN_TABLE[getIndex(piece.getPieceSide(), square)] + MG_QUEEN_VALUE;
 			case KING:
 				return MG_KING_TABLE[getIndex(piece.getPieceSide(), square)];
 			default:
@@ -197,15 +203,15 @@ public class PeSTO
 		switch (piece.getPieceType())
 		{
 			case PAWN:
-				return EG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + PAWN_VALUE;
+				return EG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + EG_PAWN_VALUE;
 			case KNIGHT:
-				return EG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + KNIGHT_VALUE;
+				return EG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + EG_KNIGHT_VALUE;
 			case BISHOP:
-				return EG_BISHOP_TABLE[getIndex(piece.getPieceSide(), square)] + BISHOP_VALUE;
+				return EG_BISHOP_TABLE[getIndex(piece.getPieceSide(), square)] + EG_BISHOP_VALUE;
 			case ROOK:
-				return EG_ROOK_TABLE[getIndex(piece.getPieceSide(), square)] + ROOK_VALUE;
+				return EG_ROOK_TABLE[getIndex(piece.getPieceSide(), square)] + EG_ROOK_VALUE;
 			case QUEEN:
-				return EG_QUEEN_TABLE[getIndex(piece.getPieceSide(), square)] + QUEEN_VALUE;
+				return EG_QUEEN_TABLE[getIndex(piece.getPieceSide(), square)] + EG_QUEEN_VALUE;
 			case KING:
 				return EG_KING_TABLE[getIndex(piece.getPieceSide(), square)];
 			default:
