@@ -281,7 +281,22 @@ public class AlphaBeta
 		for (Move move : legalMoves)
 		{
 			board.doMove(move);
-			int thisMoveEval = -mainSearch(board, depth - 1, -rootBeta, -rootAlpha, 1);
+			int thisMoveEval;
+			
+			try
+			{
+				thisMoveEval = -mainSearch(board, depth - 1, -rootBeta, -rootAlpha, 1);
+			}
+			catch(TimeOutException e)
+			{
+				if(depth <= 0)
+				{
+					return new MoveWithScore(bestMove, rootAlpha);
+				}
+				
+				throw e;
+			}
+			
 			board.undoMove();
 
 			if (thisMoveEval > rootAlpha)
@@ -299,6 +314,7 @@ public class AlphaBeta
 	public Move nextMove(Board board, int targetDepth, long msLeft)
 	{
 		MoveWithScore currentMove = null;
+		this.nodesCount = 0;
 		long startTime = System.nanoTime();
 		this.timeLimit = System.nanoTime() + msLeft * 1000000L;
 
