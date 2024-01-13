@@ -23,12 +23,12 @@ public class AlphaBeta
 
 	private int nodesCount;
 	private long timeLimit;
-	
+
 	private class MoveWithScore
 	{
 		public final Move move;
 		public final int score;
-		
+
 		public MoveWithScore(Move move, int score)
 		{
 			this.move = move;
@@ -173,11 +173,12 @@ public class AlphaBeta
 		return alpha;
 	}
 
-	private int mainSearch(Board board, int depth, int alpha, int beta, int ply) throws TimeOutException
+	private int mainSearch(Board board, int depth, int alpha, int beta, int ply)
+			throws TimeOutException
 	{
 		this.nodesCount++;
-		
-		if((nodesCount & 1023) == 0 && isTimeUp())
+
+		if ((nodesCount & 1023) == 0 && isTimeUp())
 		{
 			throw new TimeOutException();
 		}
@@ -289,7 +290,7 @@ public class AlphaBeta
 				rootAlpha = thisMoveEval;
 			}
 		}
-		
+
 		tt.write(board.getIncrementalHashKey(), NodeType.EXACT, depth, rootAlpha);
 
 		return new MoveWithScore(bestMove, rootAlpha);
@@ -300,16 +301,17 @@ public class AlphaBeta
 		MoveWithScore currentMove = null;
 		long startTime = System.nanoTime();
 		this.timeLimit = System.nanoTime() + msLeft * 1000000L;
-		
+
 		try
 		{
-			for(int i = 1; i <= targetDepth; i ++)
+			for (int i = 1; i <= targetDepth; i++)
 			{
 				currentMove = rootSearch(board, i);
-				UCI.report(i, nodesCount, currentMove.score, (System.nanoTime() - startTime) / 1000000, Arrays.asList(currentMove.move));
+				UCI.report(i, nodesCount, currentMove.score / PeSTO.MAX_PHASE,
+						(System.nanoTime() - startTime) / 1000000, Arrays.asList(currentMove.move));
 			}
 		}
-		
+
 		catch (TimeOutException e)
 		{
 			UCI.reportBestMove(currentMove.move);

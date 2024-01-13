@@ -61,6 +61,6 @@ public class TranspositionTable
 
 	public void write(long hash, NodeType type, int depth, int evaluation)
 	{
-		entries[(int) (hash & mask)] = new Entry(type, depth, evaluation / PeSTO.MAX_PHASE, hash);
+		entries[(int) (hash & mask)] = new Entry(type, depth, evaluation, hash);
 	}
 }
