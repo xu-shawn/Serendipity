@@ -18,6 +18,7 @@ public class AlphaBeta
 	private final int DRAW_EVAL = 0;
 	
 	private final int MAX_PLY = 256;
+	private final int ASPIRATION_DELTA = 600;
 
 	private final TranspositionTable tt;
 
@@ -37,6 +38,11 @@ public class AlphaBeta
 	{
 		pv[ply][0] = move;
 		System.arraycopy(pv[ply + 1], 0, pv[ply], 1, MAX_PLY - 1);
+	}
+	
+	private void clearPV()
+	{
+		this.pv = new Move[MAX_PLY][MAX_PLY];
 	}
 
 	private int pieceValue(Piece p)
@@ -123,14 +129,14 @@ public class AlphaBeta
 	{
 		this.nodesCount++;
 
-		if (board.isMated())
-		{
-			return -MATE_EVAL + ply;
-		}
-
 		if (board.isDraw())
 		{
 			return -DRAW_EVAL;
+		}
+
+		if (board.isMated())
+		{
+			return -MATE_EVAL + ply;
 		}
 
 		int standPat = evaluate(board);
@@ -180,6 +186,11 @@ public class AlphaBeta
 		{
 			throw new TimeOutException();
 		}
+		
+		if(board.isRepetition() || board.getHalfMoveCounter() >= 100)
+		{
+			return -DRAW_EVAL;
+		}
 
 		final List<Move> legalMoves = board.legalMoves();
 
@@ -202,7 +213,7 @@ public class AlphaBeta
 
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
-		if (currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
+		if (ply != 0 && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
 		{
 			int eval = currentMoveEntry.getEvaluation();
@@ -231,7 +242,7 @@ public class AlphaBeta
 		if (nullAllowed && beta < MATE_EVAL - 1024 && !board.isKingAttacked()
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING)) | board
 						.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
-						.getBitboard(board.getSideToMove()) && PeSTO.evaluate(board) >= beta)
+						.getBitboard(board.getSideToMove()) && PeSTO.evaluate(board) >= beta && ply > 0)
 		{
 			board.doNullMove();
 			int nullEval = -mainSearch(board, depth - 3, -beta, -beta + 1, ply + 1, false);
@@ -291,7 +302,8 @@ public class AlphaBeta
 
 	public Move nextMove(Board board, int targetDepth, long msLeft)
 	{
-		int currentScore;
+		int currentScore = MIN_EVAL;
+		clearPV();
 		Move[] lastCompletePV = null;
 		this.nodesCount = 0;
 		long startTime = System.nanoTime();
@@ -301,7 +313,22 @@ public class AlphaBeta
 		{
 			for (int i = 1; i <= targetDepth; i++)
 			{
-				currentScore = mainSearch(board, i, MIN_EVAL, MAX_EVAL, 0, true);
+				if(i > 3)
+				{
+					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA, currentScore + ASPIRATION_DELTA, 0, false);
+					if(newScore > currentScore - ASPIRATION_DELTA && newScore < currentScore + ASPIRATION_DELTA)
+					{
+						currentScore = newScore;
+						lastCompletePV = pv[0].clone();
+						UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
+								(System.nanoTime() - startTime) / 1000000, lastCompletePV);
+						continue;
+					}
+				}
+				
+				currentScore = mainSearch(board, i, MIN_EVAL, MAX_EVAL, 0, false);
+				
+				
 				lastCompletePV = pv[0].clone();
 				UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
 						(System.nanoTime() - startTime) / 1000000, lastCompletePV);
