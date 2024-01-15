@@ -265,6 +265,11 @@ public class AlphaBeta
 			int newdepth = depth - 1;
 			
 			board.doMove(move);
+			
+			if(board.isKingAttacked())
+			{
+				newdepth ++;
+			}
 
 			int thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
 
