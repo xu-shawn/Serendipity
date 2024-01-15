@@ -52,6 +52,7 @@ public class UCI
 						break;
 					case "ucinewgame":
 						internalBoard = new Board();
+						engine = new AlphaBeta();
 						break;
 					case "quit":
 						input.close();
