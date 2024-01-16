@@ -90,38 +90,96 @@ public class AlphaBeta
 		return System.nanoTime() > this.timeLimit;
 	}
 
-	private List<Move> sortMoves(List<Move> moves, Board board, boolean useTT)
+	private List<Move> sortMoves(List<Move> moves, Board board)
 	{
-		moves.sort(new Comparator<Move>() {
+		List<Move> captures = new ArrayList<Move>();
+		List<Move> quiets = new ArrayList<Move>();
+		List<Move> ttMoves = new ArrayList<Move>();
+
+		for (Move move : moves)
+		{
+			board.doMove(move);
+			TranspositionTable.Entry ttResult = tt.probe(board.getIncrementalHashKey());
+			long boardSignature = board.getIncrementalHashKey();
+			board.undoMove();
+
+			if (ttResult != null && ttResult.getSignature() == boardSignature
+					&& ttResult.getType() == TranspositionTable.NodeType.EXACT)
+			{
+				ttMoves.add(move);
+			}
+
+			else if (board.getPiece(move.getTo()).equals(Piece.NONE)
+					|| board.getPiece(move.getTo()) == null)
+			{
+				quiets.add(move);
+			}
+
+			else
+			{
+				captures.add(move);
+			}
+		}
+
+		ttMoves.sort(new Comparator<Move>() {
 
 			@Override
 			public int compare(Move m1, Move m2)
 			{
 				int cmp = 0;
 
-				cmp += pieceValue(board.getPiece(m2.getTo()))
-						- pieceValue(board.getPiece(m2.getFrom()))
-						- (pieceValue(board.getPiece(m1.getTo()))
-								- pieceValue(board.getPiece(m1.getFrom())));
-				if (useTT)
-				{
-					board.doMove(m2);
-					cmp += (tt.probe(board.getIncrementalHashKey()) != null
-							&& tt.probe(board.getIncrementalHashKey())
-									.getType() == TranspositionTable.NodeType.EXACT) ? 10000 : 0;
-					board.undoMove();
+				board.doMove(m2);
+				cmp += tt.probe(board.getIncrementalHashKey()).getEvaluation();
+				board.undoMove();
 
-					board.doMove(m1);
-					cmp -= (tt.probe(board.getIncrementalHashKey()) != null
-							&& tt.probe(board.getIncrementalHashKey())
-									.getType() == TranspositionTable.NodeType.EXACT) ? 10000 : 0;
-					board.undoMove();
-				}
+				board.doMove(m1);
+				cmp -= tt.probe(board.getIncrementalHashKey()).getEvaluation();
+				board.undoMove();
 
 				return cmp;
 			}
 
 		});
+
+		captures.sort(new Comparator<Move>() {
+
+			@Override
+			public int compare(Move m1, Move m2)
+			{
+				return pieceValue(board.getPiece(m2.getTo()))
+						- pieceValue(board.getPiece(m2.getFrom()))
+
+						- (pieceValue(board.getPiece(m1.getTo()))
+								- pieceValue(board.getPiece(m1.getFrom())));
+			}
+
+		});
+
+		moves.clear();
+
+		moves.addAll(ttMoves);
+		moves.addAll(captures);
+		moves.addAll(quiets);
+
+		return moves;
+	}
+
+	private List<Move> sortCaptures(List<Move> moves, Board board)
+	{
+		moves.sort(new Comparator<Move>() {
+
+			@Override
+			public int compare(Move m1, Move m2)
+			{
+				return pieceValue(board.getPiece(m2.getTo()))
+						- pieceValue(board.getPiece(m2.getFrom()))
+
+						- (pieceValue(board.getPiece(m1.getTo()))
+								- pieceValue(board.getPiece(m1.getFrom())));
+			}
+
+		});
+
 		return moves;
 	}
 
@@ -150,7 +208,7 @@ public class AlphaBeta
 
 		final List<Move> pseudoLegalCaptures = board.pseudoLegalCaptures();
 
-		sortMoves(pseudoLegalCaptures, board.clone(), false);
+		sortCaptures(pseudoLegalCaptures, board);
 
 		for (Move move : pseudoLegalCaptures)
 		{
@@ -260,7 +318,7 @@ public class AlphaBeta
 
 		int oldAlpha = alpha;
 
-		sortMoves(legalMoves, board, true);
+		sortMoves(legalMoves, board);
 
 		for (Move move : legalMoves)
 		{
