@@ -16,7 +16,7 @@ public class AlphaBeta
 	private final int MIN_EVAL = -1000000000;
 	private final int MATE_EVAL = 500000000;
 	private final int DRAW_EVAL = 0;
-	
+
 	private final int MAX_PLY = 256;
 	private final int ASPIRATION_DELTA = 600;
 
@@ -24,7 +24,7 @@ public class AlphaBeta
 
 	private int nodesCount;
 	private long timeLimit;
-	
+
 	private Move[][] pv;
 
 	public AlphaBeta()
@@ -33,13 +33,13 @@ public class AlphaBeta
 		this.nodesCount = 0;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 	}
-	
+
 	private void updatePV(Move move, int ply)
 	{
 		pv[ply][0] = move;
 		System.arraycopy(pv[ply + 1], 0, pv[ply], 1, MAX_PLY - 1);
 	}
-	
+
 	private void clearPV()
 	{
 		this.pv = new Move[MAX_PLY][MAX_PLY];
@@ -150,7 +150,7 @@ public class AlphaBeta
 
 		final List<Move> pseudoLegalCaptures = board.pseudoLegalCaptures();
 
-		sortMoves(pseudoLegalCaptures, board, false);
+		sortMoves(pseudoLegalCaptures, board.clone(), false);
 
 		for (Move move : pseudoLegalCaptures)
 		{
@@ -176,18 +176,19 @@ public class AlphaBeta
 		return alpha;
 	}
 
-	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed)
-			throws TimeOutException
+	private int mainSearch(Board board, int depth, int alpha, int beta, int ply,
+			boolean nullAllowed) throws TimeOutException
 	{
 		this.nodesCount++;
 		this.pv[ply][0] = null;
+		int legalMoveCount = 0;
 
 		if ((nodesCount & 1023) == 0 && isTimeUp())
 		{
 			throw new TimeOutException();
 		}
-		
-		if(board.isRepetition() || board.getHalfMoveCounter() >= 100)
+
+		if (board.isRepetition() || board.getHalfMoveCounter() >= 100)
 		{
 			return -DRAW_EVAL;
 		}
@@ -196,7 +197,7 @@ public class AlphaBeta
 
 		if (legalMoves.isEmpty())
 		{
-			if(board.isKingAttacked())
+			if (board.isKingAttacked())
 			{
 				return -MATE_EVAL + ply;
 			}
@@ -242,13 +243,14 @@ public class AlphaBeta
 		if (nullAllowed && beta < MATE_EVAL - 1024 && !board.isKingAttacked()
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING)) | board
 						.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
-						.getBitboard(board.getSideToMove()) && PeSTO.evaluate(board) >= beta && ply > 0)
+								.getBitboard(board.getSideToMove())
+				&& PeSTO.evaluate(board) >= beta && ply > 0)
 		{
 			board.doNullMove();
 			int nullEval = -mainSearch(board, depth - 3, -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
-			
-			if(nullEval >= beta)
+
+			if (nullEval >= beta)
 			{
 				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND,
 						depth, nullEval);
@@ -262,30 +264,38 @@ public class AlphaBeta
 
 		for (Move move : legalMoves)
 		{
+			legalMoveCount++;
 			int newdepth = depth - 1;
-			
+
+			boolean inCheck = board.isKingAttacked();
+
 			board.doMove(move);
-			
-			if(board.isKingAttacked())
+
+			if (legalMoveCount > 3 && depth > 3 && !inCheck && !board.isKingAttacked())
 			{
-				newdepth ++;
+				newdepth--;
+			}
+
+			if (board.isKingAttacked())
+			{
+				newdepth++;
 			}
 
 			int thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
 
 			board.undoMove();
 
-			if(thisMoveEval > alpha)
+			if (thisMoveEval > alpha)
 			{
 				alpha = thisMoveEval;
-				
+
 				if (alpha >= beta)
 				{
 					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND,
 							depth, alpha);
 					return beta;
 				}
-				
+
 				updatePV(move, ply);
 			}
 		}
@@ -318,10 +328,12 @@ public class AlphaBeta
 		{
 			for (int i = 1; i <= targetDepth; i++)
 			{
-				if(i > 3)
+				if (i > 3)
 				{
-					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA, currentScore + ASPIRATION_DELTA, 0, false);
-					if(newScore > currentScore - ASPIRATION_DELTA && newScore < currentScore + ASPIRATION_DELTA)
+					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA,
+							currentScore + ASPIRATION_DELTA, 0, false);
+					if (newScore > currentScore - ASPIRATION_DELTA
+							&& newScore < currentScore + ASPIRATION_DELTA)
 					{
 						currentScore = newScore;
 						lastCompletePV = pv[0].clone();
@@ -330,17 +342,18 @@ public class AlphaBeta
 						continue;
 					}
 				}
-				
+
 				currentScore = mainSearch(board, i, MIN_EVAL, MAX_EVAL, 0, false);
-				
-				
+
 				lastCompletePV = pv[0].clone();
 				UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
 						(System.nanoTime() - startTime) / 1000000, lastCompletePV);
 			}
 		}
 
-		catch (TimeOutException e) {}
+		catch (TimeOutException e)
+		{
+		}
 
 		UCI.reportBestMove(lastCompletePV[0]);
 		return lastCompletePV[0];
