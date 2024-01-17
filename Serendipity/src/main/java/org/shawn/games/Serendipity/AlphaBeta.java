@@ -12,6 +12,7 @@ public class AlphaBeta
 	private final int BISHOP_VALUE = 300;
 	private final int ROOK_VALUE = 500;
 	private final int QUEEN_VALUE = 900;
+	private final int KING_VALUE = 100000;
 	private final int MAX_EVAL = 1000000000;
 	private final int MIN_EVAL = -1000000000;
 	private final int MATE_EVAL = 500000000;
@@ -26,12 +27,14 @@ public class AlphaBeta
 	private long timeLimit;
 
 	private Move[][] pv;
+	private Move[] killers;
 
 	public AlphaBeta()
 	{
 		this.tt = new TranspositionTable(8388608);
 		this.nodesCount = 0;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
+		this.killers = new Move[MAX_PLY];
 	}
 
 	private void updatePV(Move move, int ply)
@@ -90,10 +93,11 @@ public class AlphaBeta
 		return System.nanoTime() > this.timeLimit;
 	}
 
-	private List<Move> sortMoves(List<Move> moves, Board board)
+	private List<Move> sortMoves(List<Move> moves, Board board, int ply)
 	{
 		List<Move> captures = new ArrayList<Move>();
 		List<Move> quiets = new ArrayList<Move>();
+		List<Move> killers = new ArrayList<Move>();
 		List<Move> ttMoves = new ArrayList<Move>();
 
 		for (Move move : moves)
@@ -107,6 +111,11 @@ public class AlphaBeta
 					&& ttResult.getType() == TranspositionTable.NodeType.EXACT)
 			{
 				ttMoves.add(move);
+			}
+
+			else if (move.equals(this.killers[ply]))
+			{
+				killers.add(move);
 			}
 
 			else if (board.getPiece(move.getTo()).equals(Piece.NONE)
@@ -159,6 +168,7 @@ public class AlphaBeta
 
 		moves.addAll(ttMoves);
 		moves.addAll(captures);
+		moves.addAll(killers);
 		moves.addAll(quiets);
 
 		return moves;
@@ -239,6 +249,7 @@ public class AlphaBeta
 	{
 		this.nodesCount++;
 		this.pv[ply][0] = null;
+		this.killers[ply + 2] = null;
 		int legalMoveCount = 0;
 
 		if ((nodesCount & 1023) == 0 && isTimeUp())
@@ -318,7 +329,7 @@ public class AlphaBeta
 
 		int oldAlpha = alpha;
 
-		sortMoves(legalMoves, board);
+		sortMoves(legalMoves, board, ply);
 
 		for (Move move : legalMoves)
 		{
@@ -351,6 +362,11 @@ public class AlphaBeta
 				{
 					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND,
 							depth, alpha);
+					if (move.getPromotion().equals(Piece.NONE)
+							&& board.getPiece(move.getTo()).equals(Piece.NONE))
+					{
+						killers[ply] = move;
+					}
 					return beta;
 				}
 
@@ -376,6 +392,7 @@ public class AlphaBeta
 	public Move nextMove(Board board, int targetDepth, long msLeft)
 	{
 		int currentScore = MIN_EVAL;
+		killers = new Move[MAX_PLY];
 		clearPV();
 		Move[] lastCompletePV = null;
 		this.nodesCount = 0;
