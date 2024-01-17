@@ -12,7 +12,6 @@ public class AlphaBeta
 	private final int BISHOP_VALUE = 300;
 	private final int ROOK_VALUE = 500;
 	private final int QUEEN_VALUE = 900;
-	private final int KING_VALUE = 100000;
 	private final int MAX_EVAL = 1000000000;
 	private final int MIN_EVAL = -1000000000;
 	private final int MATE_EVAL = 500000000;
@@ -28,6 +27,7 @@ public class AlphaBeta
 
 	private Move[][] pv;
 	private Move[] killers;
+	private Move[][] counterMoves;
 
 	public AlphaBeta()
 	{
@@ -35,6 +35,7 @@ public class AlphaBeta
 		this.nodesCount = 0;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.killers = new Move[MAX_PLY];
+		this.counterMoves = new Move[13][65];
 	}
 
 	private void updatePV(Move move, int ply)
@@ -100,6 +101,14 @@ public class AlphaBeta
 		List<Move> killers = new ArrayList<Move>();
 		List<Move> ttMoves = new ArrayList<Move>();
 
+		MoveBackup lastMove = board.getBackup().peekLast();
+		Move counterMove = null;
+		boolean hasCounterMove = false;
+
+		if (lastMove != null)
+			counterMove = counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove()
+					.getTo().ordinal()];
+
 		for (Move move : moves)
 		{
 			board.doMove(move);
@@ -121,7 +130,14 @@ public class AlphaBeta
 			else if (board.getPiece(move.getTo()).equals(Piece.NONE)
 					|| board.getPiece(move.getTo()) == null)
 			{
-				quiets.add(move);
+				if (!hasCounterMove && counterMove != null && move.equals(counterMove))
+				{
+					hasCounterMove = true;
+				}
+				else
+				{
+					quiets.add(move);
+				}
 			}
 
 			else
@@ -169,6 +185,12 @@ public class AlphaBeta
 		moves.addAll(ttMoves);
 		moves.addAll(captures);
 		moves.addAll(killers);
+
+		if (hasCounterMove)
+		{
+			moves.add(counterMove);
+		}
+
 		moves.addAll(quiets);
 
 		return moves;
@@ -366,6 +388,13 @@ public class AlphaBeta
 							&& board.getPiece(move.getTo()).equals(Piece.NONE))
 					{
 						killers[ply] = move;
+
+						MoveBackup lastMove = board.getBackup().peekLast();
+						if (lastMove != null)
+						{
+							counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove()
+									.getTo().ordinal()] = move;
+						}
 					}
 					return beta;
 				}
@@ -393,6 +422,7 @@ public class AlphaBeta
 	{
 		int currentScore = MIN_EVAL;
 		killers = new Move[MAX_PLY];
+		counterMoves = new Move[13][65];
 		clearPV();
 		Move[] lastCompletePV = null;
 		this.nodesCount = 0;
@@ -431,6 +461,7 @@ public class AlphaBeta
 		}
 
 		UCI.reportBestMove(lastCompletePV[0]);
+		
 		return lastCompletePV[0];
 	}
 }
