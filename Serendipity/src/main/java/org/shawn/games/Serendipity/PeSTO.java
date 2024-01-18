@@ -17,7 +17,7 @@ public class PeSTO
 		      0,   0,   0,   0,   0,   0,  0,   0,
 	};
 
-	final static int EG_PAWN_TABLE[]=new int[]
+	final static int EG_PAWN_TABLE[] = new int[]
 	{
 		      0,   0,   0,   0,   0,   0,   0,   0,
 		    178, 173, 158, 134, 147, 132, 165, 187,
@@ -29,7 +29,7 @@ public class PeSTO
 		      0,   0,   0,   0,   0,   0,   0,   0,
 	};
 
-	final static int MG_KNIGHT_TABLE[]=new int[]
+	final static int MG_KNIGHT_TABLE[] = new int[]
 	{
 		    -167, -89, -34, -49,  61, -97, -15, -107,
 		     -73, -41,  72,  36,  23,  62,   7,  -17,
@@ -41,7 +41,7 @@ public class PeSTO
 		    -105, -21, -58, -33, -17, -28, -19,  -23,
 	};
 
-	final static int EG_KNIGHT_TABLE[]= new int[]
+	final static int EG_KNIGHT_TABLE[] = new int[]
 	{
 		    -58, -38, -13, -28, -31, -27, -63, -99,
 		    -25,  -8, -25,  -2,  -9, -25, -24, -52,
@@ -53,7 +53,7 @@ public class PeSTO
 		    -29, -51, -23, -15, -22, -18, -50, -64,
 	};
 
-	final static int MG_BISHOP_TABLE[]=new int[]
+	final static int MG_BISHOP_TABLE[] = new int[]
 	{
 		    -29,   4, -82, -37, -25, -42,   7,  -8,
 		    -26,  16, -18, -13,  30,  59,  18, -47,
@@ -65,7 +65,7 @@ public class PeSTO
 		    -33,  -3, -14, -21, -13, -12, -39, -21,
 	};
 
-	final static int EG_BISHOP_TABLE[]=new int[]
+	final static int EG_BISHOP_TABLE[] = new int[]
 	{
 		    -14, -21, -11,  -8, -7,  -9, -17, -24,
 		     -8,  -4,   7, -12, -3, -13,  -4, -14,
@@ -77,7 +77,7 @@ public class PeSTO
 		    -23,  -9, -23,  -5, -9, -16,  -5, -17,
 	};
 
-	final static int MG_ROOK_TABLE[]=new int[]
+	final static int MG_ROOK_TABLE[] = new int[]
 	{
 		     32,  42,  32,  51, 63,  9,  31,  43,
 		     27,  32,  58,  62, 80, 67,  26,  44,
@@ -89,7 +89,7 @@ public class PeSTO
 		    -19, -13,   1,  17, 16,  7, -37, -26,
 	};
 
-	final static int EG_ROOK_TABLE[]=new int[]
+	final static int EG_ROOK_TABLE[] = new int[]
 	{
 		    13, 10, 18, 15, 12,  12,   8,   5,
 		    11, 13, 13, 11, -3,   3,   8,   3,
@@ -275,7 +275,7 @@ public class PeSTO
 		Side ourSide = board.getSideToMove();
 		Side opposite = board.getSideToMove().flip();
 		// @formatter:off
-		return Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) * PAWN_PHASE
+		return Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.PAWN))) * PAWN_PHASE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.KNIGHT))) * KNIGHT_PHASE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.BISHOP))) * BISHOP_PHASE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.ROOK))) * ROOK_PHASE
@@ -294,7 +294,7 @@ public class PeSTO
 		Side ourSide = board.getSideToMove();
 		Side opposite = board.getSideToMove().flip();
 		// @formatter:off
-		return Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) * MG_PAWN_VALUE
+		return Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.PAWN))) * MG_PAWN_VALUE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.KNIGHT))) * MG_KNIGHT_VALUE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.BISHOP))) * MG_BISHOP_VALUE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.ROOK))) * MG_ROOK_VALUE
