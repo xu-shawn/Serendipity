@@ -97,6 +97,7 @@ public class AlphaBeta
 	private List<Move> sortMoves(List<Move> moves, Board board, int ply)
 	{
 		List<Move> captures = new ArrayList<Move>();
+//		List<Move> promotions = new ArrayList<Move>();
 		List<Move> quiets = new ArrayList<Move>();
 		List<Move> killers = new ArrayList<Move>();
 		List<Move> ttMoves = new ArrayList<Move>();
@@ -106,8 +107,8 @@ public class AlphaBeta
 		boolean hasCounterMove = false;
 
 		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove()
-					.getTo().ordinal()];
+			counterMove = counterMoves[board.getPiece(lastMove.getMove().getTo())
+					.ordinal()][lastMove.getMove().getTo().ordinal()];
 
 		for (Move move : moves)
 		{
@@ -121,6 +122,11 @@ public class AlphaBeta
 			{
 				ttMoves.add(move);
 			}
+
+//			else if (!move.getPromotion().equals(Piece.NONE))
+//			{
+//				promotions.add(move);
+//			}
 
 			else if (move.equals(this.killers[ply]))
 			{
@@ -166,6 +172,16 @@ public class AlphaBeta
 
 		});
 
+//		promotions.sort(new Comparator<Move>() {
+//
+//			@Override
+//			public int compare(Move m1, Move m2)
+//			{
+//				return pieceValue(m2.getPromotion()) - pieceValue(m1.getPromotion());
+//			}
+//
+//		});
+
 		captures.sort(new Comparator<Move>() {
 
 			@Override
@@ -184,6 +200,12 @@ public class AlphaBeta
 
 		moves.addAll(ttMoves);
 		moves.addAll(captures);
+
+//		if(!promotions.isEmpty())
+//		{
+//			moves.add(promotions.get(0));
+//		}
+
 		moves.addAll(killers);
 
 		if (hasCounterMove)
@@ -192,6 +214,11 @@ public class AlphaBeta
 		}
 
 		moves.addAll(quiets);
+
+//		if(!promotions.isEmpty())
+//		{
+//			moves.addAll(1, promotions);
+//		}
 
 		return moves;
 	}
@@ -362,17 +389,27 @@ public class AlphaBeta
 
 			board.doMove(move);
 
-			if (legalMoveCount > 3 && depth > 3 && !inCheck && !board.isKingAttacked())
-			{
-				newdepth--;
-			}
-
 			if (board.isKingAttacked())
 			{
 				newdepth++;
 			}
 
-			int thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
+			int thisMoveEval;
+
+			if (legalMoveCount > 3 && depth > 3 && !inCheck && !board.isKingAttacked())
+			{
+				thisMoveEval = -mainSearch(board, newdepth - 1, -(alpha + 1), -alpha, ply + 1, true);
+				
+				if(thisMoveEval > alpha)
+				{
+					thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
+				}
+			}
+
+			else
+			{
+				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
+			}
 
 			board.undoMove();
 
@@ -392,8 +429,8 @@ public class AlphaBeta
 						MoveBackup lastMove = board.getBackup().peekLast();
 						if (lastMove != null)
 						{
-							counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove()
-									.getTo().ordinal()] = move;
+							counterMoves[board.getPiece(lastMove.getMove().getTo())
+									.ordinal()][lastMove.getMove().getTo().ordinal()] = move;
 						}
 					}
 					return beta;
@@ -461,7 +498,7 @@ public class AlphaBeta
 		}
 
 		UCI.reportBestMove(lastCompletePV[0]);
-		
+
 		return lastCompletePV[0];
 	}
 }
