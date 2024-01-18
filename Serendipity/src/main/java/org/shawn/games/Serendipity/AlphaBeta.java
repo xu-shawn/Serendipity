@@ -398,9 +398,10 @@ public class AlphaBeta
 
 			if (legalMoveCount > 3 && depth > 3 && !inCheck && !board.isKingAttacked())
 			{
-				thisMoveEval = -mainSearch(board, newdepth - 1, -(alpha + 1), -alpha, ply + 1, true);
-				
-				if(thisMoveEval > alpha)
+				thisMoveEval = -mainSearch(board, newdepth - 1, -(alpha + 1), -alpha, ply + 1,
+						true);
+
+				if (thisMoveEval > alpha)
 				{
 					thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
 				}

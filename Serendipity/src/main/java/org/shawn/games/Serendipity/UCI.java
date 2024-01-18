@@ -9,7 +9,6 @@ import com.github.bhlangonijr.chesslib.move.Move;
 
 public class UCI
 {
-
 	private static Board internalBoard = new Board();
 	private static AlphaBeta engine = new AlphaBeta();
 
@@ -21,8 +20,8 @@ public class UCI
 	public static void report(int depth, int nodes, int score, long ms, Move[] pv)
 	{
 		System.out.printf("info depth %d nodes %d score cp %d time %d pv %s\n", depth, nodes, score,
-				ms, String.join(" ", Arrays.stream(pv).takeWhile(x -> x != null).map(Object::toString)
-						.collect(Collectors.toList())));
+				ms, String.join(" ", Arrays.stream(pv).takeWhile(x -> x != null)
+						.map(Object::toString).collect(Collectors.toList())));
 	}
 
 	public static void reportBestMove(Move bestMove)
