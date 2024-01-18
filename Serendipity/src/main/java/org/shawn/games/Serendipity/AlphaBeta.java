@@ -299,7 +299,8 @@ public class AlphaBeta
 		this.nodesCount++;
 		this.pv[ply][0] = null;
 		this.killers[ply + 2] = null;
-		int legalMoveCount = 0;
+		int moveCount = 0;
+		boolean isPV = beta - alpha > 1;
 
 		if ((nodesCount & 1023) == 0 && isTimeUp())
 		{
@@ -339,7 +340,10 @@ public class AlphaBeta
 			switch (currentMoveEntry.getType())
 			{
 				case EXACT:
-					return eval;
+					if(!isPV)
+					{
+						return eval;
+					}
 				case UPPERBOUND:
 					if (eval <= alpha)
 					{
@@ -382,7 +386,7 @@ public class AlphaBeta
 
 		for (Move move : legalMoves)
 		{
-			legalMoveCount++;
+			moveCount++;
 			int newdepth = depth - 1;
 
 			boolean inCheck = board.isKingAttacked();
@@ -394,22 +398,28 @@ public class AlphaBeta
 				newdepth++;
 			}
 
-			int thisMoveEval;
+			int thisMoveEval = MIN_EVAL;
 
-			if (legalMoveCount > 3 && depth > 3 && !inCheck && !board.isKingAttacked())
+			if (moveCount > 3 && depth > 3 && !inCheck && !board.isKingAttacked())
 			{
 				thisMoveEval = -mainSearch(board, newdepth - 1, -(alpha + 1), -alpha, ply + 1,
 						true);
 
 				if (thisMoveEval > alpha)
 				{
-					thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
+					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
 				}
 			}
 
-			else
+			else if(!isPV || moveCount > 1)
+			{
+				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
+			}
+			
+			if(isPV && (moveCount == 1 || thisMoveEval > alpha))
 			{
 				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
+				updatePV(move, ply);
 			}
 
 			board.undoMove();
@@ -437,8 +447,6 @@ public class AlphaBeta
 
 					return beta;
 				}
-
-				updatePV(move, ply);
 			}
 		}
 
