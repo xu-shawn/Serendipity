@@ -434,6 +434,7 @@ public class AlphaBeta
 									.ordinal()][lastMove.getMove().getTo().ordinal()] = move;
 						}
 					}
+					
 					return beta;
 				}
 
