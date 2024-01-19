@@ -307,7 +307,7 @@ public class AlphaBeta
 			throw new TimeOutException();
 		}
 
-		if (board.isRepetition() || board.getHalfMoveCounter() >= 100)
+		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3) || board.getHalfMoveCounter() >= 100)
 		{
 			return -DRAW_EVAL;
 		}
@@ -333,17 +333,14 @@ public class AlphaBeta
 
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
-		if (ply != 0 && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
+		if ((!isPV || ply > 2) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
 		{
 			int eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getType())
 			{
 				case EXACT:
-					if(!isPV)
-					{
-						return eval;
-					}
+					return eval;
 				case UPPERBOUND:
 					if (eval <= alpha)
 					{
