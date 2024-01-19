@@ -7,11 +7,11 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class AlphaBeta
 {
-	private final int PAWN_VALUE = 100;
-	private final int KNIGHT_VALUE = 300;
-	private final int BISHOP_VALUE = 300;
-	private final int ROOK_VALUE = 500;
-	private final int QUEEN_VALUE = 900;
+	private final int PAWN_VALUE = 82;
+	private final int KNIGHT_VALUE = 337;
+	private final int BISHOP_VALUE = 365;
+	private final int ROOK_VALUE = 477;
+	private final int QUEEN_VALUE = 1025;
 	private final int MAX_EVAL = 1000000000;
 	private final int MIN_EVAL = -1000000000;
 	private final int MATE_EVAL = 500000000;
@@ -307,7 +307,8 @@ public class AlphaBeta
 			throw new TimeOutException();
 		}
 
-		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3) || board.getHalfMoveCounter() >= 100)
+		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3)
+				|| board.getHalfMoveCounter() >= 100)
 		{
 			return -DRAW_EVAL;
 		}
@@ -333,7 +334,7 @@ public class AlphaBeta
 
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
-		if ((!isPV || ply > 2) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
+		if ((!isPV || ply > 1) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
 		{
 			int eval = currentMoveEntry.getEvaluation();
@@ -404,16 +405,17 @@ public class AlphaBeta
 
 				if (thisMoveEval > alpha)
 				{
-					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
+					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1,
+							true);
 				}
 			}
 
-			else if(!isPV || moveCount > 1)
+			else if (!isPV || moveCount > 1)
 			{
 				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
 			}
-			
-			if(isPV && (moveCount == 1 || thisMoveEval > alpha))
+
+			if (isPV && (moveCount == 1 || thisMoveEval > alpha))
 			{
 				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
 				updatePV(move, ply);
