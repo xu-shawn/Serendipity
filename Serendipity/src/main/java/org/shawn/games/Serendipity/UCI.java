@@ -31,9 +31,9 @@ public class UCI
 
 	public static void UCIMainLoop()
 	{
-		while (true)
+		Scanner input = new Scanner(System.in);
+		while (input.hasNextLine())
 		{
-			Scanner input = new Scanner(System.in);
 			while (true)
 			{
 				String command = input.nextLine();

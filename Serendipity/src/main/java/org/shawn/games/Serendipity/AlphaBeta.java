@@ -400,7 +400,14 @@ public class AlphaBeta
 
 			if (moveCount > 3 && depth > 3 && !inCheck && !board.isKingAttacked())
 			{
-				thisMoveEval = -mainSearch(board, newdepth - 1, -(alpha + 1), -alpha, ply + 1,
+				int r = (int) (1 + Math.log(depth));
+
+//				r += isPV ? 0 : 1;
+//				r -= board.isKingAttacked() ? 1 : 0;
+//				
+//				r = Math.max(0, Math.min(depth - 1, r));
+				
+				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1,
 						true);
 
 				if (thisMoveEval > alpha)
