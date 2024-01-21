@@ -2,6 +2,8 @@ package org.shawn.games.Serendipity;
 
 import java.util.*;
 
+import org.shawn.games.Serendipity.TranspositionTable.NodeType;
+
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
 
@@ -28,6 +30,8 @@ public class AlphaBeta
 	private Move[][] pv;
 	private Move[] killers;
 	private Move[][] counterMoves;
+
+	private IntegerOption tune1;
 
 	public AlphaBeta()
 	{
@@ -360,20 +364,32 @@ public class AlphaBeta
 			}
 		}
 
+		int staticEval;
+
+		if (currentMoveEntry != null
+				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+		{
+			staticEval = currentMoveEntry.getEvaluation();
+		}
+		else
+		{
+			staticEval = PeSTO.evaluate(board);
+		}
+
 		if (nullAllowed && beta < MATE_EVAL - 1024 && !board.isKingAttacked()
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING)) | board
 						.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
-				&& PeSTO.evaluate(board) >= beta && ply > 0)
+				&& PeSTO.evaluate(board) >= beta && ply > 0 && staticEval >= beta)
 		{
+//			int r = depth / 3 + 4;
+
 			board.doNullMove();
 			int nullEval = -mainSearch(board, depth - 3, -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
 
-			if (nullEval >= beta)
+			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
 			{
-				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND,
-						depth, nullEval);
 				return nullEval;
 			}
 		}
@@ -406,9 +422,8 @@ public class AlphaBeta
 //				r -= board.isKingAttacked() ? 1 : 0;
 //				
 //				r = Math.max(0, Math.min(depth - 1, r));
-				
-				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1,
-						true);
+
+				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1, true);
 
 				if (thisMoveEval > alpha)
 				{
