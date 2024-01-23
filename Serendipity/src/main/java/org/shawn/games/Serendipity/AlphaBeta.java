@@ -2,8 +2,6 @@ package org.shawn.games.Serendipity;
 
 import java.util.*;
 
-import org.shawn.games.Serendipity.TranspositionTable.NodeType;
-
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
 
@@ -122,7 +120,7 @@ public class AlphaBeta
 			board.undoMove();
 
 			if (ttResult != null && ttResult.getSignature() == boardSignature
-					&& ttResult.getType() == TranspositionTable.NodeType.EXACT)
+					&& (ttResult.getType() == TranspositionTable.NodeType.EXACT || ttResult.getType() == TranspositionTable.NodeType.UPPERBOUND))
 			{
 				ttMoves.add(move);
 			}
@@ -420,7 +418,7 @@ public class AlphaBeta
 
 //				r += isPV ? 0 : 1;
 //				r -= board.isKingAttacked() ? 1 : 0;
-//				
+//
 //				r = Math.max(0, Math.min(depth - 1, r));
 
 				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1, true);
