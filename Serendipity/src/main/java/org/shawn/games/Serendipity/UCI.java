@@ -15,7 +15,6 @@ public class UCI
 
 	public static void main(String args[])
 	{
-		new IntegerOption(10, 5, 15, "Hello");
 		UCIMainLoop();
 	}
 
