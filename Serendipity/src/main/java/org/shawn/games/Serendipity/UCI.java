@@ -10,8 +10,8 @@ import com.github.bhlangonijr.chesslib.move.Move;
 public class UCI
 {
 	private static Board internalBoard = new Board();
-	private static AlphaBeta engine = new AlphaBeta();
 	private static Map<String, IntegerOption> options = new HashMap<>();
+	private static AlphaBeta engine = new AlphaBeta();
 
 	public static void main(String args[])
 	{
@@ -63,6 +63,10 @@ public class UCI
 				case "uci":
 					System.out.println("id name weakEngine");
 					System.out.println("id author me");
+					for (var option : options.values())
+					{
+						System.out.println(option);
+					}
 					System.out.println("uciok");
 					break;
 				case "ucinewgame":
