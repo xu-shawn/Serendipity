@@ -406,6 +406,8 @@ public class AlphaBeta
 
 		int oldAlpha = alpha;
 
+		boolean inCheckBefore = board.isKingAttacked();
+
 		sortMoves(legalMoves, board, ply);
 
 		for (Move move : legalMoves)
@@ -413,18 +415,18 @@ public class AlphaBeta
 			moveCount++;
 			int newdepth = depth - 1;
 
-			boolean inCheck = board.isKingAttacked();
-
 			board.doMove(move);
 
-			if (board.isKingAttacked())
+			boolean inCheckAfter = board.isKingAttacked();
+
+			if (inCheckAfter)
 			{
 				newdepth++;
 			}
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (moveCount > 3 && depth > 3 && !inCheck && !board.isKingAttacked())
+			if (moveCount > 3 && depth > 3 && !inCheckBefore && !inCheckAfter)
 			{
 				int r = (int) (1 + Math.log(depth));
 
@@ -470,11 +472,11 @@ public class AlphaBeta
 						history[board.getPiece(move.getTo()).ordinal()][move.getTo()
 								.ordinal()] += depth * depth;
 
-						MoveBackup lastMove = board.getBackup().peekLast();
-						if (lastMove != null)
+						if (!board.getBackup().isEmpty())
 						{
-							counterMoves[board.getPiece(lastMove.getMove().getTo())
-									.ordinal()][lastMove.getMove().getTo().ordinal()] = move;
+							Move lastMove = board.getBackup().peekLast().getMove();
+							counterMoves[board.getPiece(lastMove.getTo()).ordinal()][lastMove
+									.getTo().ordinal()] = move;
 						}
 					}
 
