@@ -28,8 +28,7 @@ public class AlphaBeta
 	private Move[][] pv;
 	private Move[] killers;
 	private Move[][] counterMoves;
-
-	private IntegerOption tune1;
+	private int[][] history;
 
 	public AlphaBeta()
 	{
@@ -38,6 +37,7 @@ public class AlphaBeta
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.killers = new Move[MAX_PLY];
 		this.counterMoves = new Move[13][65];
+		this.history = new int[13][65];
 	}
 
 	private void updatePV(Move move, int ply)
@@ -120,7 +120,8 @@ public class AlphaBeta
 			board.undoMove();
 
 			if (ttResult != null && ttResult.getSignature() == boardSignature
-					&& (ttResult.getType() == TranspositionTable.NodeType.EXACT || ttResult.getType() == TranspositionTable.NodeType.UPPERBOUND))
+					&& (ttResult.getType() == TranspositionTable.NodeType.EXACT
+							|| ttResult.getType() == TranspositionTable.NodeType.UPPERBOUND))
 			{
 				ttMoves.add(move);
 			}
@@ -198,6 +199,17 @@ public class AlphaBeta
 
 		});
 
+		quiets.sort(new Comparator<Move>() {
+
+			@Override
+			public int compare(Move m1, Move m2)
+			{
+				return history[board.getPiece(m2.getTo()).ordinal()][m2.getTo().ordinal()]
+						- history[board.getPiece(m1.getTo()).ordinal()][m1.getTo().ordinal()];
+			}
+
+		});
+
 		moves.clear();
 
 		moves.addAll(ttMoves);
@@ -250,7 +262,7 @@ public class AlphaBeta
 
 		if (board.isDraw())
 		{
-			return -DRAW_EVAL;
+			return DRAW_EVAL;
 		}
 
 		if (board.isMated())
@@ -388,7 +400,7 @@ public class AlphaBeta
 			}
 			else
 			{
-				return -DRAW_EVAL;
+				return DRAW_EVAL;
 			}
 		}
 
@@ -455,6 +467,8 @@ public class AlphaBeta
 							&& board.getPiece(move.getTo()).equals(Piece.NONE))
 					{
 						killers[ply] = move;
+						history[board.getPiece(move.getTo()).ordinal()][move.getTo()
+								.ordinal()] += depth * depth;
 
 						MoveBackup lastMove = board.getBackup().peekLast();
 						if (lastMove != null)
@@ -494,6 +508,7 @@ public class AlphaBeta
 		this.nodesCount = 0;
 		long startTime = System.nanoTime();
 		this.timeLimit = System.nanoTime() + msLeft * 1000000L;
+		this.history = new int[13][65];
 
 		try
 		{
