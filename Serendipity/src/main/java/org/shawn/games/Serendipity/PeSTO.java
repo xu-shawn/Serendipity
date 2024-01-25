@@ -179,6 +179,8 @@ public class PeSTO
 	final static int BISHOP_PHASE = 1;
 	final static int ROOK_PHASE = 2;
 	final static int QUEEN_PHASE = 4;
+	
+	final static int TEMPO = 8;
 
 	final static int MAX_PHASE = PAWN_PHASE * 16 + KNIGHT_PHASE * 4 + BISHOP_PHASE * 4
 			+ ROOK_PHASE * 4 + QUEEN_PHASE * 2;
@@ -347,6 +349,6 @@ public class PeSTO
 	public static int evaluate(Board board)
 	{
 		int gamePhase = Math.min(MAX_PHASE, gamePhase(board));
-		return middleGameEval(board) * gamePhase + endGameEval(board) * (MAX_PHASE - gamePhase);
+		return middleGameEval(board) * gamePhase + endGameEval(board) * (MAX_PHASE - gamePhase) + TEMPO * MAX_PHASE;
 	}
 }
