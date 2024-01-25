@@ -312,21 +312,7 @@ public class AlphaBeta
 		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3)
 				|| board.getHalfMoveCounter() >= 100)
 		{
-			return -DRAW_EVAL;
-		}
-
-		final List<Move> legalMoves = board.legalMoves();
-
-		if (legalMoves.isEmpty())
-		{
-			if (board.isKingAttacked())
-			{
-				return -MATE_EVAL + ply;
-			}
-			else
-			{
-				return -DRAW_EVAL;
-			}
+			return DRAW_EVAL;
 		}
 
 		if (depth <= 0 || ply >= MAX_PLY)
@@ -389,6 +375,20 @@ public class AlphaBeta
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
 			{
 				return nullEval;
+			}
+		}
+
+		final List<Move> legalMoves = board.legalMoves();
+
+		if (legalMoves.isEmpty())
+		{
+			if (board.isKingAttacked())
+			{
+				return -MATE_EVAL + ply;
+			}
+			else
+			{
+				return -DRAW_EVAL;
 			}
 		}
 
