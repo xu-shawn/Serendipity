@@ -412,7 +412,7 @@ public class AlphaBeta
 		
 		if(isPV && ttMove == null)
 		{
-			depth --;
+			depth -= 2;
 		}
 
 		for (Move move : legalMoves)
