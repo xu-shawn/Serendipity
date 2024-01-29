@@ -111,6 +111,11 @@ public class UCI
 							wtime = btime = 157680000000L;
 							break;
 						}
+						if(fullCommand[i].equals("movetime"))
+						{
+							wtime = btime = Long.parseLong(fullCommand[i + 1]) * 20;
+							winc = binc = 0;
+						}
 					}
 
 					long timeGiven = internalBoard.getSideToMove() == Side.WHITE
