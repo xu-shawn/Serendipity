@@ -435,9 +435,9 @@ public class AlphaBeta
 
 			if (moveCount > 3 && depth > 3)
 			{
-				int r = (int) (1 + Math.log(depth));
+				int r = (int) (1.35 + Math.log(depth) * Math.log(moveCount) / 2.75);
 
-//				r += isPV ? 0 : 1;
+				r += isPV ? 0 : 1;
 				r -= board.isKingAttacked() ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
