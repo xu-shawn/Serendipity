@@ -408,8 +408,6 @@ public class AlphaBeta
 
 		int oldAlpha = alpha;
 
-		boolean inCheckBefore = board.isKingAttacked();
-
 		Move ttMove = sortMoves(legalMoves, board, ply);
 		
 		if(isPV && ttMove == null && rootDepth > 2 && depth > 5)
@@ -424,9 +422,9 @@ public class AlphaBeta
 
 			board.doMove(move);
 
-			boolean inCheckAfter = board.isKingAttacked();
+			boolean inCheck = board.isKingAttacked();
 
-			if (inCheckAfter)
+			if (inCheck)
 			{
 				newdepth++;
 			}
@@ -438,7 +436,7 @@ public class AlphaBeta
 				int r = (int) (1.35 + Math.log(depth) * Math.log(moveCount) / 2.75);
 
 //				r += isPV ? 0 : 1;
-				r -= board.isKingAttacked() ? 1 : 0;
+				r -= inCheck ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
