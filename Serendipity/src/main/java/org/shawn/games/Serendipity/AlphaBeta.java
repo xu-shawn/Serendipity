@@ -29,6 +29,8 @@ public class AlphaBeta
 	private Move[] killers;
 	private Move[][] counterMoves;
 	private int[][] history;
+	
+	private int rootDepth;
 
 	public AlphaBeta()
 	{
@@ -96,7 +98,7 @@ public class AlphaBeta
 		return System.nanoTime() > this.timeLimit;
 	}
 
-	private List<Move> sortMoves(List<Move> moves, Board board, int ply)
+	private Move sortMoves(List<Move> moves, Board board, int ply)
 	{
 		List<Move> captures = new ArrayList<Move>();
 //		List<Move> promotions = new ArrayList<Move>();
@@ -234,7 +236,7 @@ public class AlphaBeta
 //			moves.addAll(1, promotions);
 //		}
 
-		return moves;
+		return ttMoves.isEmpty() ? null : ttMoves.get(0);
 	}
 
 	private List<Move> sortCaptures(List<Move> moves, Board board)
@@ -408,7 +410,12 @@ public class AlphaBeta
 
 		boolean inCheckBefore = board.isKingAttacked();
 
-		sortMoves(legalMoves, board, ply);
+		Move ttMove = sortMoves(legalMoves, board, ply);
+		
+		if(isPV && ttMove == null && rootDepth > 2 && depth > 5)
+		{
+			depth -= 2;
+		}
 
 		for (Move move : legalMoves)
 		{
@@ -516,6 +523,7 @@ public class AlphaBeta
 		{
 			for (int i = 1; i <= targetDepth; i++)
 			{
+				rootDepth = i;
 				if (i > 3)
 				{
 					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA,
