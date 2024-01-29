@@ -29,6 +29,8 @@ public class AlphaBeta
 	private Move[] killers;
 	private Move[][] counterMoves;
 	private int[][] history;
+	
+	private int rootDepth;
 
 	public AlphaBeta()
 	{
@@ -410,7 +412,7 @@ public class AlphaBeta
 
 		Move ttMove = sortMoves(legalMoves, board, ply);
 		
-		if(isPV && ttMove == null)
+		if(isPV && ttMove == null && rootDepth > 2 && depth > 5)
 		{
 			depth -= 2;
 		}
@@ -521,6 +523,7 @@ public class AlphaBeta
 		{
 			for (int i = 1; i <= targetDepth; i++)
 			{
+				rootDepth = i;
 				if (i > 3)
 				{
 					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA,
