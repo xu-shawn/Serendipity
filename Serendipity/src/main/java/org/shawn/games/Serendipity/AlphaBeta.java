@@ -433,12 +433,12 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (moveCount > 3 && depth > 3 && !inCheckBefore && !inCheckAfter)
+			if (moveCount > 3 && depth > 3)
 			{
 				int r = (int) (1 + Math.log(depth));
 
 //				r += isPV ? 0 : 1;
-//				r -= board.isKingAttacked() ? 1 : 0;
+				r -= board.isKingAttacked() ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
