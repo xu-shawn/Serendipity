@@ -49,6 +49,7 @@ public class UCI
 	public static void UCIMainLoop()
 	{
 		Scanner input = new Scanner(System.in);
+		int depth;
 		while (input.hasNextLine())
 		{
 			String command = input.nextLine();
@@ -80,7 +81,7 @@ public class UCI
 					long btime = 100;
 					long winc = 0;
 					long binc = 0;
-					int depth = 256;
+					depth = 256;
 
 					for (int i = 1; i < fullCommand.length; i++)
 					{
@@ -173,6 +174,14 @@ public class UCI
 					{
 						System.out.println(option + " value " + option.get());
 					}
+					break;
+				case "bench":
+					depth = 10;
+					if(fullCommand.length > 1)
+					{
+						depth = Integer.parseInt(fullCommand[1]);
+					}
+					Bench.bench(engine, depth);
 					break;
 			}
 		}
