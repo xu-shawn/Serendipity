@@ -70,6 +70,6 @@ public class Bench
 			totalNodes += ai.getNodesCount();
 		}
 		
-		System.out.println("Nodes per second: " + ((double)(totalNodes) * 1000000000 / (System.nanoTime() - startTime)));
+		System.out.printf("Nodes per second: %.2f\n", ((double)(totalNodes) * 1000000000 / (System.nanoTime() - startTime)));
 	}
 }
