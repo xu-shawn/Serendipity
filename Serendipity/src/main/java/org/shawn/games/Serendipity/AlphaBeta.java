@@ -42,6 +42,16 @@ public class AlphaBeta
 		this.history = new int[13][65];
 	}
 
+	public AlphaBeta(int n)
+	{
+		this.tt = new TranspositionTable(1048576 * n);
+		this.nodesCount = 0;
+		this.pv = new Move[MAX_PLY][MAX_PLY];
+		this.killers = new Move[MAX_PLY];
+		this.counterMoves = new Move[13][65];
+		this.history = new int[13][65];
+	}
+
 	private void updatePV(Move move, int ply)
 	{
 		pv[ply][0] = move;
@@ -552,5 +562,10 @@ public class AlphaBeta
 		UCI.reportBestMove(lastCompletePV[0]);
 
 		return lastCompletePV[0];
+	}
+	
+	public int getNodesCount()
+	{
+		return this.nodesCount;
 	}
 }
