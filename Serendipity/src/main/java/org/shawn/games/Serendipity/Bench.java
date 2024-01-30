@@ -69,7 +69,10 @@ public class Bench
 			ai.nextMove(board, depth, Long.MAX_VALUE / 10000000);
 			totalNodes += ai.getNodesCount();
 		}
-		
-		System.out.printf("Nodes per second: %.2f\n", ((double)(totalNodes) * 1000000000 / (System.nanoTime() - startTime)));
+		long endTime = System.nanoTime();
+
+		System.out.printf("Total time (ms)\t: %d\nNodes searched\t: %d\nNodes/second\t: %.2f\n",
+				(endTime - startTime) / 1000000L, totalNodes,
+				((double) (totalNodes) * 1000000000L / (endTime - startTime)));
 	}
 }
