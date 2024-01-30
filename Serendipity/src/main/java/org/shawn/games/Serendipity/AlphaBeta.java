@@ -327,11 +327,8 @@ public class AlphaBeta
 		this.killers[ply + 2] = null;
 		int moveCount = 0;
 		boolean isPV = beta - alpha > 1;
-<<<<<<< Upstream, based on branch 'SingularExtensions' of git@github.com:xu-shawn/Serendipity.git
 		boolean excludedMove = lastSEPly == ply;
-=======
 		this.selDepth = Math.max(this.selDepth, ply);
->>>>>>> 366922b Add seldepth output
 
 		if ((nodesCount & 1023) == 0 && isTimeUp())
 		{
