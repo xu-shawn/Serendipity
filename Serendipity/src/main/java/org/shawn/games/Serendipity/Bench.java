@@ -1,6 +1,6 @@
 package org.shawn.games.Serendipity;
 
-import com.github.bhlangonijr.chesslib.Board;
+import com.github.bhlangonijr.chesslib.*;
 
 public class Bench
 {
@@ -60,19 +60,39 @@ public class Bench
 
 	public static void bench(AlphaBeta ai, int depth)
 	{
+		bench(ai, depth, false);
+	}
+
+	public static double bench(AlphaBeta ai, int depth, boolean supressOutput)
+	{
 		long totalNodes = 0;
 		long startTime = System.nanoTime();
 		Board board = new Board();
 		for (String fen : benchPositions)
 		{
 			board.loadFromFen(fen);
-			ai.nextMove(board, depth, Long.MAX_VALUE / 10000000);
+			ai.nextMove(board, depth, Long.MAX_VALUE / 10000000, supressOutput);
 			totalNodes += ai.getNodesCount();
 		}
 		long endTime = System.nanoTime();
 
-		System.out.printf("Total time (ms)\t: %d\nNodes searched\t: %d\nNodes/second\t: %.2f\n",
-				(endTime - startTime) / 1000000L, totalNodes,
-				((double) (totalNodes) * 1000000000L / (endTime - startTime)));
+		if (!supressOutput)
+		{
+			System.out.printf("Total time (ms)\t: %d\nNodes searched\t: %d\nNodes/second\t: %.2f\n",
+					(endTime - startTime) / 1000000L, totalNodes,
+					((double) (totalNodes) * 1000000000L / (endTime - startTime)));
+		}
+
+		return (double) (totalNodes) * 1000000000L / (endTime - startTime);
+	}
+
+	public static void benchMultiple(AlphaBeta ai, int depth, int sampleSize)
+	{
+		for (int i = 0; i < sampleSize - 1; i++)
+		{
+			ai.reset();
+			System.out.printf("%.2f, ", bench(ai, depth, true));
+		}
+		System.out.printf("%.2f\n", bench(ai, depth, true));
 	}
 }

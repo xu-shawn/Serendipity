@@ -1,5 +1,7 @@
 package org.shawn.games.Serendipity;
 
+import java.util.Arrays;
+
 public class TranspositionTable
 {
 	public enum NodeType
@@ -62,5 +64,10 @@ public class TranspositionTable
 	public void write(long hash, NodeType type, int depth, int evaluation)
 	{
 		entries[(int) (hash & mask)] = new Entry(type, depth, evaluation, hash);
+	}
+
+	public void clear()
+	{
+		Arrays.fill(entries, null);
 	}
 }
