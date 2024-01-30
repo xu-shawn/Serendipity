@@ -183,6 +183,15 @@ public class UCI
 					}
 					Bench.bench(engine, depth);
 					break;
+				case "benches":
+					int iterations = Integer.parseInt(fullCommand[1]);
+					depth = 10;
+					if(fullCommand.length > 2)
+					{
+						depth = Integer.parseInt(fullCommand[2]);
+					}
+					Bench.benchMultiple(engine, depth, iterations);
+					break;
 			}
 		}
 

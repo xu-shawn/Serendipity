@@ -37,24 +37,21 @@ public class AlphaBeta
 
 	public AlphaBeta()
 	{
-		this.tt = new TranspositionTable(8388608);
-		this.nodesCount = 0;
-		this.pv = new Move[MAX_PLY][MAX_PLY];
-		this.killers = new Move[MAX_PLY];
-		this.counterMoves = new Move[13][65];
-		this.history = new int[13][65];
-		this.doubleExtensionCount = 0;
-		this.lastSEPly = -1;
+		this(8);
 	}
 
 	public AlphaBeta(int n)
 	{
 		this.tt = new TranspositionTable(1048576 * n);
 		this.nodesCount = 0;
+		this.timeLimit = 0;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.killers = new Move[MAX_PLY];
 		this.counterMoves = new Move[13][65];
 		this.history = new int[13][65];
+		this.rootDepth = 0;
+		this.doubleExtensionCount = 0;
+		this.lastSEPly = -1;
 	}
 
 	private void updatePV(Move move, int ply)
@@ -544,6 +541,11 @@ public class AlphaBeta
 
 	public Move nextMove(Board board, int targetDepth, long msLeft)
 	{
+		return nextMove(board, targetDepth, msLeft, false);
+	}
+
+	public Move nextMove(Board board, int targetDepth, long msLeft, boolean supressOutput)
+	{
 		int currentScore = MIN_EVAL;
 		killers = new Move[MAX_PLY];
 		counterMoves = new Move[13][65];
@@ -568,8 +570,11 @@ public class AlphaBeta
 					{
 						currentScore = newScore;
 						lastCompletePV = pv[0].clone();
-						UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
-								(System.nanoTime() - startTime) / 1000000, lastCompletePV);
+						if (!supressOutput)
+						{
+							UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
+									(System.nanoTime() - startTime) / 1000000, lastCompletePV);
+						}
 						continue;
 					}
 				}
@@ -577,8 +582,12 @@ public class AlphaBeta
 				currentScore = mainSearch(board, i, MIN_EVAL, MAX_EVAL, 0, false);
 
 				lastCompletePV = pv[0].clone();
-				UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE, (System.nanoTime() - startTime) / 1000000,
-						lastCompletePV);
+
+				if (!supressOutput)
+				{
+					UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
+							(System.nanoTime() - startTime) / 1000000, lastCompletePV);
+				}
 			}
 		}
 
@@ -586,13 +595,28 @@ public class AlphaBeta
 		{
 		}
 
-		UCI.reportBestMove(lastCompletePV[0]);
+		if (!supressOutput)
+		{
+			UCI.reportBestMove(lastCompletePV[0]);
+		}
 
 		return lastCompletePV[0];
 	}
-	
+
 	public int getNodesCount()
 	{
 		return this.nodesCount;
+	}
+
+	public void reset()
+	{
+		this.tt.clear();
+		this.nodesCount = 0;
+		this.timeLimit = 0;
+		this.pv = new Move[MAX_PLY][MAX_PLY];
+		this.killers = new Move[MAX_PLY];
+		this.counterMoves = new Move[13][65];
+		this.history = new int[13][65];
+		this.rootDepth = 0;
 	}
 }
