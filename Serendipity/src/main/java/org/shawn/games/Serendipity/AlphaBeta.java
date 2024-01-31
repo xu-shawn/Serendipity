@@ -433,43 +433,44 @@ public class AlphaBeta
 			board.doMove(move);
 
 			boolean inCheck = board.isKingAttacked();
-			
+
 			int extension = 0;
 
 			if (ply < rootDepth * 2)
 			{
-				if (ply != 0 && moveCount == 1 && ttMove != null && ttMove.equals(move) && currentMoveEntry != null && !excludedMove && depth > 3
-						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
-						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND) && currentMoveEntry.getDepth() > depth - 4)
+				if (ply != 0 && moveCount == 1 && ttMove != null && ttMove.equals(move) && currentMoveEntry != null
+						&& !excludedMove && depth > 3 && Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
+						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND)
+						&& currentMoveEntry.getDepth() > depth - 4)
 				{
 					int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
 					int singularDepth = depth / 2;
-					
+
 					int oldSEPly = lastSEPly;
 					lastSEPly = ply;
-					
+
 					int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, false);
-					
+
 					lastSEPly = oldSEPly;
-					
-					if(singularValue < singularBeta)
+
+					if (singularValue < singularBeta)
 					{
 						extension = 1;
-						
-						if(!isPV && singularValue < singularBeta - 50 && doubleExtensionCount <= 12)
+
+						if (!isPV && singularValue < singularBeta - 50 && doubleExtensionCount <= 12)
 						{
 							extension = 2;
 							depth += depth < 15 ? 1 : 0;
 						}
 					}
 				}
-				
+
 				else if (inCheck)
 				{
 					extension = 1;
 				}
 			}
-			
+
 			newdepth += extension;
 			doubleExtensionCount += extension == 2 ? 1 : 0;
 
