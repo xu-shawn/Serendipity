@@ -438,11 +438,11 @@ public class AlphaBeta
 
 			if (ply < rootDepth * 2)
 			{
-				if (ply != 0 && moveCount == 1 && ttMove != null && ttMove.equals(move) && currentMoveEntry != null && !excludedMove && depth > 7
+				if (ply != 0 && moveCount == 1 && ttMove != null && ttMove.equals(move) && currentMoveEntry != null && !excludedMove && depth > 3
 						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
 						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND))
 				{
-					int singularBeta = beta - 72 * depth;
+					int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
 					int singularDepth = depth / 2;
 					
 					int oldSEPly = lastSEPly;
@@ -456,11 +456,11 @@ public class AlphaBeta
 					{
 						extension = 1;
 						
-//						if(!isPV && singularValue < singularBeta - 50 && doubleExtensionCount <= 12)
-//						{
-//							extension = 2;
-//							depth += depth < 15 ? 1 : 0;
-//						}
+						if(!isPV && singularValue < singularBeta - 50 && doubleExtensionCount <= 12)
+						{
+							extension = 2;
+							depth += depth < 15 ? 1 : 0;
+						}
 					}
 				}
 				
