@@ -31,6 +31,7 @@ public class AlphaBeta
 	private int[][] history;
 
 	private int rootDepth;
+	private int selDepth;
 
 	public AlphaBeta()
 	{
@@ -269,6 +270,8 @@ public class AlphaBeta
 	{
 		this.nodesCount++;
 
+		this.selDepth = Math.max(this.selDepth, ply);
+
 		if (board.isDraw())
 		{
 			return DRAW_EVAL;
@@ -324,6 +327,7 @@ public class AlphaBeta
 		this.killers[ply + 2] = null;
 		int moveCount = 0;
 		boolean isPV = beta - alpha > 1;
+		this.selDepth = Math.max(this.selDepth, ply);
 
 		if ((nodesCount & 1023) == 0 && isTimeUp())
 		{
@@ -534,6 +538,7 @@ public class AlphaBeta
 			for (int i = 1; i <= targetDepth; i++)
 			{
 				rootDepth = i;
+				selDepth = 0;
 				if (i > 3)
 				{
 					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA,
@@ -545,7 +550,7 @@ public class AlphaBeta
 						lastCompletePV = pv[0].clone();
 						if (!supressOutput)
 						{
-							UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
+							UCI.report(i, selDepth, nodesCount, currentScore / PeSTO.MAX_PHASE,
 									(System.nanoTime() - startTime) / 1000000, lastCompletePV);
 						}
 						continue;
@@ -558,7 +563,7 @@ public class AlphaBeta
 
 				if (!supressOutput)
 				{
-					UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
+					UCI.report(i, selDepth, nodesCount, currentScore / PeSTO.MAX_PHASE,
 							(System.nanoTime() - startTime) / 1000000, lastCompletePV);
 				}
 			}
@@ -591,5 +596,6 @@ public class AlphaBeta
 		this.counterMoves = new Move[13][65];
 		this.history = new int[13][65];
 		this.rootDepth = 0;
+		this.selDepth = 0;
 	}
 }
