@@ -440,7 +440,7 @@ public class AlphaBeta
 			{
 				if (ply != 0 && moveCount == 1 && ttMove != null && ttMove.equals(move) && currentMoveEntry != null && !excludedMove && depth > 3
 						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
-						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND))
+						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND) && currentMoveEntry.getDepth() > depth - 4)
 				{
 					int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
 					int singularDepth = depth / 2;
