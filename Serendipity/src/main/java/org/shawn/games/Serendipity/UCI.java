@@ -34,9 +34,9 @@ public class UCI
 		myOption.set(value);
 	}
 
-	public static void report(int depth, int nodes, int score, long ms, Move[] pv)
+	public static void report(int depth, int selDepth, int nodes, int score, long ms, Move[] pv)
 	{
-		System.out.printf("info depth %d nodes %d score cp %d time %d pv %s\n", depth, nodes, score,
+		System.out.printf("info depth %d seldepth %d nodes %d score cp %d time %d pv %s\n", depth, selDepth, nodes, score,
 				ms, String.join(" ", Arrays.stream(pv).takeWhile(x -> x != null)
 						.map(Object::toString).collect(Collectors.toList())));
 	}
