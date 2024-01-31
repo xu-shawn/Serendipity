@@ -284,12 +284,20 @@ public class AlphaBeta
 
 		int standPat = evaluate(board);
 
-		alpha = Math.max(alpha, standPat);
-
-		if (alpha >= beta)
+		if (standPat >= beta)
 		{
 			return beta;
 		}
+
+		final int BIG_DELTA = 23400; // queen value
+
+		if (standPat < alpha - BIG_DELTA)
+		{
+			return alpha;
+		}
+
+		alpha = Math.max(alpha, standPat);
+
 
 		final List<Move> pseudoLegalCaptures = board.pseudoLegalCaptures();
 
