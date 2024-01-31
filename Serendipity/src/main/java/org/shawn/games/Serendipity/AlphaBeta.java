@@ -118,8 +118,8 @@ public class AlphaBeta
 		boolean hasCounterMove = false;
 
 		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getTo())
-					.ordinal()][lastMove.getMove().getTo().ordinal()];
+			counterMove = counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove().getTo()
+					.ordinal()];
 
 		for (Move move : moves)
 		{
@@ -145,8 +145,7 @@ public class AlphaBeta
 				killers.add(move);
 			}
 
-			else if (board.getPiece(move.getTo()).equals(Piece.NONE)
-					|| board.getPiece(move.getTo()) == null)
+			else if (board.getPiece(move.getTo()).equals(Piece.NONE) || board.getPiece(move.getTo()) == null)
 			{
 				if (!hasCounterMove && counterMove != null && move.equals(counterMove))
 				{
@@ -199,11 +198,9 @@ public class AlphaBeta
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return pieceValue(board.getPiece(m2.getTo()))
-						- pieceValue(board.getPiece(m2.getFrom()))
+				return pieceValue(board.getPiece(m2.getTo())) - pieceValue(board.getPiece(m2.getFrom()))
 
-						- (pieceValue(board.getPiece(m1.getTo()))
-								- pieceValue(board.getPiece(m1.getFrom())));
+						- (pieceValue(board.getPiece(m1.getTo())) - pieceValue(board.getPiece(m1.getFrom())));
 			}
 
 		});
@@ -253,11 +250,9 @@ public class AlphaBeta
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return pieceValue(board.getPiece(m2.getTo()))
-						- pieceValue(board.getPiece(m2.getFrom()))
+				return pieceValue(board.getPiece(m2.getTo())) - pieceValue(board.getPiece(m2.getFrom()))
 
-						- (pieceValue(board.getPiece(m1.getTo()))
-								- pieceValue(board.getPiece(m1.getFrom())));
+						- (pieceValue(board.getPiece(m1.getTo())) - pieceValue(board.getPiece(m1.getFrom())));
 			}
 
 		});
@@ -316,8 +311,8 @@ public class AlphaBeta
 		return alpha;
 	}
 
-	private int mainSearch(Board board, int depth, int alpha, int beta, int ply,
-			boolean nullAllowed) throws TimeOutException
+	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed)
+			throws TimeOutException
 	{
 		this.nodesCount++;
 		this.pv[ply][0] = null;
@@ -330,8 +325,7 @@ public class AlphaBeta
 			throw new TimeOutException();
 		}
 
-		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3)
-				|| board.getHalfMoveCounter() >= 100)
+		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3) || board.getHalfMoveCounter() >= 100)
 		{
 			return DRAW_EVAL;
 		}
@@ -364,15 +358,35 @@ public class AlphaBeta
 					}
 					break;
 				default:
-					throw new IllegalArgumentException(
-							"Unexpected value: " + currentMoveEntry.getType());
+					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
+			}
+		}
+
+		int matingValue = MATE_EVAL - ply;
+
+		if (matingValue < beta)
+		{
+			beta = matingValue;
+			if (alpha >= matingValue)
+			{
+				return matingValue;
+			}
+		}
+
+		matingValue = -MATE_EVAL + ply;
+
+		if (matingValue > alpha)
+		{
+			alpha = matingValue;
+			if (beta <= matingValue)
+			{
+				return matingValue;
 			}
 		}
 
 		int staticEval;
 
-		if (currentMoveEntry != null
-				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+		if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
 		{
 			staticEval = currentMoveEntry.getEvaluation();
 		}
@@ -382,8 +396,8 @@ public class AlphaBeta
 		}
 
 		if (nullAllowed && beta < MATE_EVAL - 1024 && !board.isKingAttacked()
-				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING)) | board
-						.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
+				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
+						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
 				&& PeSTO.evaluate(board) >= beta && ply > 0 && staticEval >= beta)
 		{
@@ -451,8 +465,7 @@ public class AlphaBeta
 
 				if (thisMoveEval > alpha)
 				{
-					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1,
-							true);
+					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
 				}
 			}
 
@@ -475,20 +488,16 @@ public class AlphaBeta
 
 				if (alpha >= beta)
 				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND,
-							depth, alpha);
-					if (move.getPromotion().equals(Piece.NONE)
-							&& board.getPiece(move.getTo()).equals(Piece.NONE))
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
+					if (move.getPromotion().equals(Piece.NONE) && board.getPiece(move.getTo()).equals(Piece.NONE))
 					{
 						killers[ply] = move;
-						history[board.getPiece(move.getTo()).ordinal()][move.getTo()
-								.ordinal()] += depth * depth;
+						history[board.getPiece(move.getTo()).ordinal()][move.getTo().ordinal()] += depth * depth;
 
 						if (!board.getBackup().isEmpty())
 						{
 							Move lastMove = board.getBackup().peekLast().getMove();
-							counterMoves[board.getPiece(lastMove.getTo()).ordinal()][lastMove
-									.getTo().ordinal()] = move;
+							counterMoves[board.getPiece(lastMove.getTo()).ordinal()][lastMove.getTo().ordinal()] = move;
 						}
 					}
 
@@ -499,14 +508,12 @@ public class AlphaBeta
 
 		if (alpha == oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth,
-					alpha);
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha);
 		}
 
 		else if (alpha > oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth,
-					alpha);
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha);
 		}
 
 		return alpha;
@@ -538,8 +545,7 @@ public class AlphaBeta
 				{
 					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA,
 							currentScore + ASPIRATION_DELTA, 0, false);
-					if (newScore > currentScore - ASPIRATION_DELTA
-							&& newScore < currentScore + ASPIRATION_DELTA)
+					if (newScore > currentScore - ASPIRATION_DELTA && newScore < currentScore + ASPIRATION_DELTA)
 					{
 						currentScore = newScore;
 						lastCompletePV = pv[0].clone();
@@ -558,8 +564,8 @@ public class AlphaBeta
 
 				if (!supressOutput)
 				{
-					UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE,
-							(System.nanoTime() - startTime) / 1000000, lastCompletePV);
+					UCI.report(i, nodesCount, currentScore / PeSTO.MAX_PHASE, (System.nanoTime() - startTime) / 1000000,
+							lastCompletePV);
 				}
 			}
 		}
