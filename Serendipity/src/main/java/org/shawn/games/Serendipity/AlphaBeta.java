@@ -35,6 +35,12 @@ public class AlphaBeta
 
 	private int rootDepth;
 	private int selDepth;
+	
+	private IntegerOption SEBetaFactor = new IntegerOption(53, 0, 300, "SEBetaFactor");
+	private IntegerOption SEDepthRequirement = new IntegerOption(5, 0, 10, "SEDepthRequirement");
+	private IntegerOption SEDepthTTCutoff = new IntegerOption(3, 0, 10, "SEDepthTTCutoff");
+	private IntegerOption SEDoubleExtensionEvalCutoff = new IntegerOption(504, 0, 2000, "SEDoubleExtensionEvalCutoff");
+	private IntegerOption SEDoubleExtensionLimit = new IntegerOption(11, 0, 20, "SEDoubleExtensionLimit");
 
 	public AlphaBeta()
 	{
@@ -327,7 +333,7 @@ public class AlphaBeta
 		this.killers[ply + 2] = null;
 		int moveCount = 0;
 		boolean isPV = beta - alpha > 1;
-		boolean noSingularExtensions = lastSEPly == ply;
+		boolean noSingularExtension = lastSEPly == ply;
 		this.selDepth = Math.max(this.selDepth, ply);
 
 		if ((nodesCount & 1023) == 0 && isTimeUp())
@@ -387,7 +393,7 @@ public class AlphaBeta
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
-				&& PeSTO.evaluate(board) >= beta && ply > 0 && staticEval >= beta && !noSingularExtensions)
+				&& PeSTO.evaluate(board) >= beta && ply > 0 && staticEval >= beta && !noSingularExtension)
 		{
 //			int r = depth / 3 + 4;
 
@@ -439,12 +445,12 @@ public class AlphaBeta
 			if (ply < rootDepth * 2)
 			{
 				if (ply != 0 && moveCount == 1 && ttMove != null && ttMove.equals(move) && currentMoveEntry != null
-						&& !noSingularExtensions && depth > 3
 						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
+						&& !noSingularExtension && depth > SEDepthRequirement.get() && Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
 						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND)
-						&& currentMoveEntry.getDepth() > depth - 4)
+						&& currentMoveEntry.getDepth() > depth - SEDepthTTCutoff.get())
 				{
-					int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
+					int singularBeta = currentMoveEntry.getEvaluation() - SEBetaFactor.get() * depth;
 					int singularDepth = depth / 2;
 
 					int oldSEPly = lastSEPly;
@@ -458,10 +464,10 @@ public class AlphaBeta
 					{
 						extension = 1;
 
-						if (!isPV && singularValue < singularBeta - 50 && doubleExtensionCount <= 12)
+						if (!isPV && singularValue < singularBeta - SEDoubleExtensionEvalCutoff.get() && doubleExtensionCount <= SEDoubleExtensionLimit.get())
 						{
 							extension = 2;
-							depth += depth < 15 ? 1 : 0;
+//							depth += depth < 15 ? 1 : 0;
 						}
 					}
 				}
