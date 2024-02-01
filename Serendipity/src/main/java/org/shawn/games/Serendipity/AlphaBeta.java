@@ -35,7 +35,7 @@ public class AlphaBeta
 
 	private int rootDepth;
 	private int selDepth;
-	
+
 	private IntegerOption SEBetaFactor = new IntegerOption(53, 0, 300, "SEBetaFactor");
 	private IntegerOption SEDepthRequirement = new IntegerOption(5, 0, 10, "SEDepthRequirement");
 	private IntegerOption SEDepthTTCutoff = new IntegerOption(3, 0, 10, "SEDepthTTCutoff");
@@ -444,14 +444,23 @@ public class AlphaBeta
 
 			if (ply < rootDepth * 2)
 			{
-				if (ply != 0 && moveCount == 1 && ttMove != null && ttMove.equals(move) && currentMoveEntry != null
-						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
-						&& !noSingularExtension && depth > SEDepthRequirement.get() && Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
-						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND)
-						&& currentMoveEntry.getDepth() > depth - SEDepthTTCutoff.get())
+				if (inCheck)
 				{
-					int singularBeta = currentMoveEntry.getEvaluation() - SEBetaFactor.get() * depth;
-					int singularDepth = depth / 2;
+					extension = 1;
+				}
+				
+				else if (ply != 0
+						&& moveCount == 1
+						&& move.equals(ttMove)
+						&& currentMoveEntry != null
+						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
+						&& !noSingularExtension
+						&& depth > 7
+						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND)
+						&& currentMoveEntry.getDepth() > depth - 4)
+				{
+					int singularBeta = currentMoveEntry.getEvaluation() - 53 * depth;
+					int singularDepth = (depth - 1) / 2;
 
 					int oldSEPly = lastSEPly;
 					lastSEPly = ply;
@@ -464,17 +473,12 @@ public class AlphaBeta
 					{
 						extension = 1;
 
-						if (!isPV && singularValue < singularBeta - SEDoubleExtensionEvalCutoff.get() && doubleExtensionCount <= SEDoubleExtensionLimit.get())
-						{
-							extension = 2;
+//						if (!isPV && singularValue < singularBeta - SEDoubleExtensionEvalCutoff.get() && doubleExtensionCount <= SEDoubleExtensionLimit.get())
+//						{
+//							extension = 2;
 //							depth += depth < 15 ? 1 : 0;
-						}
+//						}
 					}
-				}
-
-				else if (inCheck)
-				{
-					extension = 1;
 				}
 			}
 
