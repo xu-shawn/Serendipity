@@ -384,6 +384,11 @@ public class AlphaBeta
 		{
 			staticEval = PeSTO.evaluate(board);
 		}
+		
+		if (!isPV && !board.isKingAttacked() && depth < 7 && staticEval > beta && staticEval - depth * 1680 > beta)
+		{
+			return beta;
+		}
 
 		if (nullAllowed && beta < MATE_EVAL - 1024 && !board.isKingAttacked()
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING)) | board
