@@ -5,7 +5,7 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class SEE
 {
-	private final static int SEEPieceValues(PieceType piece)
+	private static int SEEPieceValues(PieceType piece)
 	{
 		return switch (piece)
 		{
@@ -17,8 +17,21 @@ public class SEE
 			default -> 0;
 		};
 	}
+	
+	static void printBitboard(long bb)
+	{
+		String binary = "0".repeat(Long.numberOfLeadingZeros(bb)) + Long.toBinaryString(bb);
+		for(int i = 0; i< 8; i++)
+		{
+			for(int j = 0; j < 8; j++)
+			{
+				System.out.print(binary.charAt(i * 8 + 7 - j));
+			}
+			System.out.println();
+		}
+	}
 
-	private final static int SEEPieceValues(Piece piece)
+	private static int SEEPieceValues(Piece piece)
 	{
 		return SEEPieceValues(piece.getPieceType());
 	}
@@ -26,7 +39,8 @@ public class SEE
 	public static int moveEstimatedValue(Board board, Move move)
 	{
 		// Start with the value of the piece on the target square
-		int value = SEEPieceValues(board.getPiece(move.getTo()).getPieceType());
+		int value = !board.getPiece(move.getTo()).equals(Piece.NONE) ? SEEPieceValues(board.getPiece(move.getTo()).getPieceType())
+				: 0;
 
 		// Factor in the new piece's value and remove our promoted pawn
 		if (!Piece.NONE.equals(move.getPromotion()))
@@ -95,53 +109,63 @@ public class SEE
 
 		// Now our opponents turn to recapture
 		colour = board.getSideToMove().flip();
+		
+//		System.out.println(board + " " + move + "\n");
+//		printBitboard(occupied);
+//		System.out.println();
+		
+		long count = 0;
 
 		while (true)
 		{
+			count ++;
 			// If we have no more attackers left we lose
 			myAttackers = attackers & board.getBitboard(colour);
 
 			if (myAttackers == 0)
 				break;
 
-			if ((myAttackers & (board.getBitboard(Piece.BLACK_PAWN) | board.getBitboard(Piece.WHITE_PAWN))) != 0L)
+			if ((myAttackers & board.getBitboard(Piece.make(colour, PieceType.PAWN))) != 0L)
 			{
 				nextVictim = PieceType.PAWN;
 			}
 
-			else if ((myAttackers
-					& (board.getBitboard(Piece.BLACK_KNIGHT) | board.getBitboard(Piece.WHITE_KNIGHT))) != 0L)
+			else if ((myAttackers & board.getBitboard(Piece.make(colour, PieceType.KNIGHT))) != 0L)
 			{
 				nextVictim = PieceType.KNIGHT;
 			}
 
-			else if ((myAttackers
-					& (board.getBitboard(Piece.BLACK_BISHOP) | board.getBitboard(Piece.WHITE_BISHOP))) != 0L)
+			else if ((myAttackers & board.getBitboard(Piece.make(colour, PieceType.BISHOP))) != 0L)
 			{
 				nextVictim = PieceType.BISHOP;
 			}
 
-			else if ((myAttackers & (board.getBitboard(Piece.BLACK_ROOK) | board.getBitboard(Piece.WHITE_ROOK))) != 0L)
+			else if ((myAttackers & board.getBitboard(Piece.make(colour, PieceType.ROOK))) != 0L)
 			{
 				nextVictim = PieceType.ROOK;
 			}
 
-			else if ((myAttackers
-					& (board.getBitboard(Piece.BLACK_QUEEN) | board.getBitboard(Piece.WHITE_QUEEN))) != 0L)
+			else if ((myAttackers & board.getBitboard(Piece.make(colour, PieceType.QUEEN))) != 0L)
 			{
 				nextVictim = PieceType.QUEEN;
 			}
-			
-			else
+
+			else if ((myAttackers & board.getBitboard(Piece.make(colour, PieceType.KING))) != 0L)
 			{
-				assert(false);
+				nextVictim = PieceType.KING;
+			}
+
+			else
+			{ 
+				assert (false);
 			}
 
 			// Remove this attacker from the occupied
-			occupied ^= (1L << Bitboard.extractLsb(myAttackers & board.getBitboard(Piece.make(colour, nextVictim))));
+			occupied ^= (1L << Bitboard.bitScanForward(myAttackers & board.getBitboard(Piece.make(colour, nextVictim))));
 
 			// A diagonal move may reveal bishop or queen attackers
-			if (nextVictim.equals(PieceType.PAWN) || nextVictim.equals(PieceType.BISHOP) || nextVictim.equals(PieceType.QUEEN))
+			if (nextVictim.equals(PieceType.PAWN) || nextVictim.equals(PieceType.BISHOP)
+					|| nextVictim.equals(PieceType.QUEEN))
 				attackers |= Bitboard.getBishopAttacks(occupied, to) & bishops;
 
 			// A vertical or horizontal move may reveal rook or queen attackers
@@ -150,6 +174,27 @@ public class SEE
 
 			// Make sure we did not add any already used attacks
 			attackers &= occupied;
+			
+//			if(count <= 10)
+//			{
+//				System.out.println(nextVictim);
+//				System.out.println(colour);
+//				System.out.println(board);
+//				System.out.println();
+////				printBitboard(attackers);
+////				System.out.println();
+////				printBitboard(1L << Bitboard.bitScanForward(myAttackers & board.getBitboard(Piece.make(colour, nextVictim))));
+////				System.out.println();
+////				printBitboard(occupied);
+////				System.out.println();
+//				printBitboard(myAttackers & board.getBitboard(Piece.make(colour, nextVictim)));
+////				System.out.println(to);
+////				printBitboard(myAttackers);
+//				System.out.println();
+////				printBitboard(attackers);
+////				System.out.println();
+//				
+//			}
 
 			// Swap the turn
 			colour = colour.flip();
