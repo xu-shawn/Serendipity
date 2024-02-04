@@ -267,6 +267,8 @@ public class AlphaBeta
 
 		this.selDepth = Math.max(this.selDepth, ply);
 
+		int bestScore;
+
 		if (board.isDraw())
 		{
 			return DRAW_EVAL;
@@ -277,7 +279,7 @@ public class AlphaBeta
 			return -MATE_EVAL + ply;
 		}
 
-		int standPat = evaluate(board);
+		int standPat = bestScore = evaluate(board);
 
 		alpha = Math.max(alpha, standPat);
 
@@ -285,6 +287,8 @@ public class AlphaBeta
 		{
 			return beta;
 		}
+		
+		int futilityBase = standPat + 4896;
 
 		final List<Move> pseudoLegalCaptures = board.pseudoLegalCaptures();
 
@@ -297,21 +301,31 @@ public class AlphaBeta
 				continue;
 			}
 
+			if (bestScore > -MATE_EVAL + 1024 && futilityBase < alpha && !SEE.staticExchangeEvaluation(board, move, 1)
+					&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
+							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
+									.getBitboard(board.getSideToMove()))
+			{
+				bestScore = Math.max(bestScore, futilityBase);
+				continue;
+			}
+
 			board.doMove(move);
 
 			int score = -quiesce(board, -beta, -alpha, ply + 1);
 
 			board.undoMove();
 
-			alpha = Math.max(alpha, score);
+			bestScore = Math.max(bestScore, score);
+			alpha = Math.max(alpha, bestScore);
 
 			if (alpha >= beta)
 			{
-				return beta;
+				break;
 			}
 		}
 
-		return alpha;
+		return bestScore;
 	}
 
 	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed)
