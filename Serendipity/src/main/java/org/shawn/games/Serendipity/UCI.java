@@ -3,11 +3,8 @@ package org.shawn.games.Serendipity;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.github.bhlangonijr.chesslib.Bitboard;
-import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.Side;
-import com.github.bhlangonijr.chesslib.Square;
-import com.github.bhlangonijr.chesslib.move.Move;
+import com.github.bhlangonijr.chesslib.*;
+import com.github.bhlangonijr.chesslib.move.*;
 
 public class UCI
 {
@@ -17,11 +14,6 @@ public class UCI
 
 	public static void main(String args[])
 	{
-//		internalBoard.loadFromFen("8/8/6k1/8/2B5/8/1K6/8 w - - 0 1");
-//		SEE.printBitboard(Bitboard.getRookAttacks(internalBoard.getBitboard(), Square.D4));
-//		internalBoard.loadFromFen("r3k2r/p1ppqpb1/Bn2Pnp1/4N3/4PB2/5Q1p/P1P2PPP/q3K2R w Kkq - 0 13");
-//		Move move = new Move("f3d1", Side.WHITE);
-//		System.out.print(SEE.staticExchangeEvaluation(internalBoard, move, 0));
 		UCIMainLoop();
 	}
 

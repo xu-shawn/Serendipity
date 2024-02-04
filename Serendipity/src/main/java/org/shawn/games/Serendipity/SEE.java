@@ -109,16 +109,9 @@ public class SEE
 
 		// Now our opponents turn to recapture
 		colour = board.getSideToMove().flip();
-		
-//		System.out.println(board + " " + move + "\n");
-//		printBitboard(occupied);
-//		System.out.println();
-		
-		long count = 0;
 
 		while (true)
 		{
-			count ++;
 			// If we have no more attackers left we lose
 			myAttackers = attackers & board.getBitboard(colour);
 
@@ -174,27 +167,6 @@ public class SEE
 
 			// Make sure we did not add any already used attacks
 			attackers &= occupied;
-			
-//			if(count <= 10)
-//			{
-//				System.out.println(nextVictim);
-//				System.out.println(colour);
-//				System.out.println(board);
-//				System.out.println();
-////				printBitboard(attackers);
-////				System.out.println();
-////				printBitboard(1L << Bitboard.bitScanForward(myAttackers & board.getBitboard(Piece.make(colour, nextVictim))));
-////				System.out.println();
-////				printBitboard(occupied);
-////				System.out.println();
-//				printBitboard(myAttackers & board.getBitboard(Piece.make(colour, nextVictim)));
-////				System.out.println(to);
-////				printBitboard(myAttackers);
-//				System.out.println();
-////				printBitboard(attackers);
-////				System.out.println();
-//				
-//			}
 
 			// Swap the turn
 			colour = colour.flip();
