@@ -3,9 +3,8 @@ package org.shawn.games.Serendipity;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.Side;
-import com.github.bhlangonijr.chesslib.move.Move;
+import com.github.bhlangonijr.chesslib.*;
+import com.github.bhlangonijr.chesslib.move.*;
 
 public class UCI
 {
