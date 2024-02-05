@@ -278,17 +278,27 @@ public class AlphaBeta
 		{
 			return -MATE_EVAL + ply;
 		}
-
-		int standPat = bestScore = evaluate(board);
-
-		alpha = Math.max(alpha, standPat);
-
-		if (alpha >= beta)
+		
+		int futilityBase;
+		
+		if(board.isKingAttacked())
 		{
-			return beta;
+			bestScore = futilityBase = MIN_EVAL;
 		}
 		
-		int futilityBase = standPat + 4896;
+		else
+		{
+			int standPat = bestScore = evaluate(board);
+	
+			alpha = Math.max(alpha, standPat);
+	
+			if (alpha >= beta)
+			{
+				return beta;
+			}
+			
+			futilityBase = standPat + 4896;
+		}
 
 		final List<Move> pseudoLegalCaptures = board.pseudoLegalCaptures();
 
