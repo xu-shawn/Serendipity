@@ -271,7 +271,7 @@ public class AlphaBeta
 
 		if (board.isRepetition() || board.getHalfMoveCounter() >= 100)
 		{
-			return DRAW_EVAL;
+			return DRAW_EVAL + 1 - (nodesCount & 2);
 		}
 		
 		int futilityBase;
@@ -358,7 +358,7 @@ public class AlphaBeta
 
 		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3) || board.getHalfMoveCounter() >= 100)
 		{
-			return DRAW_EVAL;
+			return DRAW_EVAL + 1 - (nodesCount & 2);
 		}
 
 		if (depth <= 0 || ply >= MAX_PLY)
