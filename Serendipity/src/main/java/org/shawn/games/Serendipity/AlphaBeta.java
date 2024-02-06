@@ -269,21 +269,21 @@ public class AlphaBeta
 
 		int bestScore;
 
-		if (board.isDraw())
+		if (board.isRepetition() || board.getHalfMoveCounter() >= 100)
 		{
 			return DRAW_EVAL;
 		}
-
-		if (board.isMated())
-		{
-			return -MATE_EVAL + ply;
-		}
 		
 		int futilityBase;
+		boolean inCheck = false;
+		final List<Move> moves;
 		
 		if(board.isKingAttacked())
 		{
 			bestScore = futilityBase = MIN_EVAL;
+			moves = board.legalMoves();
+			sortMoves(moves, board, ply);
+			inCheck = true;
 		}
 		
 		else
@@ -298,15 +298,13 @@ public class AlphaBeta
 			}
 			
 			futilityBase = standPat + 4896;
+			moves = board.pseudoLegalCaptures();
+			sortCaptures(moves, board);
 		}
 
-		final List<Move> pseudoLegalCaptures = board.pseudoLegalCaptures();
-
-		sortCaptures(pseudoLegalCaptures, board);
-
-		for (Move move : pseudoLegalCaptures)
+		for (Move move : moves)
 		{
-			if (!board.isMoveLegal(move, true))
+			if (!inCheck && !board.isMoveLegal(move, false))
 			{
 				continue;
 			}
@@ -333,6 +331,11 @@ public class AlphaBeta
 			{
 				break;
 			}
+		}
+		
+		if (bestScore == MIN_EVAL && inCheck)
+		{
+			return -MATE_EVAL + ply;
 		}
 
 		return bestScore;
