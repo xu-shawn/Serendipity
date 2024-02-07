@@ -10,20 +10,55 @@ public class MoveSort
 	public static Move sortMoves(List<Move> moves, Board board, TranspositionTable tt, Move[] killers,
 			Move[][] counterMoves, int[][] history, int ply)
 	{
+		if (moves.size() == 0)
+		{
+			return null;
+		}
+
 		List<ScoredMove> scoredMoves = new LinkedList<ScoredMove>();
 		MoveBackup lastMove = board.getBackup().peekLast();
 		Move killer = killers[ply];
-		Move counterMove = lastMove != null ? counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove().getTo()
-				.ordinal()] : null;
+		Move counterMove = lastMove != null
+				? counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove().getTo()
+						.ordinal()]
+				: null;
+
+		int bestEval = Integer.MIN_VALUE;
+		Move ttMove = null;
+
 		for (Move move : moves)
 		{
+			board.doMove(move);
+			TranspositionTable.Entry ttResult = tt.probe(board.getIncrementalHashKey());
+			long boardSignature = board.getIncrementalHashKey();
+			board.undoMove();
+
+			if (ttResult != null && ttResult.getSignature() == boardSignature
+					&& (ttResult.getType() == TranspositionTable.NodeType.EXACT
+							|| ttResult.getType() == TranspositionTable.NodeType.UPPERBOUND)
+					&& ttResult.getEvaluation() > bestEval)
+			{
+				ttMove = move;
+				bestEval = ttResult.getEvaluation();
+			}
+
 			insert(scoredMoves, new ScoredMove(move, moveScore(move, board, tt, killer, counterMove, history, ply)));
 		}
-		
+
 		moves.clear();
-		
-		for (ScoredMove move: scoredMoves)
+
+		if (ttMove != null)
 		{
+			moves.add(ttMove);
+		}
+
+		for (ScoredMove move : scoredMoves)
+		{
+			if (move.getMove().equals(ttMove))
+			{
+				continue;
+			}
+			
 			moves.add(move.getMove());
 		}
 
@@ -33,31 +68,20 @@ public class MoveSort
 	private static int moveScore(Move move, Board board, TranspositionTable tt, Move killer, Move counterMove,
 			int[][] history, int ply)
 	{
-		board.doMove(move);
-		TranspositionTable.Entry ttResult = tt.probe(board.getIncrementalHashKey());
-		long boardSignature = board.getIncrementalHashKey();
-		board.undoMove();
-
-		if (ttResult != null && ttResult.getSignature() == boardSignature
-				&& (ttResult.getType() == TranspositionTable.NodeType.EXACT
-						|| ttResult.getType() == TranspositionTable.NodeType.UPPERBOUND))
-		{
-			return 100000000 + ttResult.getEvaluation();
-		}
 
 //		else if (!move.getPromotion().equals(Piece.NONE))
 //		{
 //			promotions.add(move);
 //		}
 
-		else if (move.equals(killer))
+		if (move.equals(killer))
 		{
 			return 70000000;
 		}
-		
+
 		else if (move.equals(counterMove))
 		{
-			return 60000000;
+			return 69000000;
 		}
 
 		else if (board.getPiece(move.getTo()).equals(Piece.NONE) || board.getPiece(move.getTo()) == null)
@@ -67,9 +91,8 @@ public class MoveSort
 
 		else
 		{
-			return SEE.staticExchangeEvaluation(board, move, -100) ? 80000000 : -20000000
-					+ AlphaBeta.pieceValue(board.getPiece(move.getTo()))
-					- AlphaBeta.pieceValue(board.getPiece(move.getFrom()));
+			return 80000000 + AlphaBeta.pieceValue(board.getPiece(move.getTo()))
+							- AlphaBeta.pieceValue(board.getPiece(move.getFrom()));
 		}
 	}
 
@@ -79,7 +102,7 @@ public class MoveSort
 
 		for (ScoredMove curMove : scoredMoves)
 		{
-			if (curMove.getScore() < move.getScore())
+			if (curMove.getScore() <= move.getScore())
 			{
 				break;
 			}
