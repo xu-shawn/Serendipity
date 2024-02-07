@@ -62,7 +62,7 @@ public class MoveSort
 			moves.add(move.getMove());
 		}
 
-		return scoredMoves.get(0).getScore() > 90000000 ? moves.get(0) : null;
+		return ttMove;
 	}
 
 	private static int moveScore(Move move, Board board, TranspositionTable tt, Move killer, Move counterMove,
