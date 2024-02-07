@@ -269,34 +269,34 @@ public class AlphaBeta
 
 		int bestScore;
 
-		if (board.isRepetition() || board.getHalfMoveCounter() >= 100)
+		if (board.isRepetition() || board.getHalfMoveCounter() >= 100 || board.isInsufficientMaterial())
 		{
 			return DRAW_EVAL;
 		}
-		
+
 		int futilityBase;
 		boolean inCheck = false;
 		final List<Move> moves;
-		
-		if(board.isKingAttacked())
+
+		if (board.isKingAttacked())
 		{
 			bestScore = futilityBase = MIN_EVAL;
 			moves = board.legalMoves();
 			sortMoves(moves, board, ply);
 			inCheck = true;
 		}
-		
+
 		else
 		{
 			int standPat = bestScore = evaluate(board);
-	
+
 			alpha = Math.max(alpha, standPat);
-	
+
 			if (alpha >= beta)
 			{
 				return beta;
 			}
-			
+
 			futilityBase = standPat + 4896;
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
@@ -332,7 +332,7 @@ public class AlphaBeta
 				break;
 			}
 		}
-		
+
 		if (bestScore == MIN_EVAL && inCheck)
 		{
 			return -MATE_EVAL + ply;
@@ -356,7 +356,8 @@ public class AlphaBeta
 			throw new TimeOutException();
 		}
 
-		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3) || board.getHalfMoveCounter() >= 100)
+		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3)
+				|| board.getHalfMoveCounter() >= 100 || board.isInsufficientMaterial())
 		{
 			return DRAW_EVAL;
 		}
