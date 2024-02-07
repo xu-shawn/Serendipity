@@ -7,18 +7,18 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class AlphaBeta
 {
-	private final int PAWN_VALUE = 82;
-	private final int KNIGHT_VALUE = 337;
-	private final int BISHOP_VALUE = 365;
-	private final int ROOK_VALUE = 477;
-	private final int QUEEN_VALUE = 1025;
-	private final int MAX_EVAL = 1000000000;
-	private final int MIN_EVAL = -1000000000;
-	private final int MATE_EVAL = 500000000;
-	private final int DRAW_EVAL = 0;
+	private final static int PAWN_VALUE = 82;
+	private final static int KNIGHT_VALUE = 337;
+	private final static int BISHOP_VALUE = 365;
+	private final static int ROOK_VALUE = 477;
+	private final static int QUEEN_VALUE = 1025;
+	private final static int MAX_EVAL = 1000000000;
+	private final static int MIN_EVAL = -1000000000;
+	private final static int MATE_EVAL = 1000000;
+	private final static int DRAW_EVAL = 0;
 
-	private final int MAX_PLY = 256;
-	private final int ASPIRATION_DELTA = 600;
+	private final static int MAX_PLY = 256;
+	private final static int ASPIRATION_DELTA = 600;
 
 	private final TranspositionTable tt;
 
@@ -61,7 +61,7 @@ public class AlphaBeta
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 	}
 
-	private int pieceValue(Piece p)
+	public static int pieceValue(Piece p)
 	{
 		if (p.getPieceType() == null)
 		{
@@ -443,7 +443,8 @@ public class AlphaBeta
 
 		int oldAlpha = alpha;
 
-		Move ttMove = sortMoves(legalMoves, board, ply);
+//		Move ttMove = sortMoves(legalMoves, board, ply);
+		Move ttMove = MoveSort.sortMoves(legalMoves, board, tt, killers, counterMoves, history, ply);
 
 		if (isPV && ttMove == null && rootDepth > 2 && depth > 5)
 		{
