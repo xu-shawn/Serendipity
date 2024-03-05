@@ -273,30 +273,30 @@ public class AlphaBeta
 		{
 			return DRAW_EVAL;
 		}
-		
+
 		int futilityBase;
 		boolean inCheck = false;
 		final List<Move> moves;
-		
-		if(board.isKingAttacked())
+
+		if (board.isKingAttacked())
 		{
 			bestScore = futilityBase = MIN_EVAL;
 			moves = board.legalMoves();
 			sortMoves(moves, board, ply);
 			inCheck = true;
 		}
-		
+
 		else
 		{
 			int standPat = bestScore = evaluate(board);
-	
+
 			alpha = Math.max(alpha, standPat);
-	
+
 			if (alpha >= beta)
 			{
 				return beta;
 			}
-			
+
 			futilityBase = standPat + 4896;
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
@@ -332,7 +332,7 @@ public class AlphaBeta
 				break;
 			}
 		}
-		
+
 		if (bestScore == MIN_EVAL && inCheck)
 		{
 			return -MATE_EVAL + ply;
@@ -509,7 +509,18 @@ public class AlphaBeta
 
 				if (alpha >= beta)
 				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
+					if (currentMoveEntry == null || currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+					{
+						tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
+					}
+					else
+					{
+						if (currentMoveEntry != null && currentMoveEntry.getDepth() > 3)
+						{
+							tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
+						}
+					}
+
 					if (move.getPromotion().equals(Piece.NONE) && board.getPiece(move.getTo()).equals(Piece.NONE))
 					{
 						killers[ply] = move;
@@ -529,12 +540,32 @@ public class AlphaBeta
 
 		if (alpha == oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha);
+			if (currentMoveEntry == null || currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+			{
+				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha);
+			}
+			else
+			{
+				if (currentMoveEntry != null && currentMoveEntry.getDepth() > 3)
+				{
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha);
+				}
+			}
 		}
 
 		else if (alpha > oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha);
+			if (currentMoveEntry == null || currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+			{
+				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha);
+			}
+			else
+			{
+				if (currentMoveEntry != null && currentMoveEntry.getDepth() > 3)
+				{
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha);
+				}
+			}
 		}
 
 		return alpha;
