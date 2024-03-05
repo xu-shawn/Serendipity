@@ -418,7 +418,7 @@ public class AlphaBeta
 //			int r = depth / 3 + 4;
 
 			board.doNullMove();
-			int nullEval = -mainSearch(board, depth - 3, -beta, -beta + 1, ply + 1, false);
+			int nullEval = -mainSearch(board, depth / 2, -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
 
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
@@ -509,17 +509,7 @@ public class AlphaBeta
 
 				if (alpha >= beta)
 				{
-					if (currentMoveEntry == null || currentMoveEntry.getSignature() == board.getIncrementalHashKey())
-					{
-						tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
-					}
-					else
-					{
-						if (currentMoveEntry != null && currentMoveEntry.getDepth() > 3)
-						{
-							tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
-						}
-					}
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
 
 					if (move.getPromotion().equals(Piece.NONE) && board.getPiece(move.getTo()).equals(Piece.NONE))
 					{
@@ -540,32 +530,12 @@ public class AlphaBeta
 
 		if (alpha == oldAlpha)
 		{
-			if (currentMoveEntry == null || currentMoveEntry.getSignature() == board.getIncrementalHashKey())
-			{
-				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha);
-			}
-			else
-			{
-				if (currentMoveEntry != null && currentMoveEntry.getDepth() > 3)
-				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha);
-				}
-			}
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha);
 		}
 
 		else if (alpha > oldAlpha)
 		{
-			if (currentMoveEntry == null || currentMoveEntry.getSignature() == board.getIncrementalHashKey())
-			{
-				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha);
-			}
-			else
-			{
-				if (currentMoveEntry != null && currentMoveEntry.getDepth() > 3)
-				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha);
-				}
-			}
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha);
 		}
 
 		return alpha;
