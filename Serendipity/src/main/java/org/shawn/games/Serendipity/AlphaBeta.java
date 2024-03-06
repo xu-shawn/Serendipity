@@ -106,35 +106,9 @@ public class AlphaBeta
 		return System.nanoTime() > this.timeLimit;
 	}
 
-	private Move findTTMove(List<Move> moves, Board board)
-	{
-		int bestScore = Integer.MIN_VALUE;
-		Move bestMove = null;
-		for (Move move : moves)
-		{
-			board.doMove(move);
-			TranspositionTable.Entry ttResult = tt.probe(board.getIncrementalHashKey());
-			board.undoMove();
-
-			if (ttResult == null)
-			{
-				continue;
-			}
-
-			if (ttResult.getEvaluation() > bestScore)
-			{
-				bestMove = move;
-				bestScore = ttResult.getEvaluation();
-			}
-		}
-
-		return bestMove;
-	}
-
 	private Move sortMoves(List<Move> moves, Board board, int ply)
 	{
 		List<Move> captures = new ArrayList<Move>();
-//		List<Move> promotions = new ArrayList<Move>();
 		List<Move> quiets = new ArrayList<Move>();
 		List<Move> killers = new ArrayList<Move>();
 		List<Move> ttMoves = new ArrayList<Move>();
@@ -160,11 +134,6 @@ public class AlphaBeta
 			{
 				ttMoves.add(move);
 			}
-
-//			else if (!move.getPromotion().equals(Piece.NONE))
-//			{
-//				promotions.add(move);
-//			}
 
 			else if (move.equals(this.killers[ply]))
 			{
@@ -209,16 +178,6 @@ public class AlphaBeta
 
 		});
 
-//		promotions.sort(new Comparator<Move>() {
-//
-//			@Override
-//			public int compare(Move m1, Move m2)
-//			{
-//				return pieceValue(m2.getPromotion()) - pieceValue(m1.getPromotion());
-//			}
-//
-//		});
-
 		captures.sort(new Comparator<Move>() {
 
 			@Override
@@ -247,11 +206,6 @@ public class AlphaBeta
 		moves.addAll(ttMoves);
 		moves.addAll(captures);
 
-//		if(!promotions.isEmpty())
-//		{
-//			moves.add(promotions.get(0));
-//		}
-
 		moves.addAll(killers);
 
 		if (hasCounterMove)
@@ -260,11 +214,6 @@ public class AlphaBeta
 		}
 
 		moves.addAll(quiets);
-
-//		if(!promotions.isEmpty())
-//		{
-//			moves.addAll(1, promotions);
-//		}
 
 		return ttMoves.isEmpty() ? null : ttMoves.get(0);
 	}
@@ -277,7 +226,6 @@ public class AlphaBeta
 			public int compare(Move m1, Move m2)
 			{
 				return pieceValue(board.getPiece(m2.getTo())) - pieceValue(board.getPiece(m2.getFrom()))
-
 						- (pieceValue(board.getPiece(m1.getTo())) - pieceValue(board.getPiece(m1.getFrom())));
 			}
 
@@ -374,6 +322,7 @@ public class AlphaBeta
 		this.killers[ply + 2] = null;
 		int moveCount = 0;
 		boolean isPV = beta - alpha > 1;
+		Move bestMove = null;
 		this.selDepth = Math.max(this.selDepth, ply);
 
 		if ((nodesCount & 1023) == 0 && isTimeUp())
@@ -468,18 +417,23 @@ public class AlphaBeta
 
 		int oldAlpha = alpha;
 		
-		Move ttMove = sortMoves(legalMoves, board, ply);
+//		Move ttMove = sortMoves(legalMoves, board, ply);
 
-//		Move ttMove = findTTMove(legalMoves, board);
-//
+		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
+
 		MoveBackup lastMove = board.getBackup().peekLast();
-//		Move counterMove = null;
-//
-//		if (lastMove != null)
-//			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove().getTo()
-//					.ordinal()];
-//
-//		MoveSort.sortMoves(legalMoves, ttMove, killers[ply], counterMove, history, board);
+		Move counterMove = null;
+
+		if (lastMove != null)
+			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove().getTo()
+					.ordinal()];
+		
+		if ( depth == 10 && ply == 0)
+		{
+			
+		}
+
+		MoveSort.sortMoves(legalMoves, ttMove, killers[ply], counterMove, history, board);
 		
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
@@ -544,15 +498,16 @@ public class AlphaBeta
 			if (thisMoveEval > alpha)
 			{
 				alpha = thisMoveEval;
+				bestMove = move;
 
 				if (alpha >= beta)
 				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha, bestMove);
 					
-//					for (Move quietMove : quietMovesFailBeta)
-//					{
-//						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth * depth;
-//					}
+					for (Move quietMove : quietMovesFailBeta)
+					{
+						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth * depth;
+					}
 					
 					if (isQuiet)
 					{
@@ -579,12 +534,12 @@ public class AlphaBeta
 
 		if (alpha == oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha);
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha, bestMove);
 		}
 
 		else if (alpha > oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha);
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha, bestMove);
 		}
 
 		return alpha;

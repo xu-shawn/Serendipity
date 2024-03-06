@@ -88,8 +88,6 @@ public class MoveSort
 
 			moveScore.put(move, history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()]);
 		}
-		
-		// System.out.println(moveScore);
 
 		moves.sort(new Comparator<Move>() {
 			@Override
