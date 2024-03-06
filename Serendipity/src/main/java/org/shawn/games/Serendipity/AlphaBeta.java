@@ -458,19 +458,6 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
-//		Move ttMove = findTTMove(legalMoves, board);
-//
-		MoveBackup lastMove = board.getBackup().peekLast();
-//		Move counterMove = null;
-//
-//		if (lastMove != null)
-//			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove().getTo()
-//					.ordinal()];
-//
-//		MoveSort.sortMoves(legalMoves, ttMove, killers[ply], counterMove, history, board);
-		
-		List<Move> quietMovesFailBeta = new ArrayList<>();
-
 		if (isPV && ttMove == null && rootDepth > 2 && depth > 5)
 		{
 			depth -= 2;
