@@ -42,58 +42,52 @@ public class MoveSort
 		return 0;
 	}
 
+	public static int moveValue(Move move, Move ttMove, Move killer, Move counterMove, int[][] history, Board board)
+	{
+		if (move.equals(ttMove))
+		{
+			return Integer.MAX_VALUE;
+		}
+
+		if (!move.getPromotion().equals(Piece.NONE))
+		{
+			return switch (move.getPromotion().getPieceType())
+			{
+				case QUEEN -> 2000000001;
+				case KNIGHT -> 2000000000;
+				default -> -2000000001;
+			};
+		}
+
+		if (!board.getPiece(move.getTo()).equals(Piece.NONE))
+		{
+			int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;
+			score += pieceValue(board.getPiece(move.getTo())) * 100000 - pieceValue(board.getPiece(move.getFrom()));
+			return score;
+		}
+
+		if (move.equals(killer))
+		{
+			return 800000000;
+		}
+
+		if (move.equals(counterMove))
+		{
+			return 700000000;
+		}
+
+		return history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()];
+	}
+
 	public static void sortMoves(List<Move> moves, Move ttMove, Move killer, Move counterMove, int[][] history,
 			Board board)
 	{
-		HashMap<Move, Integer> moveScore = new HashMap<>();
-
-		for (Move move : moves)
-		{
-			if (move.equals(ttMove))
-			{
-				moveScore.put(move, Integer.MAX_VALUE / 2);
-				continue;
-			}
-
-			if (!move.getPromotion().equals(Piece.NONE))
-			{
-				moveScore.put(move, switch (move.getPromotion().getPieceType())
-				{
-					case QUEEN -> 2000000001;
-					case KNIGHT -> 2000000000;
-					default -> -2000000001;
-				});
-
-				continue;
-			}
-
-			if (!board.getPiece(move.getTo()).equals(Piece.NONE))
-			{
-				int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;
-				score += pieceValue(board.getPiece(move.getTo())) * 100000 - pieceValue(board.getPiece(move.getFrom()));
-				moveScore.put(move, score);
-				continue;
-			}
-
-			if (move.equals(killer))
-			{
-				moveScore.put(move, 800000000);
-				continue;
-			}
-
-			if (move.equals(counterMove))
-			{
-				moveScore.put(move, 700000000);
-			}
-
-			moveScore.put(move, history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()]);
-		}
-
 		moves.sort(new Comparator<Move>() {
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return moveScore.get(m2).compareTo(moveScore.get(m1));
+				return Integer.compare(moveValue(m2, ttMove, killer, counterMove, history, board),
+						moveValue(m1, ttMove, killer, counterMove, history, board));
 			}
 		});
 	}
