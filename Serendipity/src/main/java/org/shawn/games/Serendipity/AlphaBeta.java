@@ -106,6 +106,31 @@ public class AlphaBeta
 		return System.nanoTime() > this.timeLimit;
 	}
 
+	private Move findTTMove(List<Move> moves, Board board)
+	{
+		int bestScore = Integer.MIN_VALUE;
+		Move bestMove = null;
+		for (Move move : moves)
+		{
+			board.doMove(move);
+			TranspositionTable.Entry ttResult = tt.probe(board.getIncrementalHashKey());
+			board.undoMove();
+
+			if (ttResult == null)
+			{
+				continue;
+			}
+
+			if (ttResult.getEvaluation() > bestScore)
+			{
+				bestMove = move;
+				bestScore = ttResult.getEvaluation();
+			}
+		}
+
+		return bestMove;
+	}
+
 	private Move sortMoves(List<Move> moves, Board board, int ply)
 	{
 		List<Move> captures = new ArrayList<Move>();
@@ -433,6 +458,19 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
+//		Move ttMove = findTTMove(legalMoves, board);
+//
+		MoveBackup lastMove = board.getBackup().peekLast();
+//		Move counterMove = null;
+//
+//		if (lastMove != null)
+//			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove().getTo()
+//					.ordinal()];
+//
+//		MoveSort.sortMoves(legalMoves, ttMove, killers[ply], counterMove, history, board);
+		
+		List<Move> quietMovesFailBeta = new ArrayList<>();
+
 		if (isPV && ttMove == null && rootDepth > 2 && depth > 5)
 		{
 			depth -= 2;
@@ -517,7 +555,7 @@ public class AlphaBeta
 						killers[ply] = move;
 
 						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] += depth * depth;
-
+            
 						if (lastMove != null)
 						{
 							counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
