@@ -292,7 +292,7 @@ public class AlphaBeta
 
 			if (alpha >= beta)
 			{
-				return beta;
+				return alpha;
 			}
 
 			futilityBase = standPat + 4896;
@@ -528,7 +528,7 @@ public class AlphaBeta
 
 				if (alpha >= beta)
 				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha,
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
 							bestMove);
 
 					for (Move quietMove : quietMovesFailBeta)
@@ -550,7 +550,7 @@ public class AlphaBeta
 						}
 					}
 
-					return beta;
+					return bestValue;
 				}
 			}
 
@@ -562,15 +562,15 @@ public class AlphaBeta
 
 		if (alpha == oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, alpha, bestMove);
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue, bestMove);
 		}
 
 		else if (alpha > oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, alpha, bestMove);
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, bestValue, bestMove);
 		}
 
-		return alpha;
+		return bestValue;
 	}
 
 	public Move nextMove(Board board, int targetDepth, long msLeft)
