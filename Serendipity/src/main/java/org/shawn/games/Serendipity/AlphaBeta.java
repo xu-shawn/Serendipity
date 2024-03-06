@@ -118,8 +118,8 @@ public class AlphaBeta
 		boolean hasCounterMove = false;
 
 		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove().getTo()
-					.ordinal()];
+			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
+					.getTo().ordinal()];
 
 		for (Move move : moves)
 		{
@@ -323,6 +323,7 @@ public class AlphaBeta
 		int moveCount = 0;
 		boolean isPV = beta - alpha > 1;
 		Move bestMove = null;
+		int bestValue = MIN_EVAL;
 		this.selDepth = Math.max(this.selDepth, ply);
 
 		if ((nodesCount & 1023) == 0 && isTimeUp())
@@ -416,7 +417,7 @@ public class AlphaBeta
 		}
 
 		int oldAlpha = alpha;
-		
+
 //		Move ttMove = sortMoves(legalMoves, board, ply);
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
@@ -425,16 +426,11 @@ public class AlphaBeta
 		Move counterMove = null;
 
 		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove().getTo()
-					.ordinal()];
-		
-		if ( depth == 10 && ply == 0)
-		{
-			
-		}
+			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
+					.getTo().ordinal()];
 
 		MoveSort.sortMoves(legalMoves, ttMove, killers[ply], counterMove, history, board);
-		
+
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
 		if (isPV && ttMove == null && rootDepth > 2 && depth > 5)
@@ -495,24 +491,31 @@ public class AlphaBeta
 
 			board.undoMove();
 
+			if (thisMoveEval > bestValue)
+			{
+				bestValue = thisMoveEval;
+				bestMove = move;
+			}
+
 			if (thisMoveEval > alpha)
 			{
 				alpha = thisMoveEval;
-				bestMove = move;
 
 				if (alpha >= beta)
 				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha, bestMove);
-					
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha,
+							bestMove);
+
 					for (Move quietMove : quietMovesFailBeta)
 					{
-						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth * depth;
+						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth
+								* depth;
 					}
-					
+
 					if (isQuiet)
 					{
 						killers[ply] = move;
-						
+
 						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] += depth * depth;
 
 						if (lastMove != null)
@@ -525,7 +528,7 @@ public class AlphaBeta
 					return beta;
 				}
 			}
-			
+
 			if (isQuiet)
 			{
 				quietMovesFailBeta.add(move);

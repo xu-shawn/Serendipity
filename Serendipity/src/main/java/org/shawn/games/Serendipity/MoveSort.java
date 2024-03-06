@@ -80,7 +80,7 @@ public class MoveSort
 				moveScore.put(move, 800000000);
 				continue;
 			}
-			
+
 			if (move.equals(counterMove))
 			{
 				moveScore.put(move, 700000000);
@@ -93,7 +93,7 @@ public class MoveSort
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return moveScore.get(m2) - moveScore.get(m1);
+				return moveScore.get(m2).compareTo(moveScore.get(m1));
 			}
 		});
 	}
