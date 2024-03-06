@@ -106,6 +106,31 @@ public class AlphaBeta
 		return System.nanoTime() > this.timeLimit;
 	}
 
+	private Move findTTMove(List<Move> moves, Board board)
+	{
+		int bestScore = Integer.MIN_VALUE;
+		Move bestMove = null;
+		for (Move move : moves)
+		{
+			board.doMove(move);
+			TranspositionTable.Entry ttResult = tt.probe(board.getIncrementalHashKey());
+			board.undoMove();
+
+			if (ttResult == null)
+			{
+				continue;
+			}
+
+			if (ttResult.getEvaluation() > bestScore)
+			{
+				bestMove = move;
+				bestScore = ttResult.getEvaluation();
+			}
+		}
+
+		return bestMove;
+	}
+
 	private Move sortMoves(List<Move> moves, Board board, int ply)
 	{
 		List<Move> captures = new ArrayList<Move>();
@@ -119,7 +144,7 @@ public class AlphaBeta
 		boolean hasCounterMove = false;
 
 		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove().getTo()
+			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove().getTo()
 					.ordinal()];
 
 		for (Move move : moves)
@@ -211,8 +236,8 @@ public class AlphaBeta
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return history[board.getPiece(m2.getTo()).ordinal()][m2.getTo().ordinal()]
-						- history[board.getPiece(m1.getTo()).ordinal()][m1.getTo().ordinal()];
+				return history[board.getPiece(m2.getFrom()).ordinal()][m2.getTo().ordinal()]
+						- history[board.getPiece(m1.getFrom()).ordinal()][m1.getTo().ordinal()];
 			}
 
 		});
@@ -273,30 +298,30 @@ public class AlphaBeta
 		{
 			return DRAW_EVAL;
 		}
-		
+
 		int futilityBase;
 		boolean inCheck = false;
 		final List<Move> moves;
-		
-		if(board.isKingAttacked())
+
+		if (board.isKingAttacked())
 		{
 			bestScore = futilityBase = MIN_EVAL;
 			moves = board.legalMoves();
 			sortMoves(moves, board, ply);
 			inCheck = true;
 		}
-		
+
 		else
 		{
 			int standPat = bestScore = evaluate(board);
-	
+
 			alpha = Math.max(alpha, standPat);
-	
+
 			if (alpha >= beta)
 			{
 				return beta;
 			}
-			
+
 			futilityBase = standPat + 4896;
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
@@ -332,7 +357,7 @@ public class AlphaBeta
 				break;
 			}
 		}
-		
+
 		if (bestScore == MIN_EVAL && inCheck)
 		{
 			return -MATE_EVAL + ply;
@@ -442,8 +467,21 @@ public class AlphaBeta
 		}
 
 		int oldAlpha = alpha;
-
+		
 		Move ttMove = sortMoves(legalMoves, board, ply);
+
+//		Move ttMove = findTTMove(legalMoves, board);
+//
+		MoveBackup lastMove = board.getBackup().peekLast();
+//		Move counterMove = null;
+//
+//		if (lastMove != null)
+//			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove().getTo()
+//					.ordinal()];
+//
+//		MoveSort.sortMoves(legalMoves, ttMove, killers[ply], counterMove, history, board);
+		
+		List<Move> quietMovesFailBeta = new ArrayList<>();
 
 		if (isPV && ttMove == null && rootDepth > 2 && depth > 5)
 		{
@@ -510,20 +548,32 @@ public class AlphaBeta
 				if (alpha >= beta)
 				{
 					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
-					if (move.getPromotion().equals(Piece.NONE) && board.getPiece(move.getTo()).equals(Piece.NONE))
+					
+//					for (Move quietMove : quietMovesFailBeta)
+//					{
+//						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth * depth;
+//					}
+					
+					if (isQuiet)
 					{
 						killers[ply] = move;
-						history[board.getPiece(move.getTo()).ordinal()][move.getTo().ordinal()] += depth * depth;
+						
+						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] += depth * depth;
 
-						if (!board.getBackup().isEmpty())
+						if (lastMove != null)
 						{
-							Move lastMove = board.getBackup().peekLast().getMove();
-							counterMoves[board.getPiece(lastMove.getTo()).ordinal()][lastMove.getTo().ordinal()] = move;
+							counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
+									.getTo().ordinal()] = move;
 						}
 					}
 
 					return beta;
 				}
+			}
+			
+			else if (isQuiet)
+			{
+				quietMovesFailBeta.add(move);
 			}
 		}
 
