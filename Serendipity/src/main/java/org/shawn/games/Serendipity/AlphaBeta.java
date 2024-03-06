@@ -526,7 +526,7 @@ public class AlphaBeta
 				}
 			}
 			
-			else if (isQuiet)
+			if (isQuiet)
 			{
 				quietMovesFailBeta.add(move);
 			}
