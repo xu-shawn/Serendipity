@@ -549,10 +549,10 @@ public class AlphaBeta
 				{
 					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, alpha);
 					
-//					for (Move quietMove : quietMovesFailBeta)
-//					{
-//						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth * depth;
-//					}
+					for (Move quietMove : quietMovesFailBeta)
+					{
+						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth * depth;
+					}
 					
 					if (isQuiet)
 					{
@@ -571,7 +571,7 @@ public class AlphaBeta
 				}
 			}
 			
-			else if (isQuiet)
+			if (isQuiet)
 			{
 				quietMovesFailBeta.add(move);
 			}
