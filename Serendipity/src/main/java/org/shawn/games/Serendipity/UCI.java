@@ -42,7 +42,7 @@ public class UCI
 
 	public static void reportBestMove(Move bestMove)
 	{
-		System.out.println("bestmove " + bestMove);
+		System.out.println("bestmove " + bestMove != null ? bestMove : "(none)");
 	}
 
 	public static void UCIMainLoop()
