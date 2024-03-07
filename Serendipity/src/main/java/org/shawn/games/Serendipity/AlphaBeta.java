@@ -18,7 +18,7 @@ public class AlphaBeta
 	private final int DRAW_EVAL = 0;
 
 	private final int MAX_PLY = 256;
-	private final int ASPIRATION_DELTA = 600;
+	private final int ASPIRATION_DELTA = 590;
 
 	private final TranspositionTable tt;
 
@@ -270,7 +270,7 @@ public class AlphaBeta
 				return alpha;
 			}
 
-			futilityBase = standPat + 4896;
+			futilityBase = standPat + 4613;
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
 		}
@@ -379,7 +379,7 @@ public class AlphaBeta
 			staticEval = PeSTO.evaluate(board);
 		}
 
-		if (!isPV && !board.isKingAttacked() && depth < 7 && staticEval > beta && staticEval - depth * 1680 > beta)
+		if (!isPV && !board.isKingAttacked() && depth < 5 && staticEval > beta && staticEval - depth * 1672 > beta)
 		{
 			return beta;
 		}
@@ -390,10 +390,10 @@ public class AlphaBeta
 								.getBitboard(board.getSideToMove())
 				&& PeSTO.evaluate(board) >= beta && ply > 0 && staticEval >= beta)
 		{
-//			int r = depth / 3 + 4;
+			int r = depth / 3 + 3;
 
 			board.doNullMove();
-			int nullEval = -mainSearch(board, depth - 3, -beta, -beta + 1, ply + 1, false);
+			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
 
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
@@ -433,9 +433,9 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 2 && depth > 5)
+		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
 		{
-			depth -= 2;
+			depth -= 1;
 		}
 
 		for (Move move : legalMoves)
@@ -444,8 +444,8 @@ public class AlphaBeta
 			int newdepth = depth - 1;
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
 
-			if (alpha > -MATE_EVAL + 1024 && depth < 8
-					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -64 * depth : -20 * depth * depth))
+			if (alpha > -MATE_EVAL + 1024 && depth < 9
+					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -60 * depth : -16 * depth * depth))
 			{
 				continue;
 			}
@@ -461,9 +461,9 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (moveCount > 3 && depth > 3)
+			if (moveCount > 5 && depth > 4)
 			{
-				int r = (int) (1.35 + Math.log(depth) * Math.log(moveCount) / 2.75);
+				int r = (int) (1.11 + Math.log(depth) * Math.log(moveCount) / 2.71);
 
 //				r += isPV ? 0 : 1;
 				r -= inCheck ? 1 : 0;
@@ -510,7 +510,7 @@ public class AlphaBeta
 
 					for (Move quietMove : quietMovesFailBeta)
 					{
-						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth
+						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= 0.91 * depth
 								* depth;
 					}
 
