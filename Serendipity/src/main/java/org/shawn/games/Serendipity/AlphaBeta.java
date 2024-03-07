@@ -121,10 +121,8 @@ public class AlphaBeta
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return pieceValue(board.getPiece(m2.getTo())) - pieceValue(board.getPiece(m2.getFrom()))
-						+ (SEE.staticExchangeEvaluation(board, m2, -20) ? 1000000 : 0)
-						- (pieceValue(board.getPiece(m1.getTo())) - pieceValue(board.getPiece(m1.getFrom()))
-								+ (SEE.staticExchangeEvaluation(board, m1, -20) ? 1000000 : 0));
+				return pieceValue(board.getPiece(m2.getTo())) * 600 - pieceValue(board.getPiece(m2.getFrom()))
+						- (pieceValue(board.getPiece(m1.getTo())) * 600 - pieceValue(board.getPiece(m1.getFrom())));
 			}
 
 		});
