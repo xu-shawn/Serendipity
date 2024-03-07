@@ -109,7 +109,7 @@ public class AlphaBeta
 	private void sortMoves(List<Move> moves, Board board, int ply)
 	{
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
-		
+
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 		MoveSort.sortMoves(moves, ttMove, null, null, history, board);
 	}
@@ -122,7 +122,9 @@ public class AlphaBeta
 			public int compare(Move m1, Move m2)
 			{
 				return pieceValue(board.getPiece(m2.getTo())) - pieceValue(board.getPiece(m2.getFrom()))
-						- (pieceValue(board.getPiece(m1.getTo())) - pieceValue(board.getPiece(m1.getFrom())));
+						+ (SEE.staticExchangeEvaluation(board, m2, -20) ? 1000000 : 0)
+						- (pieceValue(board.getPiece(m1.getTo())) - pieceValue(board.getPiece(m1.getFrom()))
+								+ (SEE.staticExchangeEvaluation(board, m1, -20) ? 1000000 : 0));
 			}
 
 		});
@@ -390,8 +392,8 @@ public class AlphaBeta
 			{
 				bestValue = thisMoveEval;
 				bestMove = move;
-				
-				if(isPV)
+
+				if (isPV)
 					updatePV(move, ply);
 			}
 
@@ -415,7 +417,7 @@ public class AlphaBeta
 						killers[ply] = move;
 
 						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] += depth * depth;
-            
+
 						if (lastMove != null)
 						{
 							counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
