@@ -486,7 +486,6 @@ public class AlphaBeta
 			if (isPV && (moveCount == 1 || thisMoveEval > alpha))
 			{
 				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
-				updatePV(move, ply);
 			}
 
 			board.undoMove();
@@ -495,6 +494,9 @@ public class AlphaBeta
 			{
 				bestValue = thisMoveEval;
 				bestMove = move;
+				
+				if(isPV)
+					updatePV(move, ply);
 			}
 
 			if (thisMoveEval > alpha)
