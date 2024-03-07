@@ -418,8 +418,6 @@ public class AlphaBeta
 
 		int oldAlpha = alpha;
 
-//		Move ttMove = sortMoves(legalMoves, board, ply);
-
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 
 		MoveBackup lastMove = board.getBackup().peekLast();
@@ -508,16 +506,19 @@ public class AlphaBeta
 
 					for (Move quietMove : quietMovesFailBeta)
 					{
-						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth
-								* depth;
+						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] = Math
+								.max(history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()]
+										- depth * depth, -16384);
 					}
 
 					if (isQuiet)
 					{
 						killers[ply] = move;
 
-						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] += depth * depth;
-            
+						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] = Math
+								.min(history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()]
+										+ depth * depth, 16384);
+
 						if (lastMove != null)
 						{
 							counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
@@ -563,7 +564,6 @@ public class AlphaBeta
 		this.nodesCount = 0;
 		long startTime = System.nanoTime();
 		this.timeLimit = System.nanoTime() + msLeft * 1000000L;
-		this.history = new int[13][65];
 
 		try
 		{
