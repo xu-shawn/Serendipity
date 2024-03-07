@@ -106,116 +106,12 @@ public class AlphaBeta
 		return System.nanoTime() > this.timeLimit;
 	}
 
-	private Move sortMoves(List<Move> moves, Board board, int ply)
+	private void sortMoves(List<Move> moves, Board board, int ply)
 	{
-		List<Move> captures = new ArrayList<Move>();
-		List<Move> quiets = new ArrayList<Move>();
-		List<Move> killers = new ArrayList<Move>();
-		List<Move> ttMoves = new ArrayList<Move>();
-
-		MoveBackup lastMove = board.getBackup().peekLast();
-		Move counterMove = null;
-		boolean hasCounterMove = false;
-
-		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
-					.getTo().ordinal()];
-
-		for (Move move : moves)
-		{
-			board.doMove(move);
-			TranspositionTable.Entry ttResult = tt.probe(board.getIncrementalHashKey());
-			long boardSignature = board.getIncrementalHashKey();
-			board.undoMove();
-
-			if (ttResult != null && ttResult.getSignature() == boardSignature
-					&& (ttResult.getType() == TranspositionTable.NodeType.EXACT
-							|| ttResult.getType() == TranspositionTable.NodeType.UPPERBOUND))
-			{
-				ttMoves.add(move);
-			}
-
-			else if (move.equals(this.killers[ply]))
-			{
-				killers.add(move);
-			}
-
-			else if (board.getPiece(move.getTo()).equals(Piece.NONE) || board.getPiece(move.getTo()) == null)
-			{
-				if (!hasCounterMove && counterMove != null && move.equals(counterMove))
-				{
-					hasCounterMove = true;
-				}
-				else
-				{
-					quiets.add(move);
-				}
-			}
-
-			else
-			{
-				captures.add(move);
-			}
-		}
-
-		ttMoves.sort(new Comparator<Move>() {
-
-			@Override
-			public int compare(Move m1, Move m2)
-			{
-				int cmp = 0;
-
-				board.doMove(m2);
-				cmp += tt.probe(board.getIncrementalHashKey()).getEvaluation();
-				board.undoMove();
-
-				board.doMove(m1);
-				cmp -= tt.probe(board.getIncrementalHashKey()).getEvaluation();
-				board.undoMove();
-
-				return cmp;
-			}
-
-		});
-
-		captures.sort(new Comparator<Move>() {
-
-			@Override
-			public int compare(Move m1, Move m2)
-			{
-				return pieceValue(board.getPiece(m2.getTo())) - pieceValue(board.getPiece(m2.getFrom()))
-
-						- (pieceValue(board.getPiece(m1.getTo())) - pieceValue(board.getPiece(m1.getFrom())));
-			}
-
-		});
-
-		quiets.sort(new Comparator<Move>() {
-
-			@Override
-			public int compare(Move m1, Move m2)
-			{
-				return history[board.getPiece(m2.getFrom()).ordinal()][m2.getTo().ordinal()]
-						- history[board.getPiece(m1.getFrom()).ordinal()][m1.getTo().ordinal()];
-			}
-
-		});
-
-		moves.clear();
-
-		moves.addAll(ttMoves);
-		moves.addAll(captures);
-
-		moves.addAll(killers);
-
-		if (hasCounterMove)
-		{
-			moves.add(counterMove);
-		}
-
-		moves.addAll(quiets);
-
-		return ttMoves.isEmpty() ? null : ttMoves.get(0);
+		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
+		
+		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
+		MoveSort.sortMoves(moves, ttMove, null, null, history, board);
 	}
 
 	private List<Move> sortCaptures(List<Move> moves, Board board)
