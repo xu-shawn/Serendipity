@@ -69,6 +69,7 @@ public class UCI
 					System.out.println("uciok");
 					break;
 				case "ucinewgame":
+					System.gc();
 					internalBoard = new Board();
 					engine = new AlphaBeta();
 					break;
