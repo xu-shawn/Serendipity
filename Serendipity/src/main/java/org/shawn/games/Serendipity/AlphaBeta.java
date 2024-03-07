@@ -106,31 +106,6 @@ public class AlphaBeta
 		return System.nanoTime() > this.timeLimit;
 	}
 
-	private Move findTTMove(List<Move> moves, Board board)
-	{
-		int bestScore = Integer.MIN_VALUE;
-		Move bestMove = null;
-		for (Move move : moves)
-		{
-			board.doMove(move);
-			TranspositionTable.Entry ttResult = tt.probe(board.getIncrementalHashKey());
-			board.undoMove();
-
-			if (ttResult == null)
-			{
-				continue;
-			}
-
-			if (ttResult.getEvaluation() > bestScore)
-			{
-				bestMove = move;
-				bestScore = ttResult.getEvaluation();
-			}
-		}
-
-		return bestMove;
-	}
-
 	private Move sortMoves(List<Move> moves, Board board, int ply)
 	{
 		List<Move> captures = new ArrayList<Move>();
