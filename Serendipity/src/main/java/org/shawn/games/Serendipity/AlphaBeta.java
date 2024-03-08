@@ -106,28 +106,14 @@ public class AlphaBeta
 		return System.nanoTime() > this.timeLimit;
 	}
 
-	private void sortMoves(List<Move> moves, Board board, int ply)
+	private void sortMoves(List<Move> moves, Board board, int ply, Move ttMove)
 	{
-		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
-
-		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 		MoveSort.sortMoves(moves, ttMove, null, null, history, board);
 	}
 
-	private List<Move> sortCaptures(List<Move> moves, Board board)
+	private void sortCaptures(List<Move> moves, Board board, Move ttMove)
 	{
-		moves.sort(new Comparator<Move>() {
-
-			@Override
-			public int compare(Move m1, Move m2)
-			{
-				return pieceValue(board.getPiece(m2.getTo())) - pieceValue(board.getPiece(m2.getFrom()))
-						- (pieceValue(board.getPiece(m1.getTo())) - pieceValue(board.getPiece(m1.getFrom())));
-			}
-
-		});
-
-		return moves;
+		MoveSort.sortMoves(moves, ttMove, null, null, history, board);
 	}
 
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
@@ -146,12 +132,16 @@ public class AlphaBeta
 		int futilityBase;
 		boolean inCheck = false;
 		final List<Move> moves;
+		
+		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
+
+		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 
 		if (board.isKingAttacked())
 		{
 			bestScore = futilityBase = MIN_EVAL;
 			moves = board.legalMoves();
-			sortMoves(moves, board, ply);
+			sortMoves(moves, board, ply, ttMove);
 			inCheck = true;
 		}
 
@@ -168,7 +158,7 @@ public class AlphaBeta
 
 			futilityBase = standPat + 4896;
 			moves = board.pseudoLegalCaptures();
-			sortCaptures(moves, board);
+			sortCaptures(moves, board, ttMove);
 		}
 
 		for (Move move : moves)
