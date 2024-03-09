@@ -218,6 +218,7 @@ public class AlphaBeta
 		this.killers[ply + 2] = null;
 		int moveCount = 0;
 		boolean isPV = beta - alpha > 1;
+		boolean rootNode = ply == 0;
 		Move bestMove = null;
 		int bestValue = MIN_EVAL;
 		this.selDepth = Math.max(this.selDepth, ply);
@@ -357,7 +358,7 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (moveCount > 3 && depth > 3)
+			if (moveCount > 1 + (rootNode ? 2 : 0) && depth > 3)
 			{
 				int r = (int) (1.35 + Math.log(depth) * Math.log(moveCount) / 2.75);
 
