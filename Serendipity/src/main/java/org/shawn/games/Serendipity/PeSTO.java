@@ -179,11 +179,11 @@ public class PeSTO
 	final static int BISHOP_PHASE = 1;
 	final static int ROOK_PHASE = 2;
 	final static int QUEEN_PHASE = 4;
-	
+
 	final static int TEMPO = 8;
 
-	final static int MAX_PHASE = PAWN_PHASE * 16 + KNIGHT_PHASE * 4 + BISHOP_PHASE * 4
-			+ ROOK_PHASE * 4 + QUEEN_PHASE * 2;
+	final static int MAX_PHASE = PAWN_PHASE * 16 + KNIGHT_PHASE * 4 + BISHOP_PHASE * 4 + ROOK_PHASE * 4
+			+ QUEEN_PHASE * 2;
 
 	private static int getIndex(Side side, Square square)
 	{
@@ -301,7 +301,7 @@ public class PeSTO
 				+ Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.QUEEN))) * QUEEN_PHASE;
 		// @formatter:on
 	}
-	
+
 	private static int middleGameMaterialEval(Board board)
 	{
 
@@ -320,7 +320,7 @@ public class PeSTO
 				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.QUEEN))) * MG_QUEEN_VALUE;
 		// @formatter:on
 	}
-	
+
 	private static int endGameMaterialEval(Board board)
 	{
 
@@ -339,7 +339,15 @@ public class PeSTO
 				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.QUEEN))) * EG_QUEEN_VALUE;
 		// @formatter:on
 	}
-	
+
+	private static int bishopPairAdjustment(Board board)
+	{
+		return (Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove(), PieceType.BISHOP))) == 2 ? 720 : 0)
+				- (Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove().flip(), PieceType.BISHOP))) == 2
+						? 720
+						: 0);
+	}
+
 	public static int materialEval(Board board)
 	{
 		int gamePhase = Math.min(MAX_PHASE, gamePhase(board));
@@ -349,6 +357,7 @@ public class PeSTO
 	public static int evaluate(Board board)
 	{
 		int gamePhase = Math.min(MAX_PHASE, gamePhase(board));
-		return middleGameEval(board) * gamePhase + endGameEval(board) * (MAX_PHASE - gamePhase) + TEMPO * MAX_PHASE;
+		return middleGameEval(board) * gamePhase + endGameEval(board) * (MAX_PHASE - gamePhase)
+				+ bishopPairAdjustment(board) + TEMPO * MAX_PHASE;
 	}
 }
