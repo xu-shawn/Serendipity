@@ -186,6 +186,11 @@ public class AlphaBeta
 				bestScore = Math.max(bestScore, futilityBase);
 				continue;
 			}
+			
+			if (!inCheck && !SEE.staticExchangeEvaluation(board, move, 0))
+			{
+				continue;
+			}
 
 			board.doMove(move);
 
