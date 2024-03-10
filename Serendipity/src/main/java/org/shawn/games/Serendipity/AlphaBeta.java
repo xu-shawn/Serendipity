@@ -334,7 +334,7 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 2 && depth > 5)
+		if (ttMove == null && rootDepth > 2 && depth > 5)
 		{
 			depth -= 2;
 		}
