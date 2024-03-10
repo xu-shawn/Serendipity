@@ -1,19 +1,37 @@
 package org.shawn.games.Serendipity;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.shawn.games.Serendipity.NNUE.NNUE;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
 
 public class UCI
 {
-	private static Board internalBoard = new Board();
-	private static Map<String, IntegerOption> options = new HashMap<>();
-	private static AlphaBeta engine = new AlphaBeta();
+	private static Board internalBoard;
+	private static Map<String, IntegerOption> options;
+	private static AlphaBeta engine;
+	private static NNUE network;
 
 	public static void main(String args[])
 	{
+		try
+		{
+			network = new NNUE("resources/simple.nnue");
+		}
+		
+		catch (IOException e)
+		{
+			System.out.print("Error Loading NNUE");
+		}
+		
+		internalBoard = new Board();
+		options = new HashMap<>();
+		engine = new AlphaBeta(network);
+		
 		UCIMainLoop();
 	}
 
@@ -70,7 +88,7 @@ public class UCI
 					break;
 				case "ucinewgame":
 					internalBoard = new Board();
-					engine = new AlphaBeta();
+					engine = new AlphaBeta(network);
 					break;
 				case "quit":
 					input.close();

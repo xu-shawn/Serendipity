@@ -2,6 +2,9 @@ package org.shawn.games.Serendipity;
 
 import java.util.*;
 
+import org.shawn.games.Serendipity.NNUE.NNUE;
+import org.shawn.games.Serendipity.NNUE.NNUE.NNUEAccumulator;
+
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
 
@@ -33,12 +36,16 @@ public class AlphaBeta
 	private int rootDepth;
 	private int selDepth;
 
-	public AlphaBeta()
+	private NNUE network;
+	private NNUEAccumulator blackAccumulator;
+	private NNUEAccumulator whiteAccumulator;
+
+	public AlphaBeta(NNUE network)
 	{
-		this(8);
+		this(8, network);
 	}
 
-	public AlphaBeta(int n)
+	public AlphaBeta(int n, NNUE network)
 	{
 		this.tt = new TranspositionTable(1048576 * n);
 		this.nodesCount = 0;
@@ -48,6 +55,8 @@ public class AlphaBeta
 		this.counterMoves = new Move[13][65];
 		this.history = new int[13][65];
 		this.rootDepth = 0;
+
+		this.network = network;
 	}
 
 	private void updatePV(Move move, int ply)
@@ -98,7 +107,8 @@ public class AlphaBeta
 
 	public int evaluate(Board board)
 	{
-		return PeSTO.evaluate(board);
+		return (Side.WHITE.equals(board.getSideToMove()) ? NNUE.evaluate(network, whiteAccumulator, blackAccumulator)
+				: NNUE.evaluate(network, blackAccumulator, whiteAccumulator)) * 24;
 	}
 
 	public boolean isTimeUp()
@@ -128,6 +138,88 @@ public class AlphaBeta
 		});
 
 		return moves;
+	}
+
+	private void updateAccumulators(Board board, Move move, boolean undo)
+	{
+		if (undo)
+		{
+
+			whiteAccumulator.addFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE),
+					network);
+			blackAccumulator.addFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.BLACK),
+					network);
+
+			if (move.getPromotion().equals(Piece.NONE))
+			{
+				whiteAccumulator.subtractFeature(
+						NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.WHITE), network);
+				blackAccumulator.subtractFeature(
+						NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.BLACK), network);
+			}
+
+			else
+			{
+				whiteAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.BLACK), network);
+			}
+
+			if (!board.getPiece(move.getTo()).equals(Piece.NONE))
+			{
+				whiteAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.WHITE),
+						network);
+				blackAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.BLACK),
+						network);
+			}
+
+			else if (move.getTo().equals(board.getEnPassantTarget())
+					&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
+			{
+				whiteAccumulator.addFeature(
+						NNUE.getIndex(board.getEnPassant(), board.getPiece(board.getEnPassant()), Side.WHITE), network);
+				blackAccumulator.addFeature(
+						NNUE.getIndex(board.getEnPassant(), board.getPiece(board.getEnPassant()), Side.BLACK), network);
+			}
+		}
+
+		else
+		{
+			whiteAccumulator.subtractFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE),
+					network);
+			blackAccumulator.subtractFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.BLACK),
+					network);
+
+			if (move.getPromotion().equals(Piece.NONE))
+			{
+				whiteAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.WHITE),
+						network);
+				blackAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.BLACK),
+						network);
+			}
+
+			else
+			{
+				whiteAccumulator.addFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.BLACK), network);
+			}
+
+			if (!board.getPiece(move.getTo()).equals(Piece.NONE))
+			{
+				whiteAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.WHITE),
+						network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.BLACK),
+						network);
+			}
+
+			else if (move.getTo().equals(board.getEnPassantTarget())
+					&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
+			{
+				whiteAccumulator.subtractFeature(
+						NNUE.getIndex(board.getEnPassant(), board.getPiece(board.getEnPassant()), Side.WHITE), network);
+				blackAccumulator.subtractFeature(
+						NNUE.getIndex(board.getEnPassant(), board.getPiece(board.getEnPassant()), Side.BLACK), network);
+			}
+		}
 	}
 
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
@@ -192,11 +284,13 @@ public class AlphaBeta
 				continue;
 			}
 
+			updateAccumulators(board, move, false);
 			board.doMove(move);
 
 			int score = -quiesce(board, -beta, -alpha, ply + 1);
 
 			board.undoMove();
+			updateAccumulators(board, move, true);
 
 			bestScore = Math.max(bestScore, score);
 			alpha = Math.max(alpha, bestScore);
@@ -277,7 +371,7 @@ public class AlphaBeta
 		}
 		else
 		{
-			staticEval = PeSTO.evaluate(board);
+			staticEval = evaluate(board);
 		}
 
 		if (!isPV && !board.isKingAttacked() && depth < 7 && staticEval > beta && staticEval - depth * 1680 > beta)
@@ -289,7 +383,7 @@ public class AlphaBeta
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
-				&& PeSTO.evaluate(board) >= beta && ply > 0 && staticEval >= beta)
+				&& evaluate(board) >= beta && ply > 0 && staticEval >= beta)
 		{
 //			int r = depth / 3 + 4;
 
@@ -351,6 +445,7 @@ public class AlphaBeta
 				continue;
 			}
 
+			updateAccumulators(board, move, false);
 			board.doMove(move);
 
 			boolean inCheck = board.isKingAttacked();
@@ -390,6 +485,7 @@ public class AlphaBeta
 			}
 
 			board.undoMove();
+			updateAccumulators(board, move, true);
 
 			if (thisMoveEval > bestValue)
 			{
@@ -467,6 +563,18 @@ public class AlphaBeta
 		long startTime = System.nanoTime();
 		this.timeLimit = System.nanoTime() + msLeft * 1000000L;
 		this.history = new int[13][65];
+		this.whiteAccumulator = new NNUEAccumulator(network);
+		this.blackAccumulator = new NNUEAccumulator(network);
+
+		// Initialize Accumulators
+		for (Square sq : Square.values())
+		{
+			if (!board.getPiece(sq).equals(Piece.NONE))
+			{
+				whiteAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK), network);
+			}
+		}
 
 		try
 		{
