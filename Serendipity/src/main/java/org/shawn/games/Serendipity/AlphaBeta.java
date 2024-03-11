@@ -144,6 +144,75 @@ public class AlphaBeta
 	{
 		if (undo)
 		{
+			if (board.getContext().isKingSideCastle(move)
+					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_SIDE)
+							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
+			{
+				whiteAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.BLACK), network);
+
+				whiteAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.BLACK), network);
+
+				whiteAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.BLACK), network);
+
+				whiteAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.BLACK), network);
+
+				return;
+			}
+
+			if (board.getContext().isQueenSideCastle(move)
+					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.QUEEN_SIDE)
+							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
+			{
+				whiteAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.BLACK), network);
+
+				whiteAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.BLACK), network);
+
+				whiteAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.BLACK), network);
+
+				whiteAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.BLACK), network);
+
+				return;
+			}
 
 			whiteAccumulator.addFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE),
 					network);
@@ -172,18 +241,88 @@ public class AlphaBeta
 						network);
 			}
 
-			else if (move.getTo().equals(board.getEnPassantTarget())
+			else if (move.getTo().equals(board.getEnPassant())
 					&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
 			{
-				whiteAccumulator.addFeature(
-						NNUE.getIndex(board.getEnPassant(), board.getPiece(board.getEnPassant()), Side.WHITE), network);
-				blackAccumulator.addFeature(
-						NNUE.getIndex(board.getEnPassant(), board.getPiece(board.getEnPassant()), Side.BLACK), network);
+				whiteAccumulator.addFeature(NNUE.getIndex(board.getEnPassantTarget(),
+						board.getPiece(board.getEnPassantTarget()), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(board.getEnPassantTarget(),
+						board.getPiece(board.getEnPassantTarget()), Side.BLACK), network);
 			}
 		}
 
 		else
 		{
+			if (board.getContext().isKingSideCastle(move)
+					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_SIDE)
+							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
+			{
+				whiteAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.BLACK), network);
+
+				whiteAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.BLACK), network);
+
+				whiteAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.BLACK), network);
+
+				whiteAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.BLACK), network);
+
+				return;
+			}
+
+			if (board.getContext().isQueenSideCastle(move)
+					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.QUEEN_SIDE)
+							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
+			{
+				whiteAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.BLACK), network);
+
+				whiteAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.WHITE), network);
+				blackAccumulator.addFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.BLACK), network);
+
+				whiteAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.ROOK), Side.BLACK), network);
+
+				whiteAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(
+						board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
+						Piece.make(board.getSideToMove(), PieceType.KING), Side.BLACK), network);
+
+				return;
+			}
+
 			whiteAccumulator.subtractFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE),
 					network);
 			blackAccumulator.subtractFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.BLACK),
@@ -211,17 +350,17 @@ public class AlphaBeta
 						network);
 			}
 
-			else if (move.getTo().equals(board.getEnPassantTarget())
+			else if (move.getTo().equals(board.getEnPassant())
 					&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
 			{
-				whiteAccumulator.subtractFeature(
-						NNUE.getIndex(board.getEnPassant(), board.getPiece(board.getEnPassant()), Side.WHITE), network);
-				blackAccumulator.subtractFeature(
-						NNUE.getIndex(board.getEnPassant(), board.getPiece(board.getEnPassant()), Side.BLACK), network);
+				whiteAccumulator.subtractFeature(NNUE.getIndex(board.getEnPassantTarget(),
+						board.getPiece(board.getEnPassantTarget()), Side.WHITE), network);
+				blackAccumulator.subtractFeature(NNUE.getIndex(board.getEnPassantTarget(),
+						board.getPiece(board.getEnPassantTarget()), Side.BLACK), network);
 			}
 		}
 	}
-
+	
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
 	{
 		this.nodesCount++;
