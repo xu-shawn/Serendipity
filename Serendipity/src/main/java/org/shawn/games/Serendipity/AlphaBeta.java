@@ -144,7 +144,9 @@ public class AlphaBeta
 	{
 		if (undo)
 		{
-			if (board.getContext().isKingSideCastle(move))
+			if (board.getContext().isKingSideCastle(move)
+					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_SIDE)
+							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
 			{
 				whiteAccumulator.subtractFeature(NNUE.getIndex(
 						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
@@ -177,7 +179,9 @@ public class AlphaBeta
 				return;
 			}
 
-			if (board.getContext().isQueenSideCastle(move))
+			if (board.getContext().isQueenSideCastle(move)
+					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.QUEEN_SIDE)
+							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
 			{
 				whiteAccumulator.subtractFeature(NNUE.getIndex(
 						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
@@ -249,7 +253,9 @@ public class AlphaBeta
 
 		else
 		{
-			if (board.getContext().isKingSideCastle(move))
+			if (board.getContext().isKingSideCastle(move)
+					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_SIDE)
+							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
 			{
 				whiteAccumulator.addFeature(NNUE.getIndex(
 						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE).getTo(),
@@ -282,7 +288,9 @@ public class AlphaBeta
 				return;
 			}
 
-			if (board.getContext().isQueenSideCastle(move))
+			if (board.getContext().isQueenSideCastle(move)
+					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.QUEEN_SIDE)
+							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
 			{
 				whiteAccumulator.addFeature(NNUE.getIndex(
 						board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
@@ -352,7 +360,7 @@ public class AlphaBeta
 			}
 		}
 	}
-
+	
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
 	{
 		this.nodesCount++;
