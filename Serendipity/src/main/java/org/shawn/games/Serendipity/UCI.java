@@ -20,7 +20,7 @@ public class UCI
 	{
 		try
 		{
-			network = new NNUE("resources/simple.nnue");
+			network = new NNUE("/simple.nnue");
 		}
 		
 		catch (IOException e)

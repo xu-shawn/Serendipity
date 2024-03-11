@@ -54,7 +54,7 @@ public class NNUE
 
 	public NNUE(String filePath) throws IOException
 	{
-		DataInputStream networkData = new DataInputStream(getClass().getResourceAsStream("/simple.nnue"));
+		DataInputStream networkData = new DataInputStream(getClass().getResourceAsStream(filePath));
 
 		L1Weights = new short[FEATURE_SIZE][HIDDEN_SIZE];
 

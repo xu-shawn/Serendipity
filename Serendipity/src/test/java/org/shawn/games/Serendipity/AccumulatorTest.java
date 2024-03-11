@@ -26,7 +26,7 @@ public class AccumulatorTest
 
 	public AccumulatorTest() throws IOException
 	{
-		network = new NNUE("simple.nnue");
+		network = new NNUE("/simple.nnue");
 		whiteAccumulator = new NNUEAccumulator(network);
 		blackAccumulator = new NNUEAccumulator(network);
 		board = new Board();
