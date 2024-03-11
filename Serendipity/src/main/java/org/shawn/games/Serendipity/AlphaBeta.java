@@ -40,6 +40,33 @@ public class AlphaBeta
 	private NNUEAccumulator blackAccumulator;
 	private NNUEAccumulator whiteAccumulator;
 
+	private IntegerOption a2 = new IntegerOption(3, -2, 6, "a2"); // Step: 1
+
+	private IntegerOption b1 = new IntegerOption(7, 1, 15, "b1"); // Step: 1
+	private IntegerOption b2 = new IntegerOption(1680, 0, 3000, "b2"); // Step: 10
+
+	private IntegerOption c1 = new IntegerOption(2, -1, 15, "c1"); // Step: 1
+	private IntegerOption c2 = new IntegerOption(5, 0, 15, "c2"); // Step: 1
+	private IntegerOption c3 = new IntegerOption(2, 0, 9, "c3"); // Step: 1
+	
+	private IntegerOption d1 = new IntegerOption(8, 0, 15, "d1"); // Step: 1
+	private IntegerOption d2 = new IntegerOption(64, 0, 300, "d2"); // Step: 5
+	private IntegerOption d3 = new IntegerOption(20, 0, 150, "d3"); // Step: 5
+	
+	private IntegerOption e1 = new IntegerOption(3, 1, 8, "e1"); // Step: 1
+	private IntegerOption e2 = new IntegerOption(3, -1, 10, "e2"); // Step: 1
+
+	private IntegerOption f1 = new IntegerOption(135, -300, 300, "f1"); // Step: 15
+	private IntegerOption f2 = new IntegerOption(275, -800, 800, "f2"); // Step: 25
+	
+	private IntegerOption g1 = new IntegerOption(1, 1, 3, "g1"); // Step: 1
+
+	private IntegerOption h1 = new IntegerOption(100, 10, 500, "h1"); // Step: 25
+	
+	private IntegerOption i1 = new IntegerOption(4896, 0, 20000, "i1"); // Step: 100
+	
+	private IntegerOption asp = new IntegerOption(600, 12, 2400, "asp"); // Step: 12
+
 	public AlphaBeta(NNUE network)
 	{
 		this(8, network);
@@ -397,7 +424,7 @@ public class AlphaBeta
 				return alpha;
 			}
 
-			futilityBase = standPat + 4896;
+			futilityBase = standPat + i1.get();
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
 		}
@@ -513,7 +540,7 @@ public class AlphaBeta
 			staticEval = evaluate(board);
 		}
 
-		if (!isPV && !board.isKingAttacked() && depth < 7 && staticEval > beta && staticEval - depth * 1680 > beta)
+		if (!isPV && !board.isKingAttacked() && depth < b1.get() && staticEval > beta && staticEval - depth * b2.get() > beta)
 		{
 			return beta;
 		}
@@ -527,7 +554,7 @@ public class AlphaBeta
 //			int r = depth / 3 + 4;
 
 			board.doNullMove();
-			int nullEval = -mainSearch(board, depth - 3, -beta, -beta + 1, ply + 1, false);
+			int nullEval = -mainSearch(board, depth - a2.get(), -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
 
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
@@ -567,9 +594,9 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 2 && depth > 5)
+		if (isPV && ttMove == null && rootDepth > c1.get() && depth > c2.get())
 		{
-			depth -= 2;
+			depth -= c3.get();
 		}
 
 		for (Move move : legalMoves)
@@ -578,8 +605,8 @@ public class AlphaBeta
 			int newdepth = depth - 1;
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
 
-			if (alpha > -MATE_EVAL + 1024 && depth < 8
-					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -64 * depth : -20 * depth * depth))
+			if (alpha > -MATE_EVAL + 1024 && depth < d1.get()
+					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -d2.get() * depth : -d3.get() * depth * depth))
 			{
 				continue;
 			}
@@ -596,12 +623,12 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (moveCount > 3 && depth > 3)
+			if (moveCount > e1.get() && depth > e2.get())
 			{
-				int r = (int) (1.35 + Math.log(depth) * Math.log(moveCount) / 2.75);
+				int r = (int) ((double) f1.get() / 100f + Math.log(depth) * Math.log(moveCount) / ((double) f2.get() / 100f));
 
 //				r += isPV ? 0 : 1;
-				r -= inCheck ? 1 : 0;
+				r -= inCheck ? g1.get() : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
@@ -646,8 +673,8 @@ public class AlphaBeta
 
 					for (Move quietMove : quietMovesFailBeta)
 					{
-						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth
-								* depth;
+						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= h1.get() * depth
+								* depth / 100;
 					}
 
 					if (isQuiet)
@@ -723,9 +750,9 @@ public class AlphaBeta
 				selDepth = 0;
 				if (i > 3)
 				{
-					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA,
-							currentScore + ASPIRATION_DELTA, 0, false);
-					if (newScore > currentScore - ASPIRATION_DELTA && newScore < currentScore + ASPIRATION_DELTA)
+					int newScore = mainSearch(board, i, currentScore - asp.get(),
+							currentScore + asp.get(), 0, false);
+					if (newScore > currentScore - asp.get() && newScore < currentScore + asp.get())
 					{
 						currentScore = newScore;
 						lastCompletePV = pv[0].clone();
