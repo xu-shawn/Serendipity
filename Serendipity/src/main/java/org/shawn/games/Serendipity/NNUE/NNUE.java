@@ -9,7 +9,7 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-	private static final int HIDDEN_SIZE = 384;
+	private static final int HIDDEN_SIZE = 768;
 	private static final int FEATURE_SIZE = 768;
 
 	private static final int SCALE = 400;
