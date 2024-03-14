@@ -11,6 +11,8 @@ public class NNUE
 
 	private static final int HIDDEN_SIZE = 768;
 	private static final int FEATURE_SIZE = 768;
+	private static final int OUTPUT_BUCKET_SIZE = 8;
+	private static final int BUCKET_DIVISOR = (32 + OUTPUT_BUCKET_SIZE - 1) / OUTPUT_BUCKET_SIZE;
 
 	private static final int SCALE = 400;
 	private static final int QA = 255;
@@ -18,8 +20,8 @@ public class NNUE
 
 	private final short[][] L1Weights;
 	private final short[] L1Biases;
-	private final short[] L2Weights;
-	private final short outputBias;
+	private final short[][] L2Weights;
+	private final short[] outputBiases;
 
 	public static class NNUEAccumulator
 	{
@@ -73,14 +75,22 @@ public class NNUE
 			L1Biases[i] = toLittleEndian(networkData.readShort());
 		}
 
-		L2Weights = new short[HIDDEN_SIZE * 2];
+		L2Weights = new short[HIDDEN_SIZE * 2][OUTPUT_BUCKET_SIZE];
 
 		for (int i = 0; i < HIDDEN_SIZE * 2; i++)
 		{
-			L2Weights[i] = toLittleEndian(networkData.readShort());
+			for (int j = 0; j < OUTPUT_BUCKET_SIZE; j++)
+			{
+				L2Weights[i][j] = toLittleEndian(networkData.readShort());
+			}
 		}
 
-		outputBias = toLittleEndian(networkData.readShort());
+		outputBiases = new short[OUTPUT_BUCKET_SIZE];
+
+		for (int i = 0; i < OUTPUT_BUCKET_SIZE; i++)
+		{
+			outputBiases[i] = toLittleEndian(networkData.readShort());
+		}
 
 		networkData.close();
 	}
@@ -90,14 +100,15 @@ public class NNUE
 		return Math.max(0, Math.min(i, QA));
 	}
 
-	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them)
+	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, Board board)
 	{
-		int eval = network.outputBias;
+		int bucket = (Long.bitCount(board.getBitboard()) - 2) / BUCKET_DIVISOR;
+		int eval = network.outputBiases[bucket];
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
-			eval += crelu(us.values[i]) * (int) network.L2Weights[i]
-					+ crelu(them.values[i]) * (int) network.L2Weights[i + HIDDEN_SIZE];
+			eval += crelu(us.values[i]) * (int) network.L2Weights[i][bucket]
+					+ crelu(them.values[i]) * (int) network.L2Weights[i + HIDDEN_SIZE][bucket];
 		}
 
 		eval *= SCALE;

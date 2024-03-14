@@ -107,8 +107,8 @@ public class AlphaBeta
 
 	public int evaluate(Board board)
 	{
-		return (Side.WHITE.equals(board.getSideToMove()) ? NNUE.evaluate(network, whiteAccumulator, blackAccumulator)
-				: NNUE.evaluate(network, blackAccumulator, whiteAccumulator)) * 24;
+		return (Side.WHITE.equals(board.getSideToMove()) ? NNUE.evaluate(network, whiteAccumulator, blackAccumulator, board)
+				: NNUE.evaluate(network, blackAccumulator, whiteAccumulator, board)) * 24;
 	}
 
 	public boolean isTimeUp()
