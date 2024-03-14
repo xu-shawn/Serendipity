@@ -91,9 +91,9 @@ public class Bench
 		for (int i = 0; i < sampleSize - 1; i++)
 		{
 			ai.reset();
-			System.out.printf("%.2f, ", bench(ai, depth, false));
+			System.out.printf("%.2f, ", bench(ai, depth, true));
 		}
 		ai.reset();
-		System.out.printf("%.2f\n", bench(ai, depth, false));
+		System.out.printf("%.2f\n", bench(ai, depth, true));
 	}
 }
