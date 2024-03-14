@@ -25,15 +25,11 @@ public class NNUE
 
 	public static class NNUEAccumulator
 	{
-		private final int[] values;
+		private final short[] values;
 
 		public NNUEAccumulator(NNUE network)
 		{
-			values = new int[network.L1Biases.length];
-			for (int i = 0; i < network.L1Biases.length; i ++)
-			{
-				values[i] = network.L1Biases[i];
-			}
+			values = network.L1Biases.clone();
 		}
 
 		public void addFeature(int featureIndex, NNUE network)
@@ -99,7 +95,7 @@ public class NNUE
 		networkData.close();
 	}
 
-	private static int crelu(int i)
+	private static int crelu(short i)
 	{
 		return Math.max(0, Math.min(i, QA));
 	}
