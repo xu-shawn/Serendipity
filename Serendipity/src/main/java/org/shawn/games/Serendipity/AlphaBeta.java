@@ -40,32 +40,32 @@ public class AlphaBeta
 	private NNUEAccumulator blackAccumulator;
 	private NNUEAccumulator whiteAccumulator;
 
-	private IntegerOption a2 = new IntegerOption(3, -2, 6, "a2"); // Step: 1
+	private static final IntegerOption a2 = new IntegerOption(3, -2, 6, "a2"); // Step: 1
 
-	private IntegerOption b1 = new IntegerOption(7, 1, 15, "b1"); // Step: 1
-	private IntegerOption b2 = new IntegerOption(1680, 0, 3000, "b2"); // Step: 10
+	private static final IntegerOption b1 = new IntegerOption(7, 1, 15, "b1"); // Step: 1
+	private static final IntegerOption b2 = new IntegerOption(1680, 0, 3000, "b2"); // Step: 10
 
-	private IntegerOption c1 = new IntegerOption(2, -1, 15, "c1"); // Step: 1
-	private IntegerOption c2 = new IntegerOption(5, 0, 15, "c2"); // Step: 1
-	private IntegerOption c3 = new IntegerOption(2, 0, 9, "c3"); // Step: 1
+	private static final IntegerOption c1 = new IntegerOption(2, -1, 15, "c1"); // Step: 1
+	private static final IntegerOption c2 = new IntegerOption(5, 0, 15, "c2"); // Step: 1
+	private static final IntegerOption c3 = new IntegerOption(2, 0, 9, "c3"); // Step: 1
 	
-	private IntegerOption d1 = new IntegerOption(8, 0, 15, "d1"); // Step: 1
-	private IntegerOption d2 = new IntegerOption(64, 0, 300, "d2"); // Step: 5
-	private IntegerOption d3 = new IntegerOption(20, 0, 150, "d3"); // Step: 5
+	private static final IntegerOption d1 = new IntegerOption(8, 0, 15, "d1"); // Step: 1
+	private static final IntegerOption d2 = new IntegerOption(64, 0, 300, "d2"); // Step: 5
+	private static final IntegerOption d3 = new IntegerOption(20, 0, 150, "d3"); // Step: 5
 	
-	private IntegerOption e1 = new IntegerOption(3, 1, 8, "e1"); // Step: 1
-	private IntegerOption e2 = new IntegerOption(3, -1, 10, "e2"); // Step: 1
+	private static final IntegerOption e1 = new IntegerOption(3, 1, 8, "e1"); // Step: 1
+	private static final IntegerOption e2 = new IntegerOption(3, -1, 10, "e2"); // Step: 1
 
-	private IntegerOption f1 = new IntegerOption(135, -300, 300, "f1"); // Step: 15
-	private IntegerOption f2 = new IntegerOption(275, -800, 800, "f2"); // Step: 25
+	private static final IntegerOption f1 = new IntegerOption(135, -300, 300, "f1"); // Step: 15
+	private static final IntegerOption f2 = new IntegerOption(275, -800, 800, "f2"); // Step: 25
 	
-	private IntegerOption g1 = new IntegerOption(1, 1, 3, "g1"); // Step: 1
+	private static final IntegerOption g1 = new IntegerOption(1, 1, 3, "g1"); // Step: 1
 
-	private IntegerOption h1 = new IntegerOption(100, 10, 500, "h1"); // Step: 25
+	private static final IntegerOption h1 = new IntegerOption(100, 10, 500, "h1"); // Step: 25
 	
-	private IntegerOption i1 = new IntegerOption(4896, 0, 20000, "i1"); // Step: 100
+	private static final IntegerOption i1 = new IntegerOption(4896, 0, 20000, "i1"); // Step: 100
 	
-	private IntegerOption asp = new IntegerOption(600, 12, 2400, "asp"); // Step: 12
+	private static final IntegerOption asp = new IntegerOption(600, 12, 2400, "asp"); // Step: 12
 
 	public AlphaBeta(NNUE network)
 	{
