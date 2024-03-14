@@ -11,6 +11,7 @@ public class NNUE
 
 	private static final int HIDDEN_SIZE = 768;
 	private static final int FEATURE_SIZE = 768;
+
 	private static final int OUTPUT_BUCKET_SIZE = 4;
 	private static final int BUCKET_DIVISOR = (32 + OUTPUT_BUCKET_SIZE - 1) / OUTPUT_BUCKET_SIZE;
 
