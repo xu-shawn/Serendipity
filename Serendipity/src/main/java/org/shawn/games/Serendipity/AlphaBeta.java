@@ -731,6 +731,8 @@ public class AlphaBeta
 		this.history = new int[13][65];
 		this.whiteAccumulator = new NNUEAccumulator(network);
 		this.blackAccumulator = new NNUEAccumulator(network);
+		
+		System.out.println(asp.get());
 
 		// Initialize Accumulators
 		for (Square sq : Square.values())
