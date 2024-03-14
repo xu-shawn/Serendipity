@@ -53,8 +53,9 @@ public class AlphaBeta
 	private static final IntegerOption d2 = new IntegerOption(64, 0, 300, "d2"); // Step: 5
 	private static final IntegerOption d3 = new IntegerOption(20, 0, 150, "d3"); // Step: 5
 	
-	private static final IntegerOption e1 = new IntegerOption(3, 1, 8, "e1"); // Step: 1
-	private static final IntegerOption e2 = new IntegerOption(3, -1, 10, "e2"); // Step: 1
+	private static final IntegerOption e1 = new IntegerOption(2, 1, 8, "e1"); // Step: 1
+	private static final IntegerOption e2 = new IntegerOption(1, 0, 10, "e2"); // Step: 1
+	private static final IntegerOption e3 = new IntegerOption(2, -1, 10, "e3"); // Step: 1
 
 	private static final IntegerOption f1 = new IntegerOption(135, -300, 300, "f1"); // Step: 15
 	private static final IntegerOption f2 = new IntegerOption(275, -800, 800, "f2"); // Step: 25
@@ -623,7 +624,7 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (moveCount > e1.get() && depth > e2.get())
+			if (moveCount > e1.get() + (ply == 0 ? e2.get() : 0) && depth > e3.get())
 			{
 				int r = (int) ((double) f1.get() / 100f + Math.log(depth) * Math.log(moveCount) / ((double) f2.get() / 100f));
 
