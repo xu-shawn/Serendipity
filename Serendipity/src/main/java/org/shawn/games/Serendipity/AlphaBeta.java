@@ -26,6 +26,7 @@ public class AlphaBeta
 	private final TranspositionTable tt;
 
 	private int nodesCount;
+	private int nodesLimit;
 	private long timeLimit;
 
 	private Move[][] pv;
@@ -360,7 +361,7 @@ public class AlphaBeta
 			}
 		}
 	}
-	
+
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
 	{
 		this.nodesCount++;
@@ -460,7 +461,7 @@ public class AlphaBeta
 		int bestValue = MIN_EVAL;
 		this.selDepth = Math.max(this.selDepth, ply);
 
-		if ((nodesCount & 1023) == 0 && isTimeUp())
+		if ((nodesCount & 1023) == 0 && (isTimeUp() || (nodesLimit > 0 && nodesCount > nodesLimit)))
 		{
 			throw new TimeOutException();
 		}
@@ -686,12 +687,12 @@ public class AlphaBeta
 		return bestValue;
 	}
 
-	public Move nextMove(Board board, int targetDepth, long msLeft)
+	public Move nextMove(Board board, int targetDepth, long msLeft, int nodesLimit)
 	{
-		return nextMove(board, targetDepth, msLeft, false);
+		return nextMove(board, targetDepth, msLeft, nodesLimit, false);
 	}
 
-	public Move nextMove(Board board, int targetDepth, long msLeft, boolean supressOutput)
+	public Move nextMove(Board board, int targetDepth, long msLeft, int nodesLimit, boolean supressOutput)
 	{
 		int currentScore = MIN_EVAL;
 		killers = new Move[MAX_PLY];
@@ -699,6 +700,7 @@ public class AlphaBeta
 		clearPV();
 		Move[] lastCompletePV = null;
 		this.nodesCount = 0;
+		this.nodesLimit = nodesLimit;
 		long startTime = System.nanoTime();
 		this.timeLimit = System.nanoTime() + msLeft * 1000000L;
 		this.history = new int[13][65];
@@ -772,6 +774,7 @@ public class AlphaBeta
 		this.tt.clear();
 		this.nodesCount = 0;
 		this.timeLimit = 0;
+		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.killers = new Move[MAX_PLY];
 		this.counterMoves = new Move[13][65];

@@ -98,6 +98,7 @@ public class UCI
 					long btime = 100;
 					long winc = 0;
 					long binc = 0;
+					int nodesLimit = -1;
 					depth = 256;
 
 					for (int i = 1; i < fullCommand.length; i++)
@@ -129,6 +130,12 @@ public class UCI
 							wtime = btime = 157680000000L;
 							break;
 						}
+						if (fullCommand[i].equals("nodes"))
+						{
+							nodesLimit = Integer.parseInt(fullCommand[i + 1]);
+							wtime = btime = 157680000000L;
+							break;
+						}
 						if(fullCommand[i].equals("movetime"))
 						{
 							wtime = btime = Long.parseLong(fullCommand[i + 1]) * 20;
@@ -140,7 +147,7 @@ public class UCI
 							? wtime / 20 + winc / 2
 							: btime / 20 + binc / 2;
 
-					engine.nextMove(internalBoard.clone(), depth, timeGiven - 100);
+					engine.nextMove(internalBoard.clone(), depth, timeGiven - 100, nodesLimit);
 					break;
 				case "position":
 					for (int i = 1; i < fullCommand.length; i++)
