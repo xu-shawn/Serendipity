@@ -21,7 +21,7 @@ public class AlphaBeta
 	private final int DRAW_EVAL = 0;
 
 	private final int MAX_PLY = 256;
-	private final int ASPIRATION_DELTA = 600;
+	private final int ASPIRATION_DELTA = 601;
 
 	private final TranspositionTable tt;
 
@@ -398,7 +398,7 @@ public class AlphaBeta
 				return alpha;
 			}
 
-			futilityBase = standPat + 4896;
+			futilityBase = standPat + 4986;
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
 		}
@@ -514,7 +514,7 @@ public class AlphaBeta
 			staticEval = evaluate(board);
 		}
 
-		if (!isPV && !board.isKingAttacked() && depth < 7 && staticEval > beta && staticEval - depth * 1680 > beta)
+		if (!isPV && !board.isKingAttacked() && depth < 7 && staticEval > beta && staticEval - depth * 1683 > beta)
 		{
 			return beta;
 		}
@@ -528,7 +528,7 @@ public class AlphaBeta
 //			int r = depth / 3 + 4;
 
 			board.doNullMove();
-			int nullEval = -mainSearch(board, depth - 3, -beta, -beta + 1, ply + 1, false);
+			int nullEval = -mainSearch(board, depth - 4, -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
 
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
@@ -568,7 +568,7 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 2 && depth > 5)
+		if (isPV && ttMove == null && rootDepth > 1 && depth > 4)
 		{
 			depth -= 2;
 		}
@@ -579,8 +579,8 @@ public class AlphaBeta
 			int newdepth = depth - 1;
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
 
-			if (alpha > -MATE_EVAL + 1024 && depth < 8
-					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -64 * depth : -20 * depth * depth))
+			if (alpha > -MATE_EVAL + 1024 && depth < 9
+					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -66 * depth : -21 * depth * depth))
 			{
 				continue;
 			}
@@ -597,9 +597,9 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (moveCount > 2 + (ply == 0 ? 1 : 0) && depth > 2)
+			if (moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 1)
 			{
-				int r = (int) (1.35 + Math.log(depth) * Math.log(moveCount) / 2.75);
+				int r = (int) (1.58 + Math.log(depth) * Math.log(moveCount) / 2.19);
 
 //				r += isPV ? 0 : 1;
 				r -= inCheck ? 1 : 0;
@@ -648,7 +648,7 @@ public class AlphaBeta
 					for (Move quietMove : quietMovesFailBeta)
 					{
 						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth
-								* depth;
+								* depth * 38 / 100;
 					}
 
 					if (isQuiet)
