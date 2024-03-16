@@ -12,7 +12,7 @@ import com.github.bhlangonijr.chesslib.move.*;
 public class UCI
 {
 	private static Board internalBoard;
-	private static Map<String, IntegerOption> options;
+	private static Map<String, UCIOption> options;
 	private static AlphaBeta engine;
 	private static NNUE network;
 
@@ -42,12 +42,12 @@ public class UCI
 
 	public static IntegerOption getOption(String name)
 	{
-		return options.get(name);
+		return (IntegerOption) options.get(name);
 	}
 
-	public static void setOption(String name, int value)
+	public static void setOption(String name, String value)
 	{
-		IntegerOption myOption = options.get(name);
+		UCIOption myOption = options.get(name);
 		myOption.set(value);
 	}
 
@@ -189,14 +189,14 @@ public class UCI
 						}
 						if (fullCommand[i].equals("value"))
 						{
-							options.get(key).set(Integer.valueOf(fullCommand[i + 1]));
+							options.get(key).set(fullCommand[i + 1]);
 						}
 					}
 					break;
 				case "showvalues":
 					for (var option : options.values())
 					{
-						System.out.println(option + " value " + option.get());
+						System.out.println(option + " value " + option.getString());
 					}
 					break;
 				case "bench":

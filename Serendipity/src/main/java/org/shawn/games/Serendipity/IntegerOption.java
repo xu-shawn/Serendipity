@@ -1,6 +1,6 @@
 package org.shawn.games.Serendipity;
 
-public class IntegerOption
+public class IntegerOption implements UCIOption
 {
 	int value;
 	final String name;
@@ -24,21 +24,23 @@ public class IntegerOption
 		UCI.addOption(name, this);
 	}
 
-	public void set(int value)
+	@Override
+	public void set(String value)
 	{
-		if (value < this.lowerBound)
+		int intValue = Integer.parseInt(value);
+		if (intValue < this.lowerBound)
 		{
 			this.value = this.lowerBound;
 		}
 
-		else if (value > this.upperBound)
+		else if (intValue > this.upperBound)
 		{
 			this.value = this.upperBound;
 		}
 
 		else
 		{
-			this.value = value;
+			this.value = intValue;
 		}
 	}
 
@@ -51,5 +53,11 @@ public class IntegerOption
 	{
 		return "option name " + name + " type spin default " + Integer.toString(defaultValue)
 				+ " min " + Integer.toString(lowerBound) + " max " + Integer.toString(upperBound);
+	}
+
+	@Override
+	public String getString()
+	{
+		return Integer.toString(this.value);
 	}
 }
