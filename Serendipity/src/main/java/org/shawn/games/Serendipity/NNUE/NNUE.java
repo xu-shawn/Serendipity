@@ -87,7 +87,7 @@ public class NNUE
 
 	private static int crelu(short i)
 	{
-		return Math.max(0, Math.min(i, QA));
+		return i < 0 ? 0 : i > QA ? QA : i;
 	}
 
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them)
