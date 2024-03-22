@@ -14,28 +14,57 @@ public class UCI
 	private static Board internalBoard;
 	private static Map<String, UCIOption> options;
 	private static AlphaBeta engine;
+	private static StringOption networkName;
 	private static NNUE network;
+
+	public static class NNUEOption extends StringOption
+	{
+		public NNUEOption(String value, String name)
+		{
+			super(value, name);
+		}
+
+		@Override
+		public void set(String value)
+		{
+			try
+			{
+				network = new NNUE("/" + value);
+				engine = new AlphaBeta(network);
+			}
+
+			catch (IOException e)
+			{
+				System.out.print("Error Loading NNUE");
+				return;
+			}
+
+			this.value = value;
+		}
+	}
 
 	public static void main(String args[])
 	{
+		options = new HashMap<>();
+		networkName = new NNUEOption("simple.nnue", "nnuefile");
+
 		try
 		{
-			network = new NNUE("/simple.nnue");
+			network = new NNUE("/" + networkName.get());
 		}
-		
+
 		catch (IOException e)
 		{
 			System.out.print("Error Loading NNUE");
 		}
-		
+
 		internalBoard = new Board();
-		options = new HashMap<>();
 		engine = new AlphaBeta(network);
-		
+
 		UCIMainLoop();
 	}
 
-	public static void addOption(String name, IntegerOption option)
+	public static void addOption(String name, UCIOption option)
 	{
 		options.put(name, option);
 	}
@@ -53,9 +82,9 @@ public class UCI
 
 	public static void report(int depth, int selDepth, int nodes, int score, long ms, Move[] pv)
 	{
-		System.out.printf("info depth %d seldepth %d nodes %d score cp %d time %d pv %s\n", depth, selDepth, nodes, score,
-				ms, String.join(" ", Arrays.stream(pv).takeWhile(x -> x != null)
-						.map(Object::toString).collect(Collectors.toList())));
+		System.out.printf("info depth %d seldepth %d nodes %d score cp %d time %d pv %s\n", depth, selDepth, nodes,
+				score, ms, String.join(" ", Arrays.stream(pv).takeWhile(x -> x != null).map(Object::toString)
+						.collect(Collectors.toList())));
 	}
 
 	public static void reportBestMove(Move bestMove)
@@ -136,15 +165,14 @@ public class UCI
 							wtime = btime = 157680000000L;
 							break;
 						}
-						if(fullCommand[i].equals("movetime"))
+						if (fullCommand[i].equals("movetime"))
 						{
 							wtime = btime = Long.parseLong(fullCommand[i + 1]) * 20;
 							winc = binc = 0;
 						}
 					}
 
-					long timeGiven = internalBoard.getSideToMove() == Side.WHITE
-							? wtime / 20 + winc / 2
+					long timeGiven = internalBoard.getSideToMove() == Side.WHITE ? wtime / 20 + winc / 2
 							: btime / 20 + binc / 2;
 
 					engine.nextMove(internalBoard.clone(), depth, timeGiven - 100, nodesLimit);
@@ -159,9 +187,9 @@ public class UCI
 						if (fullCommand[i].equals("fen"))
 						{
 							internalBoard = new Board();
-							internalBoard.loadFromFen(fullCommand[i + 1] + " " + fullCommand[i + 2]
-									+ " " + fullCommand[i + 3] + " " + fullCommand[i + 4] + " "
-									+ fullCommand[i + 5] + " " + fullCommand[i + 6]);
+							internalBoard.loadFromFen(
+									fullCommand[i + 1] + " " + fullCommand[i + 2] + " " + fullCommand[i + 3] + " "
+											+ fullCommand[i + 4] + " " + fullCommand[i + 5] + " " + fullCommand[i + 6]);
 						}
 						if (fullCommand[i].equals("moves"))
 						{
@@ -201,7 +229,7 @@ public class UCI
 					break;
 				case "bench":
 					depth = 10;
-					if(fullCommand.length > 1)
+					if (fullCommand.length > 1)
 					{
 						depth = Integer.parseInt(fullCommand[1]);
 					}
@@ -210,7 +238,7 @@ public class UCI
 				case "benches":
 					int iterations = Integer.parseInt(fullCommand[1]);
 					depth = 10;
-					if(fullCommand.length > 2)
+					if (fullCommand.length > 2)
 					{
 						depth = Integer.parseInt(fullCommand[2]);
 					}
