@@ -703,7 +703,7 @@ public class AlphaBeta
 		this.nodesLimit = nodesLimit;
 		long startTime = System.nanoTime();
 		this.timeLimit = System.nanoTime() + msLeft * 1000000L;
-		long softTimeLimit = System.nanoTime() + msLeft * 700000L;
+		long softTimeLimit = System.nanoTime() + msLeft * 300000L;
 		this.history = new int[13][65];
 		this.whiteAccumulator = new NNUEAccumulator(network);
 		this.blackAccumulator = new NNUEAccumulator(network);
