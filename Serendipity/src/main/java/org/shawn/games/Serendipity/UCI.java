@@ -91,7 +91,7 @@ public class UCI
 
 		else
 		{
-			int mateInPly = AlphaBeta.MATE_EVAL - score;
+			int mateInPly = AlphaBeta.MATE_EVAL - Math.abs(score);
 			System.out.printf("info depth %d seldepth %d nodes %d score mate %d time %d pv %s\n", depth, selDepth,
 					nodes, mateInPly % 2 != 0 ? (mateInPly + 1) / 2 : -mateInPly / 2, ms, String.join(" ", Arrays
 							.stream(pv).takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
