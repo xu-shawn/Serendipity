@@ -599,7 +599,7 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 1)
+			if (moveCount > 1 + (ply == 0 ? 1 : 0) && depth > 1)
 			{
 				int r = (int) (1.58 + Math.log(depth) * Math.log(moveCount) / 2.19);
 
