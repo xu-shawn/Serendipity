@@ -15,12 +15,14 @@ public class AlphaBeta
 	private final int BISHOP_VALUE = 365;
 	private final int ROOK_VALUE = 477;
 	private final int QUEEN_VALUE = 1025;
-	private final int MAX_EVAL = 1000000000;
-	private final int MIN_EVAL = -1000000000;
-	private final int MATE_EVAL = 500000000;
-	private final int DRAW_EVAL = 0;
-
-	private final int MAX_PLY = 256;
+	
+	public static final int MAX_EVAL = 1000000000;
+	public static final int MIN_EVAL = -1000000000;
+	public static final int MATE_EVAL = 500000000;
+	public static final int DRAW_EVAL = 0;
+	
+	public static final int MAX_PLY = 256;
+	
 	private final int ASPIRATION_DELTA = 601;
 
 	private final TranspositionTable tt;
@@ -734,7 +736,7 @@ public class AlphaBeta
 						lastCompletePV = pv[0].clone();
 						if (!supressOutput)
 						{
-							UCI.report(i, selDepth, nodesCount, currentScore / PeSTO.MAX_PHASE,
+							UCI.report(i, selDepth, nodesCount, currentScore,
 									(System.nanoTime() - startTime) / 1000000, lastCompletePV);
 						}
 						continue;
@@ -747,7 +749,7 @@ public class AlphaBeta
 
 				if (!supressOutput)
 				{
-					UCI.report(i, selDepth, nodesCount, currentScore / PeSTO.MAX_PHASE,
+					UCI.report(i, selDepth, nodesCount, currentScore,
 							(System.nanoTime() - startTime) / 1000000, lastCompletePV);
 				}
 			}
