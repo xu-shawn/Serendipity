@@ -527,10 +527,10 @@ public class AlphaBeta
 								.getBitboard(board.getSideToMove())
 				&& evaluate(board) >= beta && ply > 0 && staticEval >= beta)
 		{
-//			int r = depth / 3 + 4;
+			int r = depth / 3 + 4;
 
 			board.doNullMove();
-			int nullEval = -mainSearch(board, depth - 4, -beta, -beta + 1, ply + 1, false);
+			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
 
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
