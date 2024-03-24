@@ -722,7 +722,7 @@ public class AlphaBeta
 
 		try
 		{
-			for (int i = 1; i <= targetDepth && (i < 4 || System.nanoTime() < softTimeLimit); i++)
+			for (int i = 1; i <= targetDepth && (i < 7 || System.nanoTime() < softTimeLimit); i++)
 			{
 				rootDepth = i;
 				selDepth = 0;
