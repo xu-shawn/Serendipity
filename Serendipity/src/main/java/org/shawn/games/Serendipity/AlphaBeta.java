@@ -529,9 +529,9 @@ public class AlphaBeta
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
 
-			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
+			if (nullEval >= beta)
 			{
-				return nullEval;
+				return nullEval < MATE_EVAL - 1024 ? nullEval : beta;
 			}
 		}
 
