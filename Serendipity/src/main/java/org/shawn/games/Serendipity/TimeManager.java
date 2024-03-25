@@ -13,16 +13,15 @@ public class TimeManager
 	private long hardLimitTimeStamp;
 	private long softLimitTimeStamp;
 
-	public TimeManager(long timeLeft, long increment, int movesToGo, long moveOverHead)
+	public TimeManager(long timeLeft, long increment, int movesToGo, long moveOverHead, int moves)
 	{
 		this.timeLeft = timeLeft;
 		this.increment = increment;
-		this.movesToGo = movesToGo;
 		this.moveOverHead = moveOverHead;
 
 		if (movesToGo == 0)
 		{
-			movesToGo = Math.max(20, movesToGo);
+			movesToGo = Math.max(20, 50 - moves);
 		}
 
 		this.movesToGo = movesToGo;

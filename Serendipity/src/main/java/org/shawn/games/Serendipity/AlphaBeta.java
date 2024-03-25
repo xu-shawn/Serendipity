@@ -699,7 +699,8 @@ public class AlphaBeta
 		Move[] lastCompletePV = null;
 		this.nodesCount = 0;
 		this.nodesLimit = limits.getNodes();
-		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100);
+		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
+				board.getMoveCounter());
 		this.history = new int[13][65];
 		this.whiteAccumulator = new NNUEAccumulator(network);
 		this.blackAccumulator = new NNUEAccumulator(network);
