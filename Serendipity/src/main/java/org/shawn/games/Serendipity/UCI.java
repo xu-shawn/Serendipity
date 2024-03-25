@@ -84,17 +84,18 @@ public class UCI
 	{
 		if (Math.abs(score) < AlphaBeta.MATE_EVAL - AlphaBeta.MAX_PLY)
 		{
-			System.out.printf("info depth %d seldepth %d nodes %d score cp %d time %d pv %s\n", depth, selDepth, nodes,
-					score / PeSTO.MAX_PHASE, ms, String.join(" ", Arrays.stream(pv).takeWhile(x -> x != null)
-							.map(Object::toString).collect(Collectors.toList())));
+			System.out.printf("info depth %d seldepth %d nodes %d nps %d score cp %d time %d pv %s\n", depth, selDepth,
+					nodes, nodes * 1000L / ms, score / PeSTO.MAX_PHASE, ms, String.join(" ", Arrays.stream(pv)
+							.takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
 		}
 
 		else
 		{
 			int mateInPly = AlphaBeta.MATE_EVAL - Math.abs(score);
-			System.out.printf("info depth %d seldepth %d nodes %d score mate %d time %d pv %s\n", depth, selDepth,
-					nodes, mateInPly % 2 != 0 ? (mateInPly + 1) / 2 : -mateInPly / 2, ms, String.join(" ", Arrays
-							.stream(pv).takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
+			System.out.printf("info depth %d seldepth %d nodes %d nps %d score mate %d time %d pv %s\n", depth,
+					selDepth, nodes, nodes * 1000L / ms, mateInPly % 2 != 0 ? (mateInPly + 1) / 2 : -mateInPly / 2, ms,
+					String.join(" ", Arrays.stream(pv).takeWhile(x -> x != null).map(Object::toString)
+							.collect(Collectors.toList())));
 		}
 	}
 
