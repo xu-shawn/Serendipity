@@ -531,7 +531,7 @@ public class AlphaBeta
 
 			if (nullEval >= beta)
 			{
-				return nullEval < MATE_EVAL - 1024 ? nullEval : beta;
+				return nullEval < MATE_EVAL + 1 ? nullEval : beta;
 			}
 		}
 
