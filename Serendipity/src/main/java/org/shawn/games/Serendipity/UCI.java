@@ -85,17 +85,17 @@ public class UCI
 		if (Math.abs(score) < AlphaBeta.MATE_EVAL - AlphaBeta.MAX_PLY)
 		{
 			System.out.printf("info depth %d seldepth %d nodes %d nps %d score cp %d time %d pv %s\n", depth, selDepth,
-					nodes, nodes * 1000L / Math.max(1, ms), score / PeSTO.MAX_PHASE, ms, String.join(" ", Arrays.stream(pv)
-							.takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
+					nodes, nodes * 1000L / Math.max(1, ms), score / PeSTO.MAX_PHASE, ms, String.join(" ", Arrays
+							.stream(pv).takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
 		}
 
 		else
 		{
 			int mateInPly = AlphaBeta.MATE_EVAL - Math.abs(score);
 			System.out.printf("info depth %d seldepth %d nodes %d nps %d score mate %d time %d pv %s\n", depth,
-					selDepth, nodes, nodes * 1000L / Math.max(1, ms), mateInPly % 2 != 0 ? (mateInPly + 1) / 2 : -mateInPly / 2, ms,
-					String.join(" ", Arrays.stream(pv).takeWhile(x -> x != null).map(Object::toString)
-							.collect(Collectors.toList())));
+					selDepth, nodes, nodes * 1000L / Math.max(1, ms),
+					mateInPly % 2 != 0 ? (mateInPly + 1) / 2 : -mateInPly / 2, ms, String.join(" ", Arrays.stream(pv)
+							.takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
 		}
 	}
 
@@ -135,67 +135,55 @@ public class UCI
 					input.close();
 					return;
 				case "go":
-					long wtime = 100;
-					long btime = 100;
-					long winc = 0;
-					long binc = 0;
-					int movesToGo = 0;
-					int nodesLimit = -1;
-					depth = 256;
+					Limits limits = new Limits();
 
 					for (int i = 1; i < fullCommand.length; i++)
 					{
 						if (fullCommand[i].equals("infinite"))
 						{
-							wtime = btime = 157680000000L;
+							limits.setTime(157680000000L);
 							break;
 						}
-						if (fullCommand[i].equals("wtime"))
+
+						if ((fullCommand[i].equals("wtime") && Side.WHITE.equals(internalBoard.getSideToMove()))
+								|| (fullCommand[i].equals("btime") && Side.BLACK.equals(internalBoard.getSideToMove())))
 						{
-							wtime = Long.parseLong(fullCommand[i + 1]);
+							limits.setTime(Long.parseLong(fullCommand[i + 1]));
 						}
-						if (fullCommand[i].equals("btime"))
+
+						if ((fullCommand[i].equals("winc") && Side.WHITE.equals(internalBoard.getSideToMove()))
+								|| (fullCommand[i].equals("binc") && Side.BLACK.equals(internalBoard.getSideToMove())))
 						{
-							btime = Long.parseLong(fullCommand[i + 1]);
+							limits.setIncrement(Long.parseLong(fullCommand[i + 1]));
 						}
-						if (fullCommand[i].equals("winc"))
-						{
-							winc = Long.parseLong(fullCommand[i + 1]);
-						}
-						if (fullCommand[i].equals("winc"))
-						{
-							binc = Long.parseLong(fullCommand[i + 1]);
-						}
+
 						if (fullCommand[i].equals("depth"))
 						{
-							depth = Integer.parseInt(fullCommand[i + 1]);
-							wtime = btime = 157680000000L;
+							limits.setDepth(Integer.parseInt(fullCommand[i + 1]));
+							limits.setTime(157680000000L);
 							break;
 						}
+
 						if (fullCommand[i].equals("nodes"))
 						{
-							nodesLimit = Integer.parseInt(fullCommand[i + 1]);
-							wtime = btime = 157680000000L;
+							limits.setNodes(Integer.parseInt(fullCommand[i + 1]));
 							break;
 						}
+
 						if (fullCommand[i].equals("movetime"))
 						{
-							wtime = btime = Long.parseLong(fullCommand[i + 1]);
-							winc = binc = 0;
-							movesToGo = 1;
+							limits.setTime(Long.parseLong(fullCommand[i + 1]));
+							limits.setIncrement(0);
+							limits.setMovesToGo(1);
 						}
+
 						if (fullCommand[i].equals("movestogo"))
 						{
-							movesToGo = Integer.parseInt(fullCommand[i + 1]);
+							limits.setMovesToGo(Integer.parseInt(fullCommand[i + 1]));
 						}
 					}
 
-					engine.nextMove(internalBoard.clone(), depth,
-
-							new TimeManager(Side.WHITE.equals(internalBoard.getSideToMove()) ? wtime : btime,
-									Side.WHITE.equals(internalBoard.getSideToMove()) ? winc : binc, movesToGo, 100),
-
-							nodesLimit);
+					engine.nextMove(internalBoard.clone(), limits);
 					break;
 				case "position":
 					for (int i = 1; i < fullCommand.length; i++)

@@ -685,12 +685,12 @@ public class AlphaBeta
 		return bestValue;
 	}
 
-	public Move nextMove(Board board, int targetDepth, TimeManager timeManager, int nodesLimit)
+	public Move nextMove(Board board, Limits limits)
 	{
-		return nextMove(board, targetDepth, timeManager, nodesLimit, false);
+		return nextMove(board, limits, false);
 	}
 
-	public Move nextMove(Board board, int targetDepth, TimeManager timeManager, int nodesLimit, boolean supressOutput)
+	public Move nextMove(Board board, Limits limits, boolean supressOutput)
 	{
 		int currentScore = MIN_EVAL;
 		killers = new Move[MAX_PLY];
@@ -698,8 +698,8 @@ public class AlphaBeta
 		clearPV();
 		Move[] lastCompletePV = null;
 		this.nodesCount = 0;
-		this.nodesLimit = nodesLimit;
-		this.timeManager = timeManager;
+		this.nodesLimit = limits.getNodes();
+		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100);
 		this.history = new int[13][65];
 		this.whiteAccumulator = new NNUEAccumulator(network);
 		this.blackAccumulator = new NNUEAccumulator(network);
@@ -716,7 +716,7 @@ public class AlphaBeta
 
 		try
 		{
-			for (int i = 1; i <= targetDepth && (i < 4 || !timeManager.stopIterativeDeepening()); i++)
+			for (int i = 1; i <= limits.getDepth() && (i < 4 || !timeManager.stopIterativeDeepening()); i++)
 			{
 				rootDepth = i;
 				selDepth = 0;

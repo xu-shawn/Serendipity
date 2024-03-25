@@ -22,7 +22,7 @@ public class TimeManager
 
 		if (movesToGo == 0)
 		{
-			movesToGo = 20;
+			movesToGo = Math.max(20, movesToGo);
 		}
 
 		this.movesToGo = movesToGo;
