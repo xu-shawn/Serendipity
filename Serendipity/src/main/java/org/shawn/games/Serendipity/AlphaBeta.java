@@ -471,6 +471,7 @@ public class AlphaBeta
 
 		if (depth <= 0 || ply >= MAX_PLY)
 		{
+			this.nodesCount--;
 			return quiesce(board, alpha, beta, ply + 1);
 		}
 
