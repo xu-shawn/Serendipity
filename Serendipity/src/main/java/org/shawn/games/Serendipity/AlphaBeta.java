@@ -611,6 +611,8 @@ public class AlphaBeta
 
 			updateAccumulators(board, move, false);
 			board.doMove(move);
+			
+			inCheck = board.isKingAttacked();
 
 			if (inCheck)
 			{
