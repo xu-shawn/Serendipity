@@ -66,7 +66,7 @@ public class Bench
 		for (String fen : benchPositions)
 		{
 			board.loadFromFen(fen);
-			ai.nextMove(board, depth, new TimeManager(Integer.MAX_VALUE, Integer.MAX_VALUE, 1, 0), -1, supressOutput);
+			ai.nextMove(board, new Limits(Integer.MAX_VALUE, Integer.MAX_VALUE, 1, -1, depth), supressOutput);
 			totalNodes += ai.getNodesCount();
 		}
 		long endTime = System.nanoTime();

@@ -13,11 +13,10 @@ public class TimeManager
 	private long hardLimitTimeStamp;
 	private long softLimitTimeStamp;
 
-	public TimeManager(long timeLeft, long increment, int movesToGo, long moveOverHead)
+	public TimeManager(long timeLeft, long increment, int movesToGo, long moveOverHead, int moves)
 	{
 		this.timeLeft = timeLeft;
 		this.increment = increment;
-		this.movesToGo = movesToGo;
 		this.moveOverHead = moveOverHead;
 
 		if (movesToGo == 0)
@@ -27,7 +26,7 @@ public class TimeManager
 
 		this.movesToGo = movesToGo;
 
-		this.hardLimit = this.timeLeft / this.movesToGo + this.increment / 2 - this.moveOverHead;
+		this.hardLimit = this.timeLeft / this.movesToGo + this.increment * 3 / 4 - this.moveOverHead;
 		this.softLimit = this.movesToGo != 1 ? this.hardLimit / 2 : this.hardLimit;
 
 		this.startTime = System.nanoTime();
