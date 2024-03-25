@@ -521,7 +521,7 @@ public class AlphaBeta
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
-				&& evaluate(board) >= beta && ply > 0 && staticEval >= beta)
+				&& staticEval >= beta && ply > 0)
 		{
 			int r = depth / 3 + 4;
 
