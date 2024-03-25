@@ -21,12 +21,12 @@ public class TimeManager
 
 		if (movesToGo == 0)
 		{
-			movesToGo = Math.max(20, 50 - moves);
+			movesToGo = 20;
 		}
 
 		this.movesToGo = movesToGo;
 
-		this.hardLimit = this.timeLeft / this.movesToGo + this.increment / 2 - this.moveOverHead;
+		this.hardLimit = this.timeLeft / this.movesToGo + this.increment * 3 / 4 - this.moveOverHead;
 		this.softLimit = this.movesToGo != 1 ? this.hardLimit / 2 : this.hardLimit;
 
 		this.startTime = System.nanoTime();
