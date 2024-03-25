@@ -21,19 +21,14 @@ public class Bench
 			"r1q2rk1/2p1bppp/2Pp4/p6b/Q1PNp3/4B3/PP1R1PPP/2K4R w - - 2 18",
 			"4k2r/1pb2ppp/1p2p3/1R1p4/3P4/2r1PN2/P4PPP/1R4K1 b - - 3 22",
 			"3q2k1/pb3p1p/4pbp1/2r5/PpN2N2/1P2P2P/5PP1/Q2R2K1 b - - 4 26",
-			"6k1/6p1/6Pp/ppp5/3pn2P/1P3K2/1PP2P2/3N4 b - - 0 1",
-			"3b4/5kp1/1p1p1p1p/pP1PpP1P/P1P1P3/3KN3/8/8 w - - 0 1",
+			"6k1/6p1/6Pp/ppp5/3pn2P/1P3K2/1PP2P2/3N4 b - - 0 1", "3b4/5kp1/1p1p1p1p/pP1PpP1P/P1P1P3/3KN3/8/8 w - - 0 1",
 			"2K5/p7/7P/5pR1/8/5k2/r7/8 w - - 0 1 moves g5g6 f3e3 g6g5 e3f3",
 			"8/6pk/1p6/8/PP3p1p/5P2/4KP1q/3Q4 w - - 0 1", "7k/3p2pp/4q3/8/4Q3/5Kp1/P6b/8 w - - 0 1",
-			"8/2p5/8/2kPKp1p/2p4P/2P5/3P4/8 w - - 0 1",
-			"8/1p3pp1/7p/5P1P/2k3P1/8/2K2P2/8 w - - 0 1",
-			"8/pp2r1k1/2p1p3/3pP2p/1P1P1P1P/P5KR/8/8 w - - 0 1",
-			"8/3p4/p1bk3p/Pp6/1Kp1PpPp/2P2P1P/2P5/5B2 b - - 0 1",
-			"5k2/7R/4P2p/5K2/p1r2P1p/8/8/8 b - - 0 1",
-			"6k1/6p1/P6p/r1N5/5p2/7P/1b3PP1/4R1K1 w - - 0 1",
+			"8/2p5/8/2kPKp1p/2p4P/2P5/3P4/8 w - - 0 1", "8/1p3pp1/7p/5P1P/2k3P1/8/2K2P2/8 w - - 0 1",
+			"8/pp2r1k1/2p1p3/3pP2p/1P1P1P1P/P5KR/8/8 w - - 0 1", "8/3p4/p1bk3p/Pp6/1Kp1PpPp/2P2P1P/2P5/5B2 b - - 0 1",
+			"5k2/7R/4P2p/5K2/p1r2P1p/8/8/8 b - - 0 1", "6k1/6p1/P6p/r1N5/5p2/7P/1b3PP1/4R1K1 w - - 0 1",
 			"1r3k2/4q3/2Pp3b/3Bp3/2Q2p2/1p1P2P1/1P2KP2/3N4 w - - 0 1",
-			"6k1/4pp1p/3p2p1/P1pPb3/R7/1r2P1PP/3B1P2/6K1 w - - 0 1",
-			"8/3p3B/5p2/5P2/p7/PP5b/k7/6K1 w - - 0 1",
+			"6k1/4pp1p/3p2p1/P1pPb3/R7/1r2P1PP/3B1P2/6K1 w - - 0 1", "8/3p3B/5p2/5P2/p7/PP5b/k7/6K1 w - - 0 1",
 			"5rk1/q6p/2p3bR/1pPp1rP1/1P1Pp3/P3B1Q1/1K3P2/R7 w - - 93 90",
 			"4rrk1/1p1nq3/p7/2p1P1pp/3P2bp/3Q1Bn1/PPPB4/1K2R1NR w - - 40 21",
 			"r3k2r/3nnpbp/q2pp1p1/p7/Pp1PPPP1/4BNN1/1P5P/R2Q1RK1 w kq - 0 16",
@@ -55,8 +50,8 @@ public class Bench
 
 			// Mate and stalemate positions
 			"6k1/3b3r/1p1p4/p1n2p2/1PPNpP1q/P3Q1p1/1R1RB1P1/5K2 b - - 0 1",
-			"r2r1n2/pp2bk2/2p1p2p/3q4/3PN1QP/2P3R1/P4PP1/5RK1 w - - 0 1",
-			"8/8/8/8/8/6k1/6p1/6K1 w - -", "7k/7P/6K1/8/3B4/8/8/8 b - -", };
+			"r2r1n2/pp2bk2/2p1p2p/3q4/3PN1QP/2P3R1/P4PP1/5RK1 w - - 0 1", "8/8/8/8/8/6k1/6p1/6K1 w - -",
+			"7k/7P/6K1/8/3B4/8/8/8 b - -", };
 
 	public static void bench(AlphaBeta ai, int depth)
 	{
@@ -71,7 +66,7 @@ public class Bench
 		for (String fen : benchPositions)
 		{
 			board.loadFromFen(fen);
-			ai.nextMove(board, depth, Long.MAX_VALUE / 10000000, -1, supressOutput);
+			ai.nextMove(board, depth, new TimeManager(Integer.MAX_VALUE, Integer.MAX_VALUE, 1, 0), -1, supressOutput);
 			totalNodes += ai.getNodesCount();
 		}
 		long endTime = System.nanoTime();

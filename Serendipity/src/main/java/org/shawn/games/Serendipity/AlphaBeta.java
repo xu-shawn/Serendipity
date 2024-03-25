@@ -15,21 +15,22 @@ public class AlphaBeta
 	private final int BISHOP_VALUE = 365;
 	private final int ROOK_VALUE = 477;
 	private final int QUEEN_VALUE = 1025;
-	
+
 	public static final int MAX_EVAL = 1000000000;
 	public static final int MIN_EVAL = -1000000000;
 	public static final int MATE_EVAL = 500000000;
 	public static final int DRAW_EVAL = 0;
-	
+
 	public static final int MAX_PLY = 256;
-	
+
 	private final int ASPIRATION_DELTA = 601;
 
 	private final TranspositionTable tt;
 
+	private TimeManager timeManager;
+
 	private int nodesCount;
 	private int nodesLimit;
-	private long timeLimit;
 
 	private Move[][] pv;
 	private Move[] killers;
@@ -52,7 +53,7 @@ public class AlphaBeta
 	{
 		this.tt = new TranspositionTable(1048576 * n);
 		this.nodesCount = 0;
-		this.timeLimit = 0;
+		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.killers = new Move[MAX_PLY];
 		this.counterMoves = new Move[13][65];
@@ -112,11 +113,6 @@ public class AlphaBeta
 	{
 		return (Side.WHITE.equals(board.getSideToMove()) ? NNUE.evaluate(network, whiteAccumulator, blackAccumulator)
 				: NNUE.evaluate(network, blackAccumulator, whiteAccumulator)) * 24;
-	}
-
-	public boolean isTimeUp()
-	{
-		return System.nanoTime() > this.timeLimit;
 	}
 
 	private void sortMoves(List<Move> moves, Board board, int ply)
@@ -463,7 +459,7 @@ public class AlphaBeta
 		int bestValue = MIN_EVAL;
 		this.selDepth = Math.max(this.selDepth, ply);
 
-		if ((nodesCount & 1023) == 0 && (isTimeUp() || (nodesLimit > 0 && nodesCount > nodesLimit)))
+		if ((nodesCount & 1023) == 0 && (timeManager.stop() || (nodesLimit > 0 && nodesCount > nodesLimit)))
 		{
 			throw new TimeOutException();
 		}
@@ -689,12 +685,12 @@ public class AlphaBeta
 		return bestValue;
 	}
 
-	public Move nextMove(Board board, int targetDepth, long msLeft, int nodesLimit)
+	public Move nextMove(Board board, int targetDepth, TimeManager timeManager, int nodesLimit)
 	{
-		return nextMove(board, targetDepth, msLeft, nodesLimit, false);
+		return nextMove(board, targetDepth, timeManager, nodesLimit, false);
 	}
 
-	public Move nextMove(Board board, int targetDepth, long msLeft, int nodesLimit, boolean supressOutput)
+	public Move nextMove(Board board, int targetDepth, TimeManager timeManager, int nodesLimit, boolean supressOutput)
 	{
 		int currentScore = MIN_EVAL;
 		killers = new Move[MAX_PLY];
@@ -703,9 +699,7 @@ public class AlphaBeta
 		Move[] lastCompletePV = null;
 		this.nodesCount = 0;
 		this.nodesLimit = nodesLimit;
-		long startTime = System.nanoTime();
-		this.timeLimit = System.nanoTime() + msLeft * 1000000L;
-		long softTimeLimit = System.nanoTime() + msLeft * 500000L;
+		this.timeManager = timeManager;
 		this.history = new int[13][65];
 		this.whiteAccumulator = new NNUEAccumulator(network);
 		this.blackAccumulator = new NNUEAccumulator(network);
@@ -722,7 +716,7 @@ public class AlphaBeta
 
 		try
 		{
-			for (int i = 1; i <= targetDepth && (i < 4 || System.nanoTime() < softTimeLimit); i++)
+			for (int i = 1; i <= targetDepth && (i < 4 || !timeManager.stopIterativeDeepening()); i++)
 			{
 				rootDepth = i;
 				selDepth = 0;
@@ -736,8 +730,7 @@ public class AlphaBeta
 						lastCompletePV = pv[0].clone();
 						if (!supressOutput)
 						{
-							UCI.report(i, selDepth, nodesCount, currentScore,
-									(System.nanoTime() - startTime) / 1000000, lastCompletePV);
+							UCI.report(i, selDepth, nodesCount, currentScore, timeManager.timePassed(), lastCompletePV);
 						}
 						continue;
 					}
@@ -749,8 +742,7 @@ public class AlphaBeta
 
 				if (!supressOutput)
 				{
-					UCI.report(i, selDepth, nodesCount, currentScore,
-							(System.nanoTime() - startTime) / 1000000, lastCompletePV);
+					UCI.report(i, selDepth, nodesCount, currentScore, timeManager.timePassed(), lastCompletePV);
 				}
 			}
 		}
@@ -776,7 +768,6 @@ public class AlphaBeta
 	{
 		this.tt.clear();
 		this.nodesCount = 0;
-		this.timeLimit = 0;
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.killers = new Move[MAX_PLY];
