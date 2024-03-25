@@ -602,7 +602,7 @@ public class AlphaBeta
 //				r += isPV ? 0 : 1;
 				r -= inCheck ? 1 : 0;
 //
-//				r = Math.max(0, Math.min(depth - 1, r));
+				r = Math.max(0, Math.min(depth - 1, r));
 
 				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1, true);
 
