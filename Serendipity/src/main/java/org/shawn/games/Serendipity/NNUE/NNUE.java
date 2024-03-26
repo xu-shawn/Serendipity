@@ -92,7 +92,7 @@ public class NNUE
 
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them)
 	{
-		int eval = network.outputBias;
+		int eval = 0;
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
@@ -101,7 +101,9 @@ public class NNUE
 		}
 
 		eval *= SCALE;
-		eval /= QA * QB;
+		eval /= QA;
+		eval += network.outputBias;
+		eval /= QB;
 
 		return eval;
 	}
