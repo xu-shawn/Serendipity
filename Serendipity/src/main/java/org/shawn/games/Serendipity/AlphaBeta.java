@@ -577,8 +577,6 @@ public class AlphaBeta
 
 		int oldAlpha = alpha;
 
-//		Move ttMove = sortMoves(legalMoves, board, ply);
-
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 
 		MoveBackup lastMove = board.getBackup().peekLast();
@@ -625,18 +623,17 @@ public class AlphaBeta
 				else if (ply != 0 && move.equals(ttMove) && ss.excludedMove == null && depth > 4
 						&& currentMoveEntry.getDepth() > depth - 2
 						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
-						&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND)
-								|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)))
+						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND))
 				{
 					int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
 					int singularDepth = newdepth / 2;
 					ss.excludedMove = move;
-					int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, false);
+					int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, true);
 					ss.excludedMove = null;
 
 					if (singularValue < singularBeta)
 					{
-						extension = 1;
+						extension = 2;
 					}
 				}
 			}
