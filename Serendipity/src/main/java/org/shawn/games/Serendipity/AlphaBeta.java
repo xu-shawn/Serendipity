@@ -616,8 +616,6 @@ public class AlphaBeta
 
 			updateAccumulators(board, move, false);
 			board.doMove(move);
-			
-			inCheck = board.isKingAttacked();
 
 			int thisMoveEval = MIN_EVAL;
 
