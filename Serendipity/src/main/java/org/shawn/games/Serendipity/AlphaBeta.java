@@ -609,15 +609,15 @@ public class AlphaBeta
 				continue;
 			}
 
+			if (ss.inCheck)
+			{
+				newdepth++;
+			}
+
 			updateAccumulators(board, move, false);
 			board.doMove(move);
 			
 			inCheck = board.isKingAttacked();
-
-			if (inCheck)
-			{
-				newdepth++;
-			}
 
 			int thisMoveEval = MIN_EVAL;
 
