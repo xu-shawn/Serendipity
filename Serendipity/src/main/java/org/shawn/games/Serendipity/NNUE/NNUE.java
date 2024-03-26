@@ -93,16 +93,19 @@ public class NNUE
 
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them)
 	{
-		int eval = network.outputBias * QA;
+		int eval = 0;
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
 			eval += screlu(us.values[i]) * (int) network.L2Weights[i]
 					+ screlu(them.values[i]) * (int) network.L2Weights[i + HIDDEN_SIZE];
 		}
+		
+		eval /= QA;
+		eval += network.outputBias;
 
 		eval *= SCALE;
-		eval /= QA * QA * QB;
+		eval /= QA * QB;
 
 		return eval;
 	}
