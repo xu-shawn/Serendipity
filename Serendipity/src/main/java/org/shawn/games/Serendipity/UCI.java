@@ -186,7 +186,6 @@ public class UCI
 							"Nodes per second:\t" + totalNodes * 1000 / Math.max((timeEnd - timeBegin) / 1000000, 1));
 					break;
 				case "eval":
-
 					NNUEAccumulator whiteAccumulator = new NNUEAccumulator(network);
 					NNUEAccumulator blackAccumulator = new NNUEAccumulator(network);
 
