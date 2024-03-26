@@ -502,7 +502,7 @@ public class AlphaBeta
 
 		ss.ttHit = currentMoveEntry != null;
 
-		if ((!isPV ) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
+		if ((!isPV || ply > 1) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey() && ss.excludedMove == null)
 		{
 			int eval = currentMoveEntry.getEvaluation();
