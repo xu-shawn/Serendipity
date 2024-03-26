@@ -616,25 +616,28 @@ public class AlphaBeta
 
 			int extension = 0;
 
-			if (inCheck)
+			if (ply < rootDepth * 2)
 			{
-				extension = 1;
-			}
-			else if (ply != 0 && move.equals(ttMove) && ss.excludedMove == null && depth > 4
-					&& currentMoveEntry.getDepth() > depth - 2
-					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
-					&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND)
-							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)))
-			{
-				int singularBeta = currentMoveEntry.getEvaluation() - 72;
-				int singularDepth = newdepth / 2;
-				ss.excludedMove = move;
-				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, true);
-				ss.excludedMove = null;
-
-				if (singularValue < singularBeta)
+				if (inCheck)
 				{
 					extension = 1;
+				}
+				else if (ply != 0 && move.equals(ttMove) && ss.excludedMove == null && depth > 4
+						&& currentMoveEntry.getDepth() > depth - 2
+						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
+						&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND)
+								|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)))
+				{
+					int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
+					int singularDepth = newdepth / 2;
+					ss.excludedMove = move;
+					int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, true);
+					ss.excludedMove = null;
+
+					if (singularValue < singularBeta)
+					{
+						extension = 1;
+					}
 				}
 			}
 
