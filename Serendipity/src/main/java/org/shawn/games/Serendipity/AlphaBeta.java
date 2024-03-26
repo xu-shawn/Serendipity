@@ -690,6 +690,12 @@ public class AlphaBeta
 
 				if (alpha >= beta)
 				{
+					
+					if (ss.excludedMove != null)
+					{
+						return bestValue;
+					}
+					
 					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
 							bestMove);
 
@@ -720,6 +726,11 @@ public class AlphaBeta
 			{
 				quietMovesFailBeta.add(move);
 			}
+		}
+		
+		if (ss.excludedMove != null)
+		{
+			return bestValue;
 		}
 
 		if (alpha == oldAlpha)
