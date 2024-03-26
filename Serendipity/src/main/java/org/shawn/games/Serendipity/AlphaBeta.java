@@ -42,7 +42,7 @@ public class AlphaBeta
 	private NNUE network;
 	private NNUEAccumulator blackAccumulator;
 	private NNUEAccumulator whiteAccumulator;
-	
+
 	private class SearchState
 	{
 		public boolean inCheck;
@@ -51,7 +51,7 @@ public class AlphaBeta
 		public Move killer;
 		public Move excludedMove;
 	}
-	
+
 	private SearchState[] searchStack;
 
 	public AlphaBeta(NNUE network)
@@ -72,16 +72,16 @@ public class AlphaBeta
 
 		this.network = network;
 	}
-	
+
 	private SearchState[] newSearchStack()
 	{
 		SearchState[] newss = new SearchState[MAX_PLY + 10];
-		
+
 		for (int i = 0; i < newss.length; i++)
 		{
 			newss[i] = new SearchState();
 		}
-		
+
 		return newss;
 	}
 
@@ -499,11 +499,11 @@ public class AlphaBeta
 		}
 
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
-		
+
 		ss.ttHit = currentMoveEntry != null;
 
 		if ((!isPV || ply > 1) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
-				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey() && ss.excludedMove == null)
 		{
 			int eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getType())
@@ -547,7 +547,7 @@ public class AlphaBeta
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
-				&& staticEval >= beta && ply > 0)
+				&& staticEval >= beta && ply > 0 && ss.excludedMove != null)
 		{
 			int r = depth / 3 + 4;
 
@@ -599,6 +599,11 @@ public class AlphaBeta
 
 		for (Move move : legalMoves)
 		{
+			if (move.equals(ss.excludedMove))
+			{
+				continue;
+			}
+
 			ss.moveCount++;
 			int newdepth = depth - 1;
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
@@ -609,15 +614,35 @@ public class AlphaBeta
 				continue;
 			}
 
-			updateAccumulators(board, move, false);
-			board.doMove(move);
-			
-			inCheck = board.isKingAttacked();
+			int extension = 0;
 
 			if (inCheck)
 			{
-				newdepth++;
+				extension = 1;
 			}
+			else if (ply != 0 && move.equals(ttMove) && ss.excludedMove == null && depth > 4
+					&& currentMoveEntry.getDepth() > depth - 2
+					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
+					&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND)
+							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)))
+			{
+				int singularBeta = currentMoveEntry.getEvaluation() - 72;
+				int singularDepth = newdepth / 2;
+				ss.excludedMove = move;
+				int singularValue = -mainSearch(board, singularDepth, -(singularBeta + 1), -singularBeta, ply + 1,
+						true);
+				ss.excludedMove = null;
+
+				if (singularValue < singularBeta)
+				{
+					extension = 1;
+				}
+			}
+
+			newdepth += extension;
+
+			updateAccumulators(board, move, false);
+			board.doMove(move);
 
 			int thisMoveEval = MIN_EVAL;
 
@@ -626,7 +651,7 @@ public class AlphaBeta
 				int r = (int) (1.58 + Math.log(depth) * Math.log(ss.moveCount) / 2.19);
 
 //				r += isPV ? 0 : 1;
-				r -= inCheck ? 1 : 0;
+				r -= board.isKingAttacked() ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
