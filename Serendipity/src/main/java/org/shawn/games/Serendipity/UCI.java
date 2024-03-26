@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.shawn.games.Serendipity.NNUE.NNUE;
+import org.shawn.games.Serendipity.NNUE.NNUE.NNUEAccumulator;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
@@ -181,7 +182,29 @@ public class UCI
 					long timeEnd = System.nanoTime();
 					System.out.println("\nNodes searched:\t\t" + totalNodes);
 					System.out.println("Time spent (ms):\t" + (timeEnd - timeBegin) / 1000000);
-					System.out.println("Nodes per second:\t" + totalNodes * 1000 / Math.max((timeEnd - timeBegin) / 1000000, 1));
+					System.out.println(
+							"Nodes per second:\t" + totalNodes * 1000 / Math.max((timeEnd - timeBegin) / 1000000, 1));
+					break;
+				case "eval":
+					NNUEAccumulator whiteAccumulator = new NNUEAccumulator(network);
+					NNUEAccumulator blackAccumulator = new NNUEAccumulator(network);
+
+					// Initialize Accumulators
+					for (Square sq : Square.values())
+					{
+						if (!internalBoard.getPiece(sq).equals(Piece.NONE))
+						{
+							whiteAccumulator.addFeature(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.WHITE),
+									network);
+							blackAccumulator.addFeature(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.BLACK),
+									network);
+						}
+					}
+
+					System.out.println(internalBoard);
+					System.out.println(Side.WHITE.equals(internalBoard.getSideToMove())
+							? NNUE.evaluate(network, whiteAccumulator, blackAccumulator)
+							: NNUE.evaluate(network, blackAccumulator, whiteAccumulator));
 					break;
 				case "go":
 					Limits limits = new Limits();

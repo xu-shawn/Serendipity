@@ -13,7 +13,7 @@ public class NNUE
 	private static final int FEATURE_SIZE = 768;
 
 	private static final int SCALE = 400;
-	private static final int QA = 255;
+	private static final int QA = 181;
 	private static final int QB = 64;
 
 	private final short[][] L1Weights;
@@ -85,20 +85,24 @@ public class NNUE
 		networkData.close();
 	}
 
-	private static int crelu(short i)
+	private static int screlu(short i)
 	{
-		return Math.max(0, Math.min(i, QA));
+		int v = Math.max(0, Math.min(i, QA));
+		return v * v;
 	}
 
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them)
 	{
-		int eval = network.outputBias;
+		int eval = 0;
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
-			eval += crelu(us.values[i]) * (int) network.L2Weights[i]
-					+ crelu(them.values[i]) * (int) network.L2Weights[i + HIDDEN_SIZE];
+			eval += screlu(us.values[i]) * (int) network.L2Weights[i]
+					+ screlu(them.values[i]) * (int) network.L2Weights[i + HIDDEN_SIZE];
 		}
+		
+		eval /= QA;
+		eval += network.outputBias;
 
 		eval *= SCALE;
 		eval /= QA * QB;
