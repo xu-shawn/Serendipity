@@ -629,7 +629,7 @@ public class AlphaBeta
 				int singularBeta = currentMoveEntry.getEvaluation() - 72;
 				int singularDepth = newdepth / 2;
 				ss.excludedMove = move;
-				int singularValue = -mainSearch(board, singularDepth, -(singularBeta + 1), -singularBeta, ply + 1,
+				int singularValue = -mainSearch(board, singularDepth, -(singularBeta + 1), -singularBeta, ply,
 						true);
 				ss.excludedMove = null;
 
