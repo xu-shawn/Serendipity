@@ -503,7 +503,7 @@ public class AlphaBeta
 
 		ss.ttHit = currentMoveEntry != null;
 
-		if ((!isPV) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
+		if ((!isPV && ply > 1) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey() && ss.excludedMove == null)
 		{
 			int eval = currentMoveEntry.getEvaluation();
@@ -634,7 +634,7 @@ public class AlphaBeta
 
 					if (singularValue < singularBeta)
 					{
-						extension = 1;
+						extension = 0;
 					}
 				}
 			}
@@ -655,7 +655,7 @@ public class AlphaBeta
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
-				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1, true);
+				thisMoveEval = -mainSearch(board, depth - r + extension, -(alpha + 1), -alpha, ply + 1, true);
 
 				if (thisMoveEval > alpha)
 				{
