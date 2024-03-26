@@ -33,7 +33,6 @@ public class AlphaBeta
 	private int nodesLimit;
 
 	private Move[][] pv;
-	private Move[] killers;
 	private Move[][] counterMoves;
 	private int[][] history;
 
@@ -43,6 +42,17 @@ public class AlphaBeta
 	private NNUE network;
 	private NNUEAccumulator blackAccumulator;
 	private NNUEAccumulator whiteAccumulator;
+	
+	private class SearchState
+	{
+		public boolean inCheck;
+		public boolean ttHit;
+		public int moveCount;
+		public Move killer;
+		public Move excludedMove;
+	}
+	
+	private SearchState[] searchStack;
 
 	public AlphaBeta(NNUE network)
 	{
@@ -55,12 +65,24 @@ public class AlphaBeta
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
-		this.killers = new Move[MAX_PLY];
 		this.counterMoves = new Move[13][65];
 		this.history = new int[13][65];
 		this.rootDepth = 0;
+		this.searchStack = newSearchStack();
 
 		this.network = network;
+	}
+	
+	private SearchState[] newSearchStack()
+	{
+		SearchState[] newss = new SearchState[MAX_PLY + 10];
+		
+		for (int i = 0; i < newss.length; i++)
+		{
+			newss[i] = new SearchState();
+		}
+		
+		return newss;
 	}
 
 	private void updatePV(Move move, int ply)
@@ -374,15 +396,14 @@ public class AlphaBeta
 		}
 
 		int futilityBase;
-		boolean inCheck = false;
+		boolean inCheck = searchStack[ply].inCheck = board.isKingAttacked();
 		final List<Move> moves;
 
-		if (board.isKingAttacked())
+		if (inCheck)
 		{
 			bestScore = futilityBase = MIN_EVAL;
 			moves = board.legalMoves();
 			sortMoves(moves, board, ply);
-			inCheck = true;
 		}
 
 		else
@@ -450,11 +471,13 @@ public class AlphaBeta
 	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed)
 			throws TimeOutException
 	{
+		SearchState ss = searchStack[ply];
 		this.nodesCount++;
 		this.pv[ply][0] = null;
-		this.killers[ply + 2] = null;
-		int moveCount = 0;
+		this.searchStack[ply + 2].killer = null;
+		ss.moveCount = 0;
 		boolean isPV = beta - alpha > 1;
+		boolean inCheck = ss.inCheck = board.isKingAttacked();
 		Move bestMove = null;
 		int bestValue = MIN_EVAL;
 		this.selDepth = Math.max(this.selDepth, ply);
@@ -476,6 +499,8 @@ public class AlphaBeta
 		}
 
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
+		
+		ss.ttHit = currentMoveEntry != null;
 
 		if ((!isPV || ply > 1) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
@@ -513,12 +538,12 @@ public class AlphaBeta
 			staticEval = evaluate(board);
 		}
 
-		if (!isPV && !board.isKingAttacked() && depth < 7 && staticEval > beta && staticEval - depth * 1683 > beta)
+		if (!isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 1683 > beta)
 		{
 			return beta;
 		}
 
-		if (nullAllowed && beta < MATE_EVAL - 1024 && !board.isKingAttacked()
+		if (nullAllowed && beta < MATE_EVAL - 1024 && !inCheck
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
@@ -540,7 +565,7 @@ public class AlphaBeta
 
 		if (legalMoves.isEmpty())
 		{
-			if (board.isKingAttacked())
+			if (inCheck)
 			{
 				return -MATE_EVAL + ply;
 			}
@@ -563,7 +588,7 @@ public class AlphaBeta
 			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
 					.getTo().ordinal()];
 
-		MoveSort.sortMoves(legalMoves, ttMove, killers[ply], counterMove, history, board);
+		MoveSort.sortMoves(legalMoves, ttMove, ss.killer, counterMove, history, board);
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
@@ -574,7 +599,7 @@ public class AlphaBeta
 
 		for (Move move : legalMoves)
 		{
-			moveCount++;
+			ss.moveCount++;
 			int newdepth = depth - 1;
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
 
@@ -586,8 +611,8 @@ public class AlphaBeta
 
 			updateAccumulators(board, move, false);
 			board.doMove(move);
-
-			boolean inCheck = board.isKingAttacked();
+			
+			inCheck = board.isKingAttacked();
 
 			if (inCheck)
 			{
@@ -596,9 +621,9 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 1)
+			if (ss.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 1)
 			{
-				int r = (int) (1.58 + Math.log(depth) * Math.log(moveCount) / 2.19);
+				int r = (int) (1.58 + Math.log(depth) * Math.log(ss.moveCount) / 2.19);
 
 //				r += isPV ? 0 : 1;
 				r -= inCheck ? 1 : 0;
@@ -613,12 +638,12 @@ public class AlphaBeta
 				}
 			}
 
-			else if (!isPV || moveCount > 1)
+			else if (!isPV || ss.moveCount > 1)
 			{
 				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
 			}
 
-			if (isPV && (moveCount == 1 || thisMoveEval > alpha))
+			if (isPV && (ss.moveCount == 1 || thisMoveEval > alpha))
 			{
 				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
 			}
@@ -652,7 +677,7 @@ public class AlphaBeta
 
 					if (isQuiet)
 					{
-						killers[ply] = move;
+						ss.killer = move;
 
 						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] += depth * depth;
 
@@ -694,7 +719,6 @@ public class AlphaBeta
 	public Move nextMove(Board board, Limits limits, boolean supressOutput)
 	{
 		int currentScore = MIN_EVAL;
-		killers = new Move[MAX_PLY];
 		counterMoves = new Move[13][65];
 		clearPV();
 		Move[] lastCompletePV = null;
@@ -705,6 +729,7 @@ public class AlphaBeta
 		this.history = new int[13][65];
 		this.whiteAccumulator = new NNUEAccumulator(network);
 		this.blackAccumulator = new NNUEAccumulator(network);
+		this.searchStack = newSearchStack();
 
 		// Initialize Accumulators
 		for (Square sq : Square.values())
@@ -772,7 +797,7 @@ public class AlphaBeta
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
-		this.killers = new Move[MAX_PLY];
+		this.searchStack = newSearchStack();
 		this.counterMoves = new Move[13][65];
 		this.history = new int[13][65];
 		this.rootDepth = 0;
