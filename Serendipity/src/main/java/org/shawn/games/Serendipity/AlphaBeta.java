@@ -621,7 +621,7 @@ public class AlphaBeta
 					extension = 1;
 				}
 				else if (ply != 0 && move.equals(ttMove) && ss.excludedMove == null && depth > 6
-						&& currentMoveEntry.getDepth() > depth - 2
+						&& currentMoveEntry.getDepth() >= depth - 3
 						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
 						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND))
 				{
