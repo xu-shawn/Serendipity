@@ -476,6 +476,7 @@ public class AlphaBeta
 		this.pv[ply][0] = null;
 		this.searchStack[ply + 2].killer = null;
 		ss.moveCount = 0;
+		searchStack[ply + 1].excludedMove = null;
 		boolean isPV = beta - alpha > 1;
 		boolean inCheck = ss.inCheck = board.isKingAttacked();
 		Move bestMove = null;
@@ -502,7 +503,7 @@ public class AlphaBeta
 
 		ss.ttHit = currentMoveEntry != null;
 
-		if ((!isPV || ply > 1) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
+		if ((!isPV) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey() && ss.excludedMove == null)
 		{
 			int eval = currentMoveEntry.getEvaluation();
