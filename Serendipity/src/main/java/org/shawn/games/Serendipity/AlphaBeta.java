@@ -547,7 +547,7 @@ public class AlphaBeta
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
-				&& staticEval >= beta && ply > 0 && ss.excludedMove != null)
+				&& staticEval >= beta && ply > 0 && ss.excludedMove == null)
 		{
 			int r = depth / 3 + 4;
 
@@ -631,7 +631,7 @@ public class AlphaBeta
 					int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
 					int singularDepth = newdepth / 2;
 					ss.excludedMove = move;
-					int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, true);
+					int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, false);
 					ss.excludedMove = null;
 
 					if (singularValue < singularBeta)
