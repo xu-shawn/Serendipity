@@ -479,7 +479,7 @@ public class AlphaBeta
 		boolean isPV = beta - alpha > 1;
 		boolean inCheck = ss.inCheck = board.isKingAttacked();
 		Move bestMove = null;
-		int bestValue = MIN_EVAL;
+		int bestValue = ss.excludedMove == null ? MIN_EVAL : alpha;
 		this.selDepth = Math.max(this.selDepth, ply);
 
 		if ((nodesCount & 1023) == 0 && (timeManager.stop() || (nodesLimit > 0 && nodesCount > nodesLimit)))
