@@ -104,6 +104,39 @@ public class UCI
 		System.out.println("bestmove " + (bestMove == null ? "(none)" : bestMove));
 	}
 
+	private static long perft(Board board, int depth, int ply, boolean root)
+	{
+		if (depth == 0)
+		{
+			return 1;
+		}
+
+		long nodes = 0;
+		List<Move> moves = board.legalMoves();
+
+		for (Move move : moves)
+		{
+			board.doMove(move);
+
+			if (root)
+			{
+				long thisMoveNodes;
+				thisMoveNodes = perft(board, depth - 1, ply + 1, false);
+				System.out.println(move + ":\t" + thisMoveNodes);
+				nodes += thisMoveNodes;
+			}
+
+			else
+			{
+				nodes += perft(board, depth - 1, ply + 1, false);
+			}
+
+			board.undoMove();
+		}
+
+		return nodes;
+	}
+
 	public static void UCIMainLoop()
 	{
 		Scanner input = new Scanner(System.in);
@@ -134,6 +167,22 @@ public class UCI
 				case "quit":
 					input.close();
 					return;
+				case "perft":
+					if (fullCommand.length >= 2)
+					{
+						depth = Integer.parseInt(fullCommand[1]);
+					}
+					else
+					{
+						depth = 4;
+					}
+					long timeBegin = System.nanoTime();
+					long totalNodes = perft(internalBoard, depth, 0, true);
+					long timeEnd = System.nanoTime();
+					System.out.println("\nNodes searched:\t\t" + totalNodes);
+					System.out.println("Time spent (ms):\t" + (timeEnd - timeBegin) / 1000000);
+					System.out.println("Nodes per second:\t" + totalNodes * 1000 / Math.max((timeEnd - timeBegin) / 1000000, 1));
+					break;
 				case "go":
 					Limits limits = new Limits();
 
