@@ -658,7 +658,7 @@ public class AlphaBeta
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
-				thisMoveEval = -mainSearch(board, depth - r + extension, -(alpha + 1), -alpha, ply + 1, true);
+				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1, true);
 
 				if (thisMoveEval > alpha)
 				{
