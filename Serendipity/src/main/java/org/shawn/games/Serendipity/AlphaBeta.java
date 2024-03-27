@@ -503,7 +503,7 @@ public class AlphaBeta
 
 		ss.ttHit = currentMoveEntry != null;
 
-		if ((!isPV) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
+		if ((!isPV && ply > 1) && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey() && ss.excludedMove == null)
 		{
 			int eval = currentMoveEntry.getEvaluation();
@@ -624,22 +624,22 @@ public class AlphaBeta
 				{
 					extension = 1;
 				}
-				else if (ply != 0 && move.equals(ttMove) && ss.excludedMove == null && depth > 6
-						&& currentMoveEntry.getDepth() > depth - 2
-						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
-						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND))
-				{
-					int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
-					int singularDepth = newdepth / 2;
-					ss.excludedMove = move;
-					int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, true);
-					ss.excludedMove = null;
-
-					if (singularValue < singularBeta)
-					{
-						extension = 1;
-					}
-				}
+//				else if (ply != 0 && move.equals(ttMove) && ss.excludedMove == null && depth > 6
+//						&& currentMoveEntry.getDepth() > depth - 2
+//						&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
+//						&& !currentMoveEntry.getType().equals(TranspositionTable.NodeType.UPPERBOUND))
+//				{
+//					int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
+//					int singularDepth = newdepth / 2;
+//					ss.excludedMove = move;
+//					int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, true);
+//					ss.excludedMove = null;
+//
+//					if (singularValue < singularBeta)
+//					{
+//						extension = 1;
+//					}
+//				}
 			}
 
 			newdepth += extension;
