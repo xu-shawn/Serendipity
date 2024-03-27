@@ -606,6 +606,9 @@ public class AlphaBeta
 			ss.moveCount++;
 			int newdepth = depth - 1;
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
+			board.doMove(move);
+			boolean doesCheck = board.isKingAttacked();
+			board.undoMove();
 
 			if (alpha > -MATE_EVAL + 1024 && depth < 9
 					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -66 * depth : -21 * depth * depth))
@@ -617,7 +620,7 @@ public class AlphaBeta
 
 			if (ply < rootDepth * 2)
 			{
-				if (inCheck)
+				if (doesCheck)
 				{
 					extension = 1;
 				}
@@ -634,7 +637,7 @@ public class AlphaBeta
 
 					if (singularValue < singularBeta)
 					{
-						extension = 0;
+						extension = 1;
 					}
 				}
 			}
@@ -651,7 +654,7 @@ public class AlphaBeta
 				int r = (int) (1.58 + Math.log(depth) * Math.log(ss.moveCount) / 2.19);
 
 //				r += isPV ? 0 : 1;
-				r -= board.isKingAttacked() ? 1 : 0;
+				r -= doesCheck ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
