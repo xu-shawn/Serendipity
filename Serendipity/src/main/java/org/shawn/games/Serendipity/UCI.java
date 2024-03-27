@@ -47,7 +47,7 @@ public class UCI
 	public static void main(String args[])
 	{
 		options = new HashMap<>();
-		networkName = new NNUEOption("simple.nnue", "nnuefile");
+		networkName = new NNUEOption("nn.net", "nnuefile");
 
 		try
 		{

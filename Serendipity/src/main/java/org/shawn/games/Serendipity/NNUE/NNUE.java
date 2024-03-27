@@ -13,7 +13,7 @@ public class NNUE
 	private static final int FEATURE_SIZE = 768;
 
 	private static final int SCALE = 400;
-	private static final int QA = 181;
+	private static final int QA = 255;
 	private static final int QB = 64;
 
 	private final short[][] L1Weights;
