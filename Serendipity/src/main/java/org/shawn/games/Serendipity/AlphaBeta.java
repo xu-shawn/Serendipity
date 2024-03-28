@@ -133,8 +133,9 @@ public class AlphaBeta
 
 	public int evaluate(Board board)
 	{
-		return (Side.WHITE.equals(board.getSideToMove()) ? NNUE.evaluate(network, whiteAccumulator, blackAccumulator)
+		int v = (Side.WHITE.equals(board.getSideToMove()) ? NNUE.evaluate(network, whiteAccumulator, blackAccumulator)
 				: NNUE.evaluate(network, blackAccumulator, whiteAccumulator)) * 24;
+		return v * (200 - board.getHalfMoveCounter()) / 200;
 	}
 
 	private void sortMoves(List<Move> moves, Board board, int ply)
