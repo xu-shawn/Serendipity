@@ -153,8 +153,8 @@ public class UCI
 					System.out.println("readyok");
 					break;
 				case "uci":
-					System.out.println("id name weakEngine");
-					System.out.println("id author me");
+					System.out.println("id name Serendipity");
+					System.out.println("id author Shawn Xu");
 					for (var option : options.values())
 					{
 						System.out.println(option);
