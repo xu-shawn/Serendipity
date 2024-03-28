@@ -136,7 +136,6 @@ public class AlphaBeta
 		int v = (Side.WHITE.equals(board.getSideToMove())
 				? NNUE.evaluate(network, whiteAccumulator, blackAccumulator, NNUE.chooseOutputBucket(board))
 				: NNUE.evaluate(network, blackAccumulator, whiteAccumulator, NNUE.chooseOutputBucket(board))) * 24;
-		
 		return v;
 	}
 
