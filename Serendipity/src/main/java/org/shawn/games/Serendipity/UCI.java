@@ -203,8 +203,18 @@ public class UCI
 
 					System.out.println(internalBoard);
 					System.out.println(Side.WHITE.equals(internalBoard.getSideToMove())
-							? NNUE.evaluate(network, whiteAccumulator, blackAccumulator)
-							: NNUE.evaluate(network, blackAccumulator, whiteAccumulator));
+							? NNUE.evaluate(network, whiteAccumulator, blackAccumulator,
+									NNUE.chooseOutputBucket(internalBoard))
+							: NNUE.evaluate(network, blackAccumulator, whiteAccumulator,
+									NNUE.chooseOutputBucket(internalBoard)));
+
+					for (int i = 7; i >= 0; i--)
+					{
+						System.out.println(Side.WHITE.equals(internalBoard.getSideToMove())
+								? NNUE.evaluate(network, whiteAccumulator, blackAccumulator, i)
+								: NNUE.evaluate(network, blackAccumulator, whiteAccumulator, i));
+					}
+
 					break;
 				case "go":
 					Limits limits = new Limits();
