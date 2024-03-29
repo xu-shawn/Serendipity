@@ -11,6 +11,8 @@ public class NNUE
 
 	private static final int HIDDEN_SIZE = 1024;
 	private static final int FEATURE_SIZE = 768;
+	private static final int OUTPUT_BUCKETS = 8;
+	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
 
 	private static final int SCALE = 400;
 	private static final int QA = 181;
@@ -18,8 +20,8 @@ public class NNUE
 
 	private final short[][] L1Weights;
 	private final short[] L1Biases;
-	private final short[] L2Weights;
-	private final short outputBias;
+	private final short[][] L2Weights;
+	private final short outputBiases[];
 
 	public static class NNUEAccumulator
 	{
@@ -73,14 +75,22 @@ public class NNUE
 			L1Biases[i] = toLittleEndian(networkData.readShort());
 		}
 
-		L2Weights = new short[HIDDEN_SIZE * 2];
+		L2Weights = new short[HIDDEN_SIZE * 2][OUTPUT_BUCKETS];
 
 		for (int i = 0; i < HIDDEN_SIZE * 2; i++)
 		{
-			L2Weights[i] = toLittleEndian(networkData.readShort());
+			for (int j = 0; j < OUTPUT_BUCKETS; j++)
+			{
+				L2Weights[i][j] = toLittleEndian(networkData.readShort());
+			}
 		}
 
-		outputBias = toLittleEndian(networkData.readShort());
+		outputBiases = new short[OUTPUT_BUCKETS];
+
+		for (int i = 0; i < OUTPUT_BUCKETS; i++)
+		{
+			outputBiases[i] = toLittleEndian(networkData.readShort());
+		}
 
 		networkData.close();
 	}
@@ -91,23 +101,28 @@ public class NNUE
 		return v * v;
 	}
 
-	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them)
+	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
 	{
 		int eval = 0;
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
-			eval += screlu(us.values[i]) * (int) network.L2Weights[i]
-					+ screlu(them.values[i]) * (int) network.L2Weights[i + HIDDEN_SIZE];
+			eval += screlu(us.values[i]) * (int) network.L2Weights[i][chosenBucket]
+					+ screlu(them.values[i]) * (int) network.L2Weights[i + HIDDEN_SIZE][chosenBucket];
 		}
-		
+
 		eval /= QA;
-		eval += network.outputBias;
+		eval += network.outputBiases[chosenBucket];
 
 		eval *= SCALE;
 		eval /= QA * QB;
 
 		return eval;
+	}
+
+	public static int chooseOutputBucket(Board board)
+	{
+		return (Long.bitCount(board.getBitboard()) - 2) / DIVISOR;
 	}
 
 	public static int getIndex(Square square, Piece piece, Side perspective)
