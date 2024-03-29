@@ -15,8 +15,11 @@ public class UCI
 	private static Board internalBoard;
 	private static Map<String, UCIOption> options;
 	private static AlphaBeta engine;
-	private static StringOption networkName;
 	private static NNUE network;
+
+	private static StringOption networkName;
+	private static IntegerOption threads;
+	private static IntegerOption hash;
 
 	public static class NNUEOption extends StringOption
 	{
@@ -48,6 +51,8 @@ public class UCI
 	{
 		options = new HashMap<>();
 		networkName = new NNUEOption("simple.nnue", "nnuefile");
+		threads = new IntegerOption(1, 1, 1, "Threads");
+		hash = new IntegerOption(8, 8, 8, "Hash");
 
 		try
 		{
