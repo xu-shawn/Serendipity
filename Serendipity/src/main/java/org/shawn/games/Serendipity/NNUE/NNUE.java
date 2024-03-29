@@ -13,9 +13,23 @@ public class NNUE
 	private static final int FEATURE_SIZE = 768;
 	private static final int OUTPUT_BUCKETS = 8;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
+	private static final int INPUT_BUCKET_SIZE = 4;
+	// @formatter:off
+	private static final int[] INPUT_BUCKETS = new int[]
+	{
+			0, 0, 1, 1, 1, 1, 2, 2,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+	};
+	// @formatter:on
 
 	private static final int SCALE = 400;
-	private static final int QA = 181;
+	private static final int QA = 255;
 	private static final int QB = 64;
 
 	private final short[][] L1Weights;
@@ -25,26 +39,40 @@ public class NNUE
 
 	public static class NNUEAccumulator
 	{
-		private final short[] values;
+		private short[] values;
+		private int bucketIndex;
+		NNUE network;
 
-		public NNUEAccumulator(NNUE network)
+		public NNUEAccumulator(NNUE network, int bucketIndex)
+		{
+			this.network = network;
+			this.bucketIndex = bucketIndex;
+			values = network.L1Biases.clone();
+		}
+
+		public void reset()
 		{
 			values = network.L1Biases.clone();
 		}
 
-		public void addFeature(int featureIndex, NNUE network)
+		public void setBucketIndex(int bucketIndex)
+		{
+			this.bucketIndex = bucketIndex;
+		}
+
+		public void addFeature(int featureIndex)
 		{
 			for (int i = 0; i < HIDDEN_SIZE; i++)
 			{
-				values[i] += network.L1Weights[featureIndex][i];
+				values[i] += network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
 			}
 		}
 
-		public void subtractFeature(int featureIndex, NNUE network)
+		public void subtractFeature(int featureIndex)
 		{
 			for (int i = 0; i < HIDDEN_SIZE; i++)
 			{
-				values[i] -= network.L1Weights[featureIndex][i];
+				values[i] -= network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
 			}
 		}
 	}
@@ -58,9 +86,9 @@ public class NNUE
 	{
 		DataInputStream networkData = new DataInputStream(getClass().getResourceAsStream(filePath));
 
-		L1Weights = new short[FEATURE_SIZE][HIDDEN_SIZE];
+		L1Weights = new short[FEATURE_SIZE * INPUT_BUCKET_SIZE][HIDDEN_SIZE];
 
-		for (int i = 0; i < FEATURE_SIZE; i++)
+		for (int i = 0; i < FEATURE_SIZE * INPUT_BUCKET_SIZE; i++)
 		{
 			for (int j = 0; j < HIDDEN_SIZE; j++)
 			{
@@ -123,6 +151,18 @@ public class NNUE
 	public static int chooseOutputBucket(Board board)
 	{
 		return (Long.bitCount(board.getBitboard()) - 2) / DIVISOR;
+	}
+
+	public static int chooseInputBucket(Board board, Side side)
+	{
+		return side.equals(Side.WHITE)
+				? INPUT_BUCKETS[board.getKingSquare(side).ordinal()]
+				: INPUT_BUCKETS[board.getKingSquare(side).ordinal() ^ 0b111000];
+	}
+
+	public static int chooseInputBucket(int squareIndex)
+	{
+		return INPUT_BUCKETS[squareIndex];
 	}
 
 	public static int getIndex(Square square, Piece piece, Side perspective)

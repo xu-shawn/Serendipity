@@ -191,18 +191,18 @@ public class UCI
 							"Nodes per second:\t" + totalNodes * 1000 / Math.max((timeEnd - timeBegin) / 1000000, 1));
 					break;
 				case "eval":
-					NNUEAccumulator whiteAccumulator = new NNUEAccumulator(network);
-					NNUEAccumulator blackAccumulator = new NNUEAccumulator(network);
+					NNUEAccumulator whiteAccumulator = new NNUEAccumulator(network,
+							NNUE.chooseInputBucket(internalBoard, Side.WHITE));
+					NNUEAccumulator blackAccumulator = new NNUEAccumulator(network,
+							NNUE.chooseInputBucket(internalBoard, Side.BLACK));
 
 					// Initialize Accumulators
 					for (Square sq : Square.values())
 					{
 						if (!internalBoard.getPiece(sq).equals(Piece.NONE))
 						{
-							whiteAccumulator.addFeature(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.WHITE),
-									network);
-							blackAccumulator.addFeature(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.BLACK),
-									network);
+							whiteAccumulator.addFeature(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.WHITE));
+							blackAccumulator.addFeature(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.BLACK));
 						}
 					}
 
@@ -212,14 +212,6 @@ public class UCI
 									NNUE.chooseOutputBucket(internalBoard))
 							: NNUE.evaluate(network, blackAccumulator, whiteAccumulator,
 									NNUE.chooseOutputBucket(internalBoard)));
-
-					for (int i = 7; i >= 0; i--)
-					{
-						System.out.println(Side.WHITE.equals(internalBoard.getSideToMove())
-								? NNUE.evaluate(network, whiteAccumulator, blackAccumulator, i)
-								: NNUE.evaluate(network, blackAccumulator, whiteAccumulator, i));
-					}
-
 					break;
 				case "go":
 					Limits limits = new Limits();
