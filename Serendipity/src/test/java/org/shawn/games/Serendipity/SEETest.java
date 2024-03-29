@@ -285,7 +285,7 @@ public class SEETest
 			}
 
 			assertFalse(SEE.staticExchangeEvaluation(board, move, expectedValue + 1));
-//			assertTrue(SEE.staticExchangeEvaluation(board, move, expectedValue));
+			assertTrue(SEE.staticExchangeEvaluation(board, move, expectedValue));
 		}
 	}
 
