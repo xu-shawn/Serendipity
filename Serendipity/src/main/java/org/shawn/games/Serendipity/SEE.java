@@ -18,7 +18,7 @@ public class SEE
 		};
 	}
 	
-	static void printBitboard(long bb)
+	public static void printBitboard(long bb)
 	{
 		String binary = "0".repeat(Long.numberOfLeadingZeros(bb)) + Long.toBinaryString(bb);
 		for(int i = 0; i< 8; i++)
