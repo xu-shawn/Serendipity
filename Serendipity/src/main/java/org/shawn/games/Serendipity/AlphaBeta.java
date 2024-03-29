@@ -554,7 +554,7 @@ public class AlphaBeta
 			int r = depth / 3 + 4;
 
 			board.doNullMove();
-			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
+			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, true);
 			board.undoMove();
 
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
