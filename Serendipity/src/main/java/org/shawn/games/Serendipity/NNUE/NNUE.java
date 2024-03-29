@@ -15,7 +15,7 @@ public class NNUE
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
 
 	private static final int SCALE = 400;
-	private static final int QA = 181;
+	private static final int QA = 255;
 	private static final int QB = 64;
 
 	private final short[][] L1Weights;
