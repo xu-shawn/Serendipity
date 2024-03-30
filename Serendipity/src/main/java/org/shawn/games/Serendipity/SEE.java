@@ -18,7 +18,7 @@ public class SEE
 		};
 	}
 	
-	static void printBitboard(long bb)
+	public static void printBitboard(long bb)
 	{
 		String binary = "0".repeat(Long.numberOfLeadingZeros(bb)) + Long.toBinaryString(bb);
 		for(int i = 0; i< 8; i++)
@@ -39,7 +39,8 @@ public class SEE
 	public static int moveEstimatedValue(Board board, Move move)
 	{
 		// Start with the value of the piece on the target square
-		int value = !board.getPiece(move.getTo()).equals(Piece.NONE) ? SEEPieceValues(board.getPiece(move.getTo()).getPieceType())
+		int value = !board.getPiece(move.getTo()).equals(Piece.NONE)
+				? SEEPieceValues(board.getPiece(move.getTo()).getPieceType())
 				: 0;
 
 		// Factor in the new piece's value and remove our promoted pawn
@@ -48,7 +49,7 @@ public class SEE
 
 		// Target square is encoded as empty for enpass moves
 		else if (PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
-				&& board.getEnPassantTarget().equals(move.getTo()))
+				&& board.getEnPassant().equals(move.getTo()))
 			value = SEEPieceValues(PieceType.PAWN);
 
 		return value;
@@ -69,7 +70,7 @@ public class SEE
 
 		isPromotion = !Piece.NONE.equals(move.getPromotion());
 		isEnPassant = PieceType.PAWN.equals(board.getPiece(from).getPieceType())
-				&& board.getEnPassantTarget().equals(to);
+				&& board.getEnPassant().equals(to);
 
 		// Next victim is moved piece or promotion type
 		nextVictim = !isPromotion ? board.getPiece(from).getPieceType() : move.getPromotion().getPieceType();
@@ -100,7 +101,7 @@ public class SEE
 		occupied = board.getBitboard();
 		occupied = (occupied ^ (1L << from.ordinal())) | (1L << to.ordinal());
 		if (isEnPassant)
-			occupied ^= (1L << board.getEnPassantTarget().ordinal());
+			occupied ^= (1L << board.getEnPassant().ordinal());
 
 		// Get all pieces which attack the target square. And with occupied
 		// so that we do not let the same piece attack twice
@@ -149,12 +150,13 @@ public class SEE
 			}
 
 			else
-			{ 
+			{
 				assert (false);
 			}
 
 			// Remove this attacker from the occupied
-			occupied ^= (1L << Bitboard.bitScanForward(myAttackers & board.getBitboard(Piece.make(colour, nextVictim))));
+			occupied ^= (1L << Bitboard
+					.bitScanForward(myAttackers & board.getBitboard(Piece.make(colour, nextVictim))));
 
 			// A diagonal move may reveal bishop or queen attackers
 			if (nextVictim.equals(PieceType.PAWN) || nextVictim.equals(PieceType.BISHOP)
