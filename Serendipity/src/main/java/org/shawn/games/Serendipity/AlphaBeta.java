@@ -550,6 +550,34 @@ public class AlphaBeta
 			return DRAW_EVAL;
 		}
 
+		boolean isPV = beta - alpha > 1;
+
+		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
+
+		if (!isPV && currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+		{
+			int eval = currentMoveEntry.getEvaluation();
+			switch (currentMoveEntry.getType())
+			{
+				case EXACT:
+					return eval;
+				case UPPERBOUND:
+					if (eval <= alpha)
+					{
+						return eval;
+					}
+					break;
+				case LOWERBOUND:
+					if (eval > beta)
+					{
+						return eval;
+					}
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
+			}
+		}
+
 		int futilityBase;
 		boolean inCheck = searchStack[ply].inCheck = board.isKingAttacked();
 		final List<Move> moves;
