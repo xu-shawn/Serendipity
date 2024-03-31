@@ -43,7 +43,7 @@ public class AlphaBeta
 	private NNUEAccumulator blackAccumulator;
 	private NNUEAccumulator whiteAccumulator;
 
-	private static final IntegerOption a1 = new IntegerOption(3, 1, 8, "a2"); // Step: 0.5
+	private static final IntegerOption a1 = new IntegerOption(3, 1, 8, "a1"); // Step: 0.5
 	private static final IntegerOption a2 = new IntegerOption(4, -2, 6, "a2"); // Step: 0.5
 
 	private static final IntegerOption b1 = new IntegerOption(7, 1, 15, "b1"); // Step: 0.5
