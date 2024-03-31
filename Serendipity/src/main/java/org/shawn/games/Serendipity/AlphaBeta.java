@@ -43,6 +43,35 @@ public class AlphaBeta
 	private NNUEAccumulator blackAccumulator;
 	private NNUEAccumulator whiteAccumulator;
 
+	private static final IntegerOption a1 = new IntegerOption(3, 1, 8, "a2"); // Step: 0.5
+	private static final IntegerOption a2 = new IntegerOption(4, -2, 6, "a2"); // Step: 0.5
+
+	private static final IntegerOption b1 = new IntegerOption(7, 1, 15, "b1"); // Step: 0.5
+	private static final IntegerOption b2 = new IntegerOption(1683, 0, 3000, "b2"); // Step: 6
+
+	private static final IntegerOption c1 = new IntegerOption(1, -1, 15, "c1"); // Step: 0.5
+	private static final IntegerOption c2 = new IntegerOption(4, 0, 15, "c2"); // Step: 0.5
+	private static final IntegerOption c3 = new IntegerOption(2, 0, 9, "c3"); // Step: 0.5
+
+	private static final IntegerOption d1 = new IntegerOption(9, 0, 15, "d1"); // Step: 0.5
+	private static final IntegerOption d2 = new IntegerOption(66, 0, 300, "d2"); // Step: 5
+	private static final IntegerOption d3 = new IntegerOption(21, 0, 150, "d3"); // Step: 5
+
+	private static final IntegerOption e1 = new IntegerOption(3, 1, 8, "e1"); // Step: 0.5
+	private static final IntegerOption e2 = new IntegerOption(1, 0, 10, "e2"); // Step: 0.5
+	private static final IntegerOption e3 = new IntegerOption(1, -1, 10, "e3"); // Step: 0.5
+
+	private static final IntegerOption f1 = new IntegerOption(158, -300, 300, "f1"); // Step: 5
+	private static final IntegerOption f2 = new IntegerOption(219, -800, 800, "f2"); // Step: 5
+
+	private static final IntegerOption g1 = new IntegerOption(1, 1, 3, "g1"); // Step: 0.5
+
+	private static final IntegerOption h1 = new IntegerOption(38, 10, 500, "h1"); // Step: 5
+
+	private static final IntegerOption i1 = new IntegerOption(4986, 0, 20000, "i1"); // Step: 50
+
+	private static final IntegerOption asp = new IntegerOption(601, 12, 2400, "asp"); // Step: 6
+
 	private class SearchState
 	{
 		public boolean inCheck;
@@ -600,7 +629,7 @@ public class AlphaBeta
 				return alpha;
 			}
 
-			futilityBase = standPat + 4986;
+			futilityBase = standPat + i1.get();
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
 		}
@@ -721,7 +750,7 @@ public class AlphaBeta
 			staticEval = evaluate(board);
 		}
 
-		if (!isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 1683 > beta)
+		if (!isPV && !inCheck && depth < b1.get() && staticEval > beta && staticEval - depth * b2.get() > beta)
 		{
 			return beta;
 		}
@@ -732,7 +761,7 @@ public class AlphaBeta
 								.getBitboard(board.getSideToMove())
 				&& staticEval >= beta && ply > 0)
 		{
-			int r = depth / 3 + 4;
+			int r = depth / a1.get() + a2.get();
 
 			board.doNullMove();
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
@@ -775,9 +804,9 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 1 && depth > 4)
+		if (isPV && ttMove == null && rootDepth > c1.get() && depth > c2.get())
 		{
-			depth -= 2;
+			depth -= c3.get();
 		}
 
 		for (Move move : legalMoves)
@@ -786,8 +815,8 @@ public class AlphaBeta
 			int newdepth = depth - 1;
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
 
-			if (alpha > -MATE_EVAL + 1024 && depth < 9
-					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -66 * depth : -21 * depth * depth))
+			if (alpha > -MATE_EVAL + 1024 && depth < d1.get() && !SEE.staticExchangeEvaluation(board, move,
+					isQuiet ? -d2.get() * depth : -d3.get() * depth * depth))
 			{
 				continue;
 			}
@@ -804,12 +833,13 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (ss.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 1)
+			if (ss.moveCount > e1.get() + (ply == 0 ? e2.get() : 0) && depth > e3.get())
 			{
-				int r = (int) (1.58 + Math.log(depth) * Math.log(ss.moveCount) / 2.19);
+				int r = (int) ((double) f1.get() / 100f
+						+ Math.log(depth) * Math.log(ss.moveCount) / ((double) f2.get() / 100f));
 
 //				r += isPV ? 0 : 1;
-				r -= inCheck ? 1 : 0;
+				r -= inCheck ? g1.get() : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
@@ -855,7 +885,7 @@ public class AlphaBeta
 					for (Move quietMove : quietMovesFailBeta)
 					{
 						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth
-								* depth * 38 / 100;
+								* depth * h1.get() / 100;
 					}
 
 					if (isQuiet)
@@ -932,9 +962,8 @@ public class AlphaBeta
 				selDepth = 0;
 				if (i > 3)
 				{
-					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA,
-							currentScore + ASPIRATION_DELTA, 0, false);
-					if (newScore > currentScore - ASPIRATION_DELTA && newScore < currentScore + ASPIRATION_DELTA)
+					int newScore = mainSearch(board, i, currentScore - asp.get(), currentScore + asp.get(), 0, false);
+					if (newScore > currentScore - asp.get() && newScore < currentScore + asp.get())
 					{
 						currentScore = newScore;
 						lastCompletePV = pv[0].clone();
