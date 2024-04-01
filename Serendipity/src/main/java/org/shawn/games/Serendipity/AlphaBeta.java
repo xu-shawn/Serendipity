@@ -23,7 +23,7 @@ public class AlphaBeta
 
 	public static final int MAX_PLY = 256;
 
-	private final int ASPIRATION_DELTA = 601;
+	private final int ASPIRATION_DELTA = 603;
 
 	private final TranspositionTable tt;
 
@@ -600,7 +600,7 @@ public class AlphaBeta
 				return alpha;
 			}
 
-			futilityBase = standPat + 4986;
+			futilityBase = standPat + 4932;
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
 		}
@@ -721,7 +721,7 @@ public class AlphaBeta
 			staticEval = evaluate(board);
 		}
 
-		if (!isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 1683 > beta)
+		if (!isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 1687 > beta)
 		{
 			return beta;
 		}
@@ -775,7 +775,7 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 1 && depth > 4)
+		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
 		{
 			depth -= 2;
 		}
@@ -787,7 +787,7 @@ public class AlphaBeta
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
 
 			if (alpha > -MATE_EVAL + 1024 && depth < 9
-					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -66 * depth : -21 * depth * depth))
+					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
 			{
 				continue;
 			}
@@ -804,9 +804,9 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (ss.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 1)
+			if (ss.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
-				int r = (int) (1.58 + Math.log(depth) * Math.log(ss.moveCount) / 2.19);
+				int r = (int) (1.60 + Math.log(depth) * Math.log(ss.moveCount) / 2.17);
 
 //				r += isPV ? 0 : 1;
 				r -= inCheck ? 1 : 0;
@@ -855,7 +855,7 @@ public class AlphaBeta
 					for (Move quietMove : quietMovesFailBeta)
 					{
 						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth
-								* depth * 38 / 100;
+								* depth * 37 / 100;
 					}
 
 					if (isQuiet)
