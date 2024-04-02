@@ -854,15 +854,18 @@ public class AlphaBeta
 
 					for (Move quietMove : quietMovesFailBeta)
 					{
-						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] -= depth
-								* depth * 37 / 100;
+						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] = Math
+								.max(history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()]
+										- depth * depth, -32768);
 					}
 
 					if (isQuiet)
 					{
 						ss.killer = move;
 
-						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] += depth * depth;
+						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] = Math
+								.min(history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()]
+										+ depth * depth, 32767);
 
 						if (lastMove != null)
 						{
@@ -909,7 +912,13 @@ public class AlphaBeta
 		this.nodesLimit = limits.getNodes();
 		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
 				board.getMoveCounter());
-		this.history = new int[13][65];
+		for (int i = 0;i < 13; i ++)
+		{
+			for (int j = 0; j < 65; j ++)
+			{
+				history[i][j] /= 5;
+			}
+		}
 		this.whiteAccumulator = new NNUEAccumulator(network, NNUE.chooseInputBucket(board, Side.WHITE));
 		this.blackAccumulator = new NNUEAccumulator(network, NNUE.chooseInputBucket(board, Side.BLACK));
 		this.searchStack = newSearchStack();
