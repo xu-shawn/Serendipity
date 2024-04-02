@@ -856,7 +856,7 @@ public class AlphaBeta
 					{
 						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] = Math
 								.max(history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()]
-										- depth * depth * 37 / 100, -32768);
+										- depth * depth, -32768);
 					}
 
 					if (isQuiet)
