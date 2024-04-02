@@ -545,7 +545,7 @@ public class AlphaBeta
 
 		int bestScore;
 
-		if (board.isRepetition() || board.getHalfMoveCounter() >= 100)
+		if (board.isRepetition() || board.getHalfMoveCounter() > 100)
 		{
 			return DRAW_EVAL;
 		}
@@ -670,7 +670,7 @@ public class AlphaBeta
 			throw new TimeOutException();
 		}
 
-		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3) || board.getHalfMoveCounter() >= 100)
+		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3) || board.getHalfMoveCounter() > 100)
 		{
 			return DRAW_EVAL;
 		}
