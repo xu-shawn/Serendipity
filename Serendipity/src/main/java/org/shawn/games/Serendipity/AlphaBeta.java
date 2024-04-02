@@ -912,6 +912,13 @@ public class AlphaBeta
 		this.nodesLimit = limits.getNodes();
 		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
 				board.getMoveCounter());
+		for (int i = 0;i < 13; i ++)
+		{
+			for (int j = 0; j < 65; j ++)
+			{
+				history[i][j] /= 5;
+			}
+		}
 		this.whiteAccumulator = new NNUEAccumulator(network, NNUE.chooseInputBucket(board, Side.WHITE));
 		this.blackAccumulator = new NNUEAccumulator(network, NNUE.chooseInputBucket(board, Side.BLACK));
 		this.searchStack = newSearchStack();
