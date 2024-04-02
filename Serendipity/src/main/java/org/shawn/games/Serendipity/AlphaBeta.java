@@ -579,6 +579,7 @@ public class AlphaBeta
 		}
 
 		int futilityBase;
+		int moveCount = 0;
 		boolean inCheck = searchStack[ply].inCheck = board.isKingAttacked();
 		final List<Move> moves;
 
@@ -607,6 +608,7 @@ public class AlphaBeta
 
 		for (Move move : moves)
 		{
+			moveCount ++;
 			if (!inCheck && !board.isMoveLegal(move, false))
 			{
 				continue;
@@ -628,8 +630,18 @@ public class AlphaBeta
 
 			updateAccumulators(board, move, false);
 			board.doMove(move);
+			
+			int score = MIN_EVAL;
 
-			int score = -quiesce(board, -beta, -alpha, ply + 1);
+			if(moveCount > 1)
+			{
+				score = -quiesce(board, -(alpha + 1), -alpha, ply + 1);
+			}
+			
+			if (moveCount <= 1 || score > alpha)
+			{
+				score = -quiesce(board, -beta, -alpha, ply + 1);
+			}
 
 			board.undoMove();
 			updateAccumulators(board, move, true);
