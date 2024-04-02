@@ -865,7 +865,7 @@ public class AlphaBeta
 
 						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] = Math
 								.min(history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()]
-										- depth * depth, 32767);
+										+ depth * depth, 32767);
 
 						if (lastMove != null)
 						{
