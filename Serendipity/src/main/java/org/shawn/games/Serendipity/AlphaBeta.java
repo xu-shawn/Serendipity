@@ -786,10 +786,13 @@ public class AlphaBeta
 			int newdepth = depth - 1;
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
 
-			if (alpha > -MATE_EVAL + 1024 && depth < 9
-					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
+			if (!isPV)
 			{
-				continue;
+				if (alpha > -MATE_EVAL + 1024 && depth < 9
+						&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
+				{
+					continue;
+				}
 			}
 
 			updateAccumulators(board, move, false);
@@ -912,9 +915,9 @@ public class AlphaBeta
 		this.nodesLimit = limits.getNodes();
 		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
 				board.getMoveCounter());
-		for (int i = 0;i < 13; i ++)
+		for (int i = 0; i < 13; i++)
 		{
-			for (int j = 0; j < 65; j ++)
+			for (int j = 0; j < 65; j++)
 			{
 				history[i][j] /= 5;
 			}
