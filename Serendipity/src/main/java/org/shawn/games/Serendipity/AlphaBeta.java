@@ -779,6 +779,8 @@ public class AlphaBeta
 		{
 			depth -= 2;
 		}
+		
+		boolean doLateMovePruning = false;
 
 		for (Move move : legalMoves)
 		{
