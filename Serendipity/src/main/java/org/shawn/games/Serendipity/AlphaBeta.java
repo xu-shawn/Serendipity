@@ -793,6 +793,11 @@ public class AlphaBeta
 			{
 				continue;
 			}
+			
+			if (!isPV && depth < 7 && isQuiet && ss.moveCount > 3 + depth * depth)
+			{
+				continue;
+			}
 
 			updateAccumulators(board, move, false);
 			board.doMove(move);
