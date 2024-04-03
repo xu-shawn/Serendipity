@@ -60,7 +60,7 @@ public class MoveSort
 		}
 
 		if (!board.getPiece(move.getTo()).equals(Piece.NONE)
-				|| (PieceType.PAWN.equals(board.getPiece(move.getTo()).getPieceType())
+				|| (PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 						&& move.getTo() == board.getEnPassant()))
 		{
 			int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;

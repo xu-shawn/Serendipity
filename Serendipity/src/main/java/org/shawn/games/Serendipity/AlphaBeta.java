@@ -785,7 +785,7 @@ public class AlphaBeta
 			ss.moveCount++;
 			int newdepth = depth - 1;
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
-					&& !(PieceType.PAWN.equals(board.getPiece(move.getTo()).getPieceType())
+					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
 			if (alpha > -MATE_EVAL + 1024 && depth < 9
