@@ -42,6 +42,20 @@ public class AlphaBeta
 	private NNUE network;
 	private NNUEAccumulator blackAccumulator;
 	private NNUEAccumulator whiteAccumulator;
+	
+	private static int[][] lmrBaseReduction;
+	
+	static
+	{
+		lmrBaseReduction = new int[256][256];
+		for (int depth = 0; depth < 256; depth ++)
+		{
+			for (int moveCount = 0; moveCount < 256; moveCount ++)
+			{
+				lmrBaseReduction[depth][moveCount] = (int)(1.60 + Math.log(depth) * Math.log(moveCount) / 2.17);
+			}
+		}
+	}
 
 	private class SearchState
 	{
@@ -650,11 +664,6 @@ public class AlphaBeta
 
 		return bestScore;
 	}
-	
-	private int getLMRBaseReduction(int depth, int moveCount)
-	{
-		return (int)(1.60 + Math.log(depth) * Math.log(moveCount) / 2.17);
-	}
 
 	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed)
 			throws TimeOutException
@@ -793,7 +802,7 @@ public class AlphaBeta
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 			
-			int lmrDepth = depth - getLMRBaseReduction(depth, ss.moveCount);
+			int lmrDepth = depth - lmrBaseReduction[depth][ss.moveCount];
 
 			if (isQuiet && !isPV && !inCheck && depth <= 6 && ss.moveCount > 3 + depth * depth && alpha > -MATE_EVAL + 1024)
 			{
@@ -820,7 +829,7 @@ public class AlphaBeta
 
 			if (ss.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
-				int r = getLMRBaseReduction(depth, ss.moveCount);
+				int r = (int)(1.60 + Math.log(depth) * Math.log(ss.moveCount) / 2.17);
 
 //				r += isPV ? 0 : 1;
 				r -= inCheck ? 1 : 0;
