@@ -784,7 +784,14 @@ public class AlphaBeta
 		{
 			ss.moveCount++;
 			int newdepth = depth - 1;
-			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()));
+			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
+					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
+							&& move.getTo() == board.getEnPassant());
+
+			if (isQuiet && !isPV && !inCheck && depth <= 6 && ss.moveCount > 3 + depth * depth && alpha > -MATE_EVAL + 1024)
+			{
+				continue;
+			}
 
 			if (alpha > -MATE_EVAL + 1024 && depth < 9
 					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
@@ -912,9 +919,9 @@ public class AlphaBeta
 		this.nodesLimit = limits.getNodes();
 		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
 				board.getMoveCounter());
-		for (int i = 0;i < 13; i ++)
+		for (int i = 0; i < 13; i++)
 		{
-			for (int j = 0; j < 65; j ++)
+			for (int j = 0; j < 65; j++)
 			{
 				history[i][j] /= 5;
 			}
