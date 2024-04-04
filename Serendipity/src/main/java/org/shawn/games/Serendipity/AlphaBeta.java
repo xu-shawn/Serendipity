@@ -42,6 +42,20 @@ public class AlphaBeta
 	private NNUE network;
 	private NNUEAccumulator blackAccumulator;
 	private NNUEAccumulator whiteAccumulator;
+	
+	private static int[][] lmrBaseReduction;
+	
+	static
+	{
+		lmrBaseReduction = new int[MAX_PLY + 1][512];
+		for (int depth = 0; depth <= MAX_PLY; depth ++)
+		{
+			for (int moveCount = 0; moveCount < 512; moveCount ++)
+			{
+				lmrBaseReduction[depth][moveCount] = (int)(1.60 + Math.log(depth) * Math.log(moveCount) / 2.17);
+			}
+		}
+	}
 
 	private class SearchState
 	{
@@ -813,7 +827,7 @@ public class AlphaBeta
 
 			if (ss.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
-				int r = (int) (1.60 + Math.log(depth) * Math.log(ss.moveCount) / 2.17);
+				int r = lmrBaseReduction[depth][ss.moveCount];
 
 //				r += isPV ? 0 : 1;
 				r -= inCheck ? 1 : 0;
