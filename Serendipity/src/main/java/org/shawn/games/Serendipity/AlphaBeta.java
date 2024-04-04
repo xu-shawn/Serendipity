@@ -47,10 +47,10 @@ public class AlphaBeta
 	
 	static
 	{
-		lmrBaseReduction = new int[MAX_PLY + 1][MAX_PLY + 1];
+		lmrBaseReduction = new int[MAX_PLY + 1][1024];
 		for (int depth = 0; depth <= MAX_PLY; depth ++)
 		{
-			for (int moveCount = 0; moveCount <= MAX_PLY; moveCount ++)
+			for (int moveCount = 0; moveCount < 1024; moveCount ++)
 			{
 				lmrBaseReduction[depth][moveCount] = (int)(1.60 + Math.log(depth) * Math.log(moveCount) / 2.17);
 			}
