@@ -792,10 +792,8 @@ public class AlphaBeta
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
-			
-			int lmrDepth = depth - getLMRBaseReduction(depth, ss.moveCount);
 
-			if (isQuiet && !isPV && !inCheck && depth <= 6 && ss.moveCount > 3 + lmrDepth * lmrDepth && alpha > -MATE_EVAL + 1024)
+			if (isQuiet && !isPV && !inCheck && depth <= 6 && ss.moveCount > 3 + depth * depth && alpha > -MATE_EVAL + 1024)
 			{
 				continue;
 			}
