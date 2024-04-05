@@ -1,6 +1,6 @@
 package org.shawn.games.Serendipity;
 
-import org.shawn.games.Serendipity.NNUE.NNUE;
+import org.shawn.games.Serendipity.NNUE.*;
 import org.shawn.games.Serendipity.NNUE.NNUE.NNUEAccumulator;
 
 import com.github.bhlangonijr.chesslib.*;
@@ -14,8 +14,7 @@ import org.junit.Test;
 
 public class AccumulatorTest
 {
-	NNUEAccumulator whiteAccumulator;
-	NNUEAccumulator blackAccumulator;
+	AccumulatorManager accumulators;
 	NNUE network;
 	Board board;
 
@@ -23,133 +22,23 @@ public class AccumulatorTest
 	{
 		network = new NNUE("/simple.nnue");
 		board = new Board();
-		whiteAccumulator = new NNUEAccumulator(network, NNUE.chooseInputBucket(board, Side.WHITE));
-		blackAccumulator = new NNUEAccumulator(network, NNUE.chooseInputBucket(board, Side.BLACK));
-	}
-	
-	private void fullAccumulatorUpdate(Board board)
-	{
-		whiteAccumulator.reset();
-		blackAccumulator.reset();
-		whiteAccumulator.setBucketIndex(NNUE.chooseInputBucket(board.getKingSquare(Side.WHITE).ordinal()));
-		blackAccumulator.setBucketIndex(NNUE.chooseInputBucket(board.getKingSquare(Side.BLACK).ordinal() ^ 0b111000));
-		
-		for (Square sq : Square.values())
-		{
-			if (!board.getPiece(sq).equals(Piece.NONE))
-			{
-				whiteAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK));
-			}
-		}
-	}
-
-	private void updateAccumulators(Board board, Move move, boolean undo)
-	{
-		if (undo)
-		{
-			if (board.getPiece(move.getFrom()).getPieceType().equals(PieceType.KING))
-			{
-				fullAccumulatorUpdate(board);
-				return;
-			}
-
-			whiteAccumulator.addFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE));
-			blackAccumulator.addFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.BLACK));
-
-			if (move.getPromotion().equals(Piece.NONE))
-			{
-				whiteAccumulator
-						.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.WHITE));
-				blackAccumulator
-						.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.BLACK));
-			}
-
-			else
-			{
-				whiteAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.WHITE));
-				blackAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.BLACK));
-			}
-
-			if (!board.getPiece(move.getTo()).equals(Piece.NONE))
-			{
-				whiteAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.BLACK));
-			}
-
-			else if (move.getTo().equals(board.getEnPassant())
-					&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
-			{
-				whiteAccumulator.addFeature(NNUE.getIndex(board.getEnPassantTarget(),
-						board.getPiece(board.getEnPassantTarget()), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(board.getEnPassantTarget(),
-						board.getPiece(board.getEnPassantTarget()), Side.BLACK));
-			}
-		}
-
-		else
-		{
-			if (board.getPiece(move.getFrom()).getPieceType().equals(PieceType.KING))
-			{
-				board.doMove(move);
-				fullAccumulatorUpdate(board);
-				board.undoMove();
-				return;
-			}
-
-			whiteAccumulator.subtractFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE));
-			blackAccumulator.subtractFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.BLACK));
-
-			if (move.getPromotion().equals(Piece.NONE))
-			{
-				whiteAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.BLACK));
-			}
-
-			else
-			{
-				whiteAccumulator.addFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.BLACK));
-			}
-
-			if (!board.getPiece(move.getTo()).equals(Piece.NONE))
-			{
-				whiteAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.WHITE));
-				blackAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.BLACK));
-			}
-
-			else if (move.getTo().equals(board.getEnPassant())
-					&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
-			{
-				whiteAccumulator.subtractFeature(NNUE.getIndex(board.getEnPassantTarget(),
-						board.getPiece(board.getEnPassantTarget()), Side.WHITE));
-				blackAccumulator.subtractFeature(NNUE.getIndex(board.getEnPassantTarget(),
-						board.getPiece(board.getEnPassantTarget()), Side.BLACK));
-			}
-		}
+		accumulators = new AccumulatorManager(network, board);
 	}
 
 	private int evaluate(Board board)
 	{
 		int v = (Side.WHITE.equals(board.getSideToMove())
-				? NNUE.evaluate(network, whiteAccumulator, blackAccumulator, NNUE.chooseOutputBucket(board))
-				: NNUE.evaluate(network, blackAccumulator, whiteAccumulator, NNUE.chooseOutputBucket(board))) * 24;
+				? NNUE.evaluate(network, accumulators.getWhiteAccumulator(), accumulators.getBlackAccumulator(),
+						NNUE.chooseOutputBucket(board))
+				: NNUE.evaluate(network, accumulators.getBlackAccumulator(), accumulators.getWhiteAccumulator(),
+						NNUE.chooseOutputBucket(board)))
+				* 24;
 		return v;
 	}
 
 	@Test
 	public void testAccumulators()
 	{
-		// Initialize Accumulators
-		for (Square sq : Square.values())
-		{
-			if (!board.getPiece(sq).equals(Piece.NONE))
-			{
-				whiteAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK));
-			}
-		}
-
 		int eval1 = evaluate(board);
 
 		// 1. e4 d5 2. e5 f5 3. exf6 e5 4. fxg7 Bxg7 5. Ne2 Ne7 6. d3 O-O 7. Be3 c6 8.
@@ -166,31 +55,20 @@ public class AccumulatorTest
 
 		for (Move move : testGame)
 		{
-			updateAccumulators(board, move, false);
+			accumulators.updateAccumulators(board, move, false);
 			board.doMove(move);
 		}
 
 		int eval2 = evaluate(board);
-
-		whiteAccumulator = new NNUEAccumulator(network, NNUE.chooseInputBucket(board, Side.WHITE));
-		blackAccumulator = new NNUEAccumulator(network, NNUE.chooseInputBucket(board, Side.BLACK));
-
-		// Initialize Accumulators
-		for (Square sq : Square.values())
-		{
-			if (!board.getPiece(sq).equals(Piece.NONE))
-			{
-				whiteAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK));
-			}
-		}
+		
+		accumulators = new AccumulatorManager(network, board);
 
 		int eval3 = evaluate(board);
 
 		for (int i = testGame.length - 1; i >= 0; i--)
 		{
 			board.undoMove();
-			updateAccumulators(board, testGame[i], true);
+			accumulators.updateAccumulators(board, testGame[i], true);
 		}
 
 		int eval4 = evaluate(board);

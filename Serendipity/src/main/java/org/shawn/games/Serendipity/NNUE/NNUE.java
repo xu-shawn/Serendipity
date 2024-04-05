@@ -60,7 +60,7 @@ public class NNUE
 			this.bucketIndex = bucketIndex;
 		}
 
-		public void addFeature(int featureIndex)
+		public void add(int featureIndex)
 		{
 			for (int i = 0; i < HIDDEN_SIZE; i++)
 			{
@@ -68,11 +68,52 @@ public class NNUE
 			}
 		}
 
-		public void subtractFeature(int featureIndex)
+		public void sub(int featureIndex)
 		{
 			for (int i = 0; i < HIDDEN_SIZE; i++)
 			{
 				values[i] -= network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
+			}
+		}
+
+		public void addsub(int featureIndexToAdd, int featureIndexToSubtract)
+		{
+			for (int i = 0; i < HIDDEN_SIZE; i++)
+			{
+				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
+						- network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
+			}
+		}
+
+		public void addaddsub(int featureIndexToAdd1, int featureIndexToAdd2, int featureIndexToSubtract)
+		{
+			for (int i = 0; i < HIDDEN_SIZE; i++)
+			{
+				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
+						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
+						- network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
+			}
+		}
+
+		public void addsubsub(int featureIndexToAdd, int featureIndexToSubtract1, int featureIndexToSubtract2)
+		{
+			for (int i = 0; i < HIDDEN_SIZE; i++)
+			{
+				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
+						- network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
+						- network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
+			}
+		}
+
+		public void addaddsubsub(int featureIndexToAdd1, int featureIndexToAdd2, int featureIndexToSubtract1,
+				int featureIndexToSubtract2)
+		{
+			for (int i = 0; i < HIDDEN_SIZE; i++)
+			{
+				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
+						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
+						- network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
+						- network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
 			}
 		}
 	}
@@ -155,8 +196,7 @@ public class NNUE
 
 	public static int chooseInputBucket(Board board, Side side)
 	{
-		return side.equals(Side.WHITE)
-				? INPUT_BUCKETS[board.getKingSquare(side).ordinal()]
+		return side.equals(Side.WHITE) ? INPUT_BUCKETS[board.getKingSquare(side).ordinal()]
 				: INPUT_BUCKETS[board.getKingSquare(side).ordinal() ^ 0b111000];
 	}
 
