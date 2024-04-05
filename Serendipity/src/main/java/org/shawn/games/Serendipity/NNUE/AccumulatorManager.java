@@ -128,10 +128,9 @@ public class AccumulatorManager
 
 	private void efficientlyUpdate(Board board, Move move, Side side, boolean undo)
 	{
-
 		NNUE.NNUEAccumulator accumulator = Side.WHITE.equals(side) ? whiteAccumulator : blackAccumulator;
-
-		if (undo)
+		
+    if (undo)
 		{
 			if (board.getContext().isKingSideCastle(move)
 					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_SIDE)
@@ -157,7 +156,6 @@ public class AccumulatorManager
 					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.QUEEN_SIDE)
 							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
 			{
-
 				accumulator.addaddsubsub(
 						NNUE.getIndex(board.getContext()
 								.getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
@@ -229,7 +227,6 @@ public class AccumulatorManager
 					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_SIDE)
 							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
 			{
-
 				accumulator.addaddsubsub(
 						NNUE.getIndex(board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE)
 								.getTo(), Piece.make(board.getSideToMove(), PieceType.ROOK), side),
@@ -250,7 +247,6 @@ public class AccumulatorManager
 					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.QUEEN_SIDE)
 							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
 			{
-
 				accumulator.addaddsubsub(
 						NNUE.getIndex(board.getContext()
 								.getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
