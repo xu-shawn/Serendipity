@@ -38,8 +38,8 @@ public class AccumulatorTest
 		{
 			if (!board.getPiece(sq).equals(Piece.NONE))
 			{
-				whiteAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK));
+				whiteAccumulator.add(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE));
+				blackAccumulator.add(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK));
 			}
 		}
 	}
@@ -54,35 +54,35 @@ public class AccumulatorTest
 				return;
 			}
 
-			whiteAccumulator.addFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE));
-			blackAccumulator.addFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.BLACK));
+			whiteAccumulator.add(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE));
+			blackAccumulator.add(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.BLACK));
 
 			if (move.getPromotion().equals(Piece.NONE))
 			{
 				whiteAccumulator
-						.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.WHITE));
+						.sub(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.WHITE));
 				blackAccumulator
-						.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.BLACK));
+						.sub(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.BLACK));
 			}
 
 			else
 			{
-				whiteAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.WHITE));
-				blackAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.BLACK));
+				whiteAccumulator.sub(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.WHITE));
+				blackAccumulator.sub(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.BLACK));
 			}
 
 			if (!board.getPiece(move.getTo()).equals(Piece.NONE))
 			{
-				whiteAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.BLACK));
+				whiteAccumulator.add(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.WHITE));
+				blackAccumulator.add(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.BLACK));
 			}
 
 			else if (move.getTo().equals(board.getEnPassant())
 					&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
 			{
-				whiteAccumulator.addFeature(NNUE.getIndex(board.getEnPassantTarget(),
+				whiteAccumulator.add(NNUE.getIndex(board.getEnPassantTarget(),
 						board.getPiece(board.getEnPassantTarget()), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(board.getEnPassantTarget(),
+				blackAccumulator.add(NNUE.getIndex(board.getEnPassantTarget(),
 						board.getPiece(board.getEnPassantTarget()), Side.BLACK));
 			}
 		}
@@ -97,33 +97,33 @@ public class AccumulatorTest
 				return;
 			}
 
-			whiteAccumulator.subtractFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE));
-			blackAccumulator.subtractFeature(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.BLACK));
+			whiteAccumulator.sub(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.WHITE));
+			blackAccumulator.sub(NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), Side.BLACK));
 
 			if (move.getPromotion().equals(Piece.NONE))
 			{
-				whiteAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.BLACK));
+				whiteAccumulator.add(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.WHITE));
+				blackAccumulator.add(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), Side.BLACK));
 			}
 
 			else
 			{
-				whiteAccumulator.addFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.BLACK));
+				whiteAccumulator.add(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.WHITE));
+				blackAccumulator.add(NNUE.getIndex(move.getTo(), move.getPromotion(), Side.BLACK));
 			}
 
 			if (!board.getPiece(move.getTo()).equals(Piece.NONE))
 			{
-				whiteAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.WHITE));
-				blackAccumulator.subtractFeature(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.BLACK));
+				whiteAccumulator.sub(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.WHITE));
+				blackAccumulator.sub(NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), Side.BLACK));
 			}
 
 			else if (move.getTo().equals(board.getEnPassant())
 					&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
 			{
-				whiteAccumulator.subtractFeature(NNUE.getIndex(board.getEnPassantTarget(),
+				whiteAccumulator.sub(NNUE.getIndex(board.getEnPassantTarget(),
 						board.getPiece(board.getEnPassantTarget()), Side.WHITE));
-				blackAccumulator.subtractFeature(NNUE.getIndex(board.getEnPassantTarget(),
+				blackAccumulator.sub(NNUE.getIndex(board.getEnPassantTarget(),
 						board.getPiece(board.getEnPassantTarget()), Side.BLACK));
 			}
 		}
@@ -145,8 +145,8 @@ public class AccumulatorTest
 		{
 			if (!board.getPiece(sq).equals(Piece.NONE))
 			{
-				whiteAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK));
+				whiteAccumulator.add(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE));
+				blackAccumulator.add(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK));
 			}
 		}
 
@@ -180,8 +180,8 @@ public class AccumulatorTest
 		{
 			if (!board.getPiece(sq).equals(Piece.NONE))
 			{
-				whiteAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE));
-				blackAccumulator.addFeature(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK));
+				whiteAccumulator.add(NNUE.getIndex(sq, board.getPiece(sq), Side.WHITE));
+				blackAccumulator.add(NNUE.getIndex(sq, board.getPiece(sq), Side.BLACK));
 			}
 		}
 

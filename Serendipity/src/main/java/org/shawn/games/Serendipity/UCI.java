@@ -201,8 +201,8 @@ public class UCI
 					{
 						if (!internalBoard.getPiece(sq).equals(Piece.NONE))
 						{
-							whiteAccumulator.addFeature(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.WHITE));
-							blackAccumulator.addFeature(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.BLACK));
+							whiteAccumulator.add(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.WHITE));
+							blackAccumulator.add(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.BLACK));
 						}
 					}
 
