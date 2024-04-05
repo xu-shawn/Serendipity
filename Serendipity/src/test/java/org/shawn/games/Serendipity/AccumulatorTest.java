@@ -1,7 +1,6 @@
 package org.shawn.games.Serendipity;
 
 import org.shawn.games.Serendipity.NNUE.*;
-import org.shawn.games.Serendipity.NNUE.NNUE.NNUEAccumulator;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
