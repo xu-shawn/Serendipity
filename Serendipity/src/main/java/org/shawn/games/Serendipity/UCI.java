@@ -67,6 +67,14 @@ public class UCI
 		internalBoard = new Board();
 		engine = new AlphaBeta(network);
 
+		System.out.print(args[0]);
+		
+		if (args.length == 1 && args[0].equals("bench"))
+		{
+			Bench.bench(engine, 10);
+			return;
+		}
+
 		UCIMainLoop();
 	}
 
