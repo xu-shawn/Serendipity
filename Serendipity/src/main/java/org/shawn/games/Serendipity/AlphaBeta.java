@@ -407,7 +407,7 @@ public class AlphaBeta
 			depth -= 2;
 		}
 		
-		boolean onOrAfterQuiets = false;
+		boolean doLMP = false;
 
 		for (Move move : legalMoves)
 		{
@@ -416,11 +416,11 @@ public class AlphaBeta
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
-			onOrAfterQuiets |= isQuiet;
 
-			if (onOrAfterQuiets && !isPV && !inCheck && depth <= 6 && ss.moveCount > 3 + depth * depth
-					&& alpha > -MATE_EVAL + 1024)
+			if (doLMP || (isQuiet && !isPV && !inCheck && depth <= 6 && ss.moveCount > 3 + depth * depth
+					&& alpha > -MATE_EVAL + 1024))
 			{
+				doLMP |= isQuiet;
 				continue;
 			}
 
