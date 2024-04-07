@@ -288,6 +288,7 @@ public class AlphaBeta
 		ss.moveCount = 0;
 		boolean isPV = beta - alpha > 1;
 		boolean inCheck = ss.inCheck = board.isKingAttacked();
+		boolean givesCheck;
 		Move bestMove = null;
 		int bestValue = MIN_EVAL;
 		this.selDepth = Math.max(this.selDepth, ply);
@@ -411,11 +412,14 @@ public class AlphaBeta
 		{
 			ss.moveCount++;
 			int newdepth = depth - 1;
+			board.doMove(move);
+			givesCheck = board.isKingAttacked();
+			board.undoMove();
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
-			if (isQuiet && !isPV && !ss.inCheck && depth <= 6 && ss.moveCount > 3 + depth * depth
+			if (isQuiet && !isPV && !givesCheck && depth <= 6 && ss.moveCount > 3 + depth * depth
 					&& alpha > -MATE_EVAL + 1024)
 			{
 				continue;
@@ -430,9 +434,7 @@ public class AlphaBeta
 			accumulators.updateAccumulators(board, move, false);
 			board.doMove(move);
 
-			inCheck = board.isKingAttacked();
-
-			if (inCheck)
+			if (givesCheck)
 			{
 				newdepth++;
 			}
@@ -444,7 +446,7 @@ public class AlphaBeta
 				int r = (int) (1.60 + Math.log(depth) * Math.log(ss.moveCount) / 2.17);
 
 //				r += isPV ? 0 : 1;
-				r -= inCheck ? 1 : 0;
+				r -= givesCheck ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
