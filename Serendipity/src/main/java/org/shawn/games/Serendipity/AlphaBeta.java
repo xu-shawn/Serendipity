@@ -353,6 +353,16 @@ public class AlphaBeta
 		{
 			return beta;
 		}
+		
+		if (depth <= 6 && !isPV && !inCheck)
+		{
+			int futility_margin = depth * 90;
+				
+			if (staticEval - futility_margin >= beta)
+			{
+			      return staticEval;
+			}
+		}
 
 		if (nullAllowed && beta < MATE_EVAL - 1024 && !inCheck
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
