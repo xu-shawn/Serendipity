@@ -351,17 +351,7 @@ public class AlphaBeta
 
 		if (!isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 1687 > beta)
 		{
-			return beta;
-		}
-		
-		if (depth <= 6 && !isPV && !inCheck)
-		{
-			int futility_margin = depth * 90;
-				
-			if (staticEval - futility_margin >= beta)
-			{
-			      return staticEval;
-			}
+			return staticEval;
 		}
 
 		if (nullAllowed && beta < MATE_EVAL - 1024 && !inCheck
