@@ -351,7 +351,7 @@ public class AlphaBeta
 
 		if (!isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 1687 > beta)
 		{
-			return staticEval;
+			return (staticEval + beta) / 2;
 		}
 
 		if (nullAllowed && beta < MATE_EVAL - 1024 && !inCheck
