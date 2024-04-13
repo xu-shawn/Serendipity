@@ -174,10 +174,23 @@ public class NNUE
 	{
 		int eval = 0;
 
+		int[] usValues = new int[HIDDEN_SIZE];
+		int[] themValues = new int[HIDDEN_SIZE];
+
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
-			eval += screlu(us.values[i]) * (int) network.L2Weights[i][chosenBucket]
-					+ screlu(them.values[i]) * (int) network.L2Weights[i + HIDDEN_SIZE][chosenBucket];
+			usValues[i] = Math.max(us.values[i], 0);
+			usValues[i] = Math.min(usValues[i], QA);
+			usValues[i] = usValues[i] * usValues[i];
+			themValues[i] = Math.max(them.values[i], 0);
+			themValues[i] = Math.min(themValues[i], QA);
+			themValues[i] = themValues[i] * themValues[i];
+		}
+
+		for (int i = 0; i < HIDDEN_SIZE; i++)
+		{
+			eval += usValues[i] * (int) network.L2Weights[i][chosenBucket]
+					+ themValues[i] * (int) network.L2Weights[i + HIDDEN_SIZE][chosenBucket];
 		}
 
 		eval /= QA;
