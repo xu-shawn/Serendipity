@@ -523,7 +523,7 @@ public class AlphaBeta
 
 		if (alpha == oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue, bestMove);
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue, null);
 		}
 
 		else if (alpha > oldAlpha)
