@@ -348,6 +348,16 @@ public class AlphaBeta
 		{
 			staticEval = evaluate(board);
 		}
+		
+		if (!isPV && !inCheck && staticEval < alpha - 10000 - 4000 * depth * depth)
+		{
+			int razoringValue = quiesce(board, alpha, beta, ply + 1);
+			
+			if (razoringValue < alpha)
+			{
+				return razoringValue;
+			}
+		}
 
 		if (!isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 1687 > beta)
 		{
