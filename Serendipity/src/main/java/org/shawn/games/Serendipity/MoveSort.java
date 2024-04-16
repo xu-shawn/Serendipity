@@ -63,7 +63,7 @@ public class MoveSort
 				|| (PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 						&& move.getTo() == board.getEnPassant()))
 		{
-			int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;
+			int score = SEE.staticExchangeEvaluation(board, move, -1) ? 900000000 : -1000000;
 			score += pieceValue(board.getPiece(move.getTo())) * 100000 - pieceValue(board.getPiece(move.getFrom()));
 			return score;
 		}
