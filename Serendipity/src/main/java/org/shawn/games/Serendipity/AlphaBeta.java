@@ -265,8 +265,6 @@ public class AlphaBeta
 			board.undoMove();
 			accumulators.updateAccumulators(board, move, true);
 
-			bestValue = Math.max(bestValue, score);
-
 			if (score > bestValue)
 			{
 				bestValue = score;
