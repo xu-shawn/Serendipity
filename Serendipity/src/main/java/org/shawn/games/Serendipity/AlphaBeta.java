@@ -289,7 +289,7 @@ public class AlphaBeta
 		}
 
 		tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, ttDepth,
-				bestValue, ttMove);
+				bestValue, null);
 
 		return bestValue;
 	}
