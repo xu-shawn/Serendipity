@@ -217,7 +217,6 @@ public class AlphaBeta
 		{
 			bestValue = futilityBase = MIN_EVAL;
 			moves = board.legalMoves();
-			sortMoves(moves, board, ply);
 		}
 
 		else
@@ -233,8 +232,9 @@ public class AlphaBeta
 
 			futilityBase = standPat + 4932;
 			moves = board.pseudoLegalCaptures();
-			sortCaptures(moves, board);
 		}
+		
+		sortMoves(moves, board, ply);
 
 		for (Move move : moves)
 		{
