@@ -170,7 +170,7 @@ public class AlphaBeta
 
 		this.selDepth = Math.max(this.selDepth, ply);
 
-		int bestScore;
+		int bestValue;
 
 		if (board.isRepetition() || board.getHalfMoveCounter() > 100)
 		{
@@ -178,10 +178,14 @@ public class AlphaBeta
 		}
 
 		boolean isPV = beta - alpha > 1;
+		boolean inCheck = searchStack[ply].inCheck = board.isKingAttacked();
 
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
+		int ttDepth = inCheck ? 0 : -1;
+		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 
-		if (!isPV && currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+		if (!isPV && currentMoveEntry != null && currentMoveEntry.getDepth() >= ttDepth
+				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
 		{
 			int eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getType())
@@ -206,19 +210,19 @@ public class AlphaBeta
 		}
 
 		int futilityBase;
-		boolean inCheck = searchStack[ply].inCheck = board.isKingAttacked();
 		final List<Move> moves;
+		Move bestMove;
 
 		if (inCheck)
 		{
-			bestScore = futilityBase = MIN_EVAL;
+			bestValue = futilityBase = MIN_EVAL;
 			moves = board.legalMoves();
 			sortMoves(moves, board, ply);
 		}
 
 		else
 		{
-			int standPat = bestScore = evaluate(board);
+			int standPat = bestValue = evaluate(board);
 
 			alpha = Math.max(alpha, standPat);
 
@@ -239,12 +243,12 @@ public class AlphaBeta
 				continue;
 			}
 
-			if (bestScore > -MATE_EVAL + 1024 && futilityBase < alpha && !SEE.staticExchangeEvaluation(board, move, 1)
+			if (bestValue > -MATE_EVAL + 1024 && futilityBase < alpha && !SEE.staticExchangeEvaluation(board, move, 1)
 					&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 									.getBitboard(board.getSideToMove()))
 			{
-				bestScore = Math.max(bestScore, futilityBase);
+				bestValue = Math.max(bestValue, futilityBase);
 				continue;
 			}
 
@@ -261,21 +265,35 @@ public class AlphaBeta
 			board.undoMove();
 			accumulators.updateAccumulators(board, move, true);
 
-			bestScore = Math.max(bestScore, score);
-			alpha = Math.max(alpha, bestScore);
+			bestValue = Math.max(bestValue, score);
 
-			if (alpha >= beta)
+			if (score > bestValue)
 			{
-				break;
+				bestValue = score;
+
+				if (score > alpha)
+				{
+					alpha = score;
+					bestMove = move;
+
+					if (alpha >= beta)
+					{
+						tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, ttDepth,
+								bestValue, bestMove);
+					}
+				}
 			}
 		}
 
-		if (bestScore == MIN_EVAL && inCheck)
+		if (bestValue == MIN_EVAL && inCheck)
 		{
 			return -MATE_EVAL + ply;
 		}
 
-		return bestScore;
+		tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, ttDepth,
+				bestValue, ttMove);
+
+		return bestValue;
 	}
 
 	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed)
