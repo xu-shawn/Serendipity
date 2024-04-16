@@ -290,7 +290,7 @@ public class AlphaBeta
 			return -MATE_EVAL + ply;
 		}
 
-		tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, ttDepth,
+		tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, ttDepth,
 				bestValue, ttMove);
 
 		return bestValue;
