@@ -211,7 +211,7 @@ public class AlphaBeta
 
 		int futilityBase;
 		final List<Move> moves;
-		Move bestMove;
+		Move bestMove = null;
 
 		if (inCheck)
 		{
@@ -289,7 +289,7 @@ public class AlphaBeta
 		}
 
 		tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, ttDepth,
-				bestValue, ttMove);
+				bestValue, bestMove);
 
 		return bestValue;
 	}
