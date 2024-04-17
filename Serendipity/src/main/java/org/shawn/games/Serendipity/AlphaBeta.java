@@ -46,6 +46,7 @@ public class AlphaBeta
 		public boolean inCheck;
 		public boolean ttHit;
 		public int moveCount;
+		public int multipleExtensions;
 		public Move killer;
 		public Move excludedMove;
 	}
@@ -440,6 +441,11 @@ public class AlphaBeta
 
 			int extension = 0;
 
+			if (givesCheck)
+			{
+				extension = 1;
+			}
+
 			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth > 8
 					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
 					&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)
@@ -457,14 +463,18 @@ public class AlphaBeta
 
 				if (singularValue < singularBeta)
 				{
-					extension = 1;
+					if (!isPV && ss.multipleExtensions < 10)
+					{
+						extension = 2;
+						ss.multipleExtensions = ply > 0 ? searchStack[ply - 1].multipleExtensions + 1 : 1;
+					}
+
+					else
+					{
+						extension = 1;
+					}
 				}
 
-			}
-
-			if (givesCheck)
-			{
-				extension = 1;
 			}
 
 			newdepth += extension;
