@@ -558,6 +558,11 @@ public class AlphaBeta
 		{
 			return -MATE_EVAL + ply;
 		}
+		
+		if (inSingularSearch)
+		{
+			return bestValue;
+		}
 
 		if (alpha == oldAlpha)
 		{
