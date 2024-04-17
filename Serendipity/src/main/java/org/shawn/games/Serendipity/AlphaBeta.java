@@ -440,7 +440,12 @@ public class AlphaBeta
 
 			int extension = 0;
 
-			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth > 8
+			if (givesCheck)
+			{
+				extension = 1;
+			}
+
+			else if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth > 8
 					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
 					&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)
 							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.LOWERBOUND))
@@ -448,11 +453,13 @@ public class AlphaBeta
 			{
 				int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
 				int singularDepth = depth / 2;
+
 				int moveCountBackup = ss.moveCount;
 
 				ss.excludedMove = move;
 				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, false);
 				ss.excludedMove = null;
+
 				ss.moveCount = moveCountBackup;
 
 				if (singularValue < singularBeta)
@@ -460,11 +467,6 @@ public class AlphaBeta
 					extension = 1;
 				}
 
-			}
-
-			if (givesCheck)
-			{
-				extension = 1;
 			}
 
 			newdepth += extension;
