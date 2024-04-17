@@ -289,6 +289,7 @@ public class AlphaBeta
 		boolean isPV = beta - alpha > 1;
 		boolean inCheck = ss.inCheck = board.isKingAttacked();
 		boolean givesCheck;
+		boolean inSingularSearch = ss.excludedMove != null;
 		Move bestMove = null;
 		int bestValue = MIN_EVAL;
 		this.selDepth = Math.max(this.selDepth, ply);
@@ -313,7 +314,7 @@ public class AlphaBeta
 
 		ss.ttHit = currentMoveEntry != null;
 
-		if (!isPV && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
+		if (!inSingularSearch && !isPV && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
 		{
 			int eval = currentMoveEntry.getEvaluation();
@@ -349,12 +350,13 @@ public class AlphaBeta
 			staticEval = evaluate(board);
 		}
 
-		if (!isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 1687 > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && staticEval > beta
+				&& staticEval - depth * 1687 > beta)
 		{
 			return beta;
 		}
 
-		if (nullAllowed && beta < MATE_EVAL - 1024 && !inCheck
+		if (!inSingularSearch && nullAllowed && beta < MATE_EVAL - 1024 && !inCheck
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
@@ -410,6 +412,11 @@ public class AlphaBeta
 
 		for (Move move : legalMoves)
 		{
+			if (move.equals(ss.excludedMove))
+			{
+				continue;
+			}
+
 			ss.moveCount++;
 			int newdepth = depth - 1;
 			board.doMove(move);
@@ -431,13 +438,39 @@ public class AlphaBeta
 				continue;
 			}
 
-			accumulators.updateAccumulators(board, move, false);
-			board.doMove(move);
+			int extension = 0;
+
+			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth > 8
+					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
+					&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)
+							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.LOWERBOUND))
+					&& currentMoveEntry.getDepth() > depth - 2)
+			{
+				int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
+				int singularDepth = depth / 2;
+				int moveCountBackup = ss.moveCount;
+
+				ss.excludedMove = move;
+				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, false);
+				ss.excludedMove = null;
+				ss.moveCount = moveCountBackup;
+
+				if (singularValue < singularBeta)
+				{
+					extension = 1;
+				}
+
+			}
 
 			if (givesCheck)
 			{
-				newdepth++;
+				extension = 1;
 			}
+
+			newdepth += extension;
+
+			accumulators.updateAccumulators(board, move, false);
+			board.doMove(move);
 
 			int thisMoveEval = MIN_EVAL;
 
@@ -519,6 +552,11 @@ public class AlphaBeta
 			{
 				quietMovesFailBeta.add(move);
 			}
+		}
+
+		if (ss.moveCount == 0)
+		{
+			return -MATE_EVAL + ply;
 		}
 
 		if (alpha == oldAlpha)
