@@ -53,6 +53,9 @@ public class UCI
 		networkName = new NNUEOption("simple.nnue", "nnuefile");
 		threads = new IntegerOption(1, 1, 1, "Threads");
 		hash = new IntegerOption(8, 8, 8, "Hash");
+		
+		TranspositionTable testTT = new TranspositionTable(8);
+		System.out.print(ObjectSizeFetcher.getObjectSize(testTT.new Entry(TranspositionTable.NodeType.EXACT, 0, 0, 0, new Move("e2e4", Side.WHITE))));
 
 		try
 		{
