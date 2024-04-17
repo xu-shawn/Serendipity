@@ -554,7 +554,12 @@ public class AlphaBeta
 			}
 		}
 
-		if (ss.moveCount == 0)
+		if (ss.moveCount == 0 && inSingularSearch)
+		{
+			return alpha;
+		}
+		
+		else if (ss.moveCount == 0)
 		{
 			return -MATE_EVAL + ply;
 		}
