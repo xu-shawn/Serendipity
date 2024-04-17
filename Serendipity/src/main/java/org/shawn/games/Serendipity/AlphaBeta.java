@@ -463,7 +463,7 @@ public class AlphaBeta
 
 				if (singularValue < singularBeta)
 				{
-					if (!isPV && ss.multipleExtensions < 10)
+					if (!isPV && singularValue < singularBeta - 4800 && ss.multipleExtensions < 10)
 					{
 						extension = 2;
 						ss.multipleExtensions = ply > 0 ? searchStack[ply - 1].multipleExtensions + 1 : 1;
