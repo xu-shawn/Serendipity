@@ -478,7 +478,7 @@ public class AlphaBeta
 			{
 				int r = (int) (1.60 + Math.log(depth) * Math.log(ss.moveCount) / 2.17);
 
-//				r += isPV ? 0 : 1;
+				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
