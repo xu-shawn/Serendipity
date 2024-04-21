@@ -31,13 +31,6 @@ public class AlphaBeta
 	private int nodesCount;
 	private int nodesLimit;
 
-	private Move[][] pv;
-	private Move[][] counterMoves;
-	private int[][] history;
-
-	private int rootDepth;
-	private int selDepth;
-
 	private NNUE network;
 	private AccumulatorManager accumulators;
 
@@ -81,17 +74,6 @@ public class AlphaBeta
 		}
 
 		return newss;
-	}
-
-	private void updatePV(Move move, int ply)
-	{
-		pv[ply][0] = move;
-		System.arraycopy(pv[ply + 1], 0, pv[ply], 1, MAX_PLY - 1);
-	}
-
-	private void clearPV()
-	{
-		this.pv = new Move[MAX_PLY][MAX_PLY];
 	}
 
 	private int pieceValue(Piece p)
