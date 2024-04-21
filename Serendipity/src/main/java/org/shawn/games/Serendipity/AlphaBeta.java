@@ -398,7 +398,7 @@ public class AlphaBeta
 		Move counterMove = null;
 
 		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
+			counterMove = counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove()
 					.getTo().ordinal()];
 
 		MoveSort.sortMoves(legalMoves, ttMove, ss.killer, counterMove, history, board);
@@ -539,7 +539,7 @@ public class AlphaBeta
 
 						if (lastMove != null)
 						{
-							counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
+							counterMoves[board.getPiece(lastMove.getMove().getTo()).ordinal()][lastMove.getMove()
 									.getTo().ordinal()] = move;
 						}
 					}
