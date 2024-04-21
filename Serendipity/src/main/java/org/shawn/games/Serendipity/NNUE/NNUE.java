@@ -36,6 +36,16 @@ public class NNUE
 	private final short[] L1Biases;
 	private final short[][] L2Weights;
 	private final short outputBiases[];
+	
+	private final static int screlu[] = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
+	
+	static
+	{
+		for(int i = Short.MIN_VALUE; i <= Short.MAX_VALUE;i ++)
+		{
+			screlu[i - (int) Short.MIN_VALUE] = screlu((short)(i));
+		}
+	}
 
 	public static class NNUEAccumulator
 	{
@@ -144,13 +154,13 @@ public class NNUE
 			L1Biases[i] = toLittleEndian(networkData.readShort());
 		}
 
-		L2Weights = new short[HIDDEN_SIZE * 2][OUTPUT_BUCKETS];
+		L2Weights = new short[OUTPUT_BUCKETS][HIDDEN_SIZE * 2];
 
 		for (int i = 0; i < HIDDEN_SIZE * 2; i++)
 		{
 			for (int j = 0; j < OUTPUT_BUCKETS; j++)
 			{
-				L2Weights[i][j] = toLittleEndian(networkData.readShort());
+				L2Weights[j][i] = toLittleEndian(networkData.readShort());
 			}
 		}
 
@@ -176,8 +186,8 @@ public class NNUE
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
-			eval += screlu(us.values[i]) * (int) network.L2Weights[i][chosenBucket]
-					+ screlu(them.values[i]) * (int) network.L2Weights[i + HIDDEN_SIZE][chosenBucket];
+			eval += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i]
+					+ screlu[them.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
 		}
 
 		eval /= QA;
