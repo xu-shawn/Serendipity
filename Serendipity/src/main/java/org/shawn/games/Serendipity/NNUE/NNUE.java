@@ -1,6 +1,7 @@
 package org.shawn.games.Serendipity.NNUE;
 
 import java.io.*;
+import jdk.incubator.vector.*;
 
 import com.github.bhlangonijr.chesslib.*;
 
@@ -52,6 +53,50 @@ public class NNUE
 		private short[] values;
 		private int bucketIndex;
 		NNUE network;
+		
+		private static final VectorSpecies<Short> SPECIES = ShortVector.SPECIES_PREFERRED;
+
+		public static short[] vectorSum(short[] a, short[] b)
+		{
+			var c = new short[a.length];
+			var upperBound = SPECIES.loopBound(a.length);
+
+			var i = 0;
+			for (; i < upperBound; i += SPECIES.length())
+			{
+				var va = ShortVector.fromArray(SPECIES, a, i);
+				var vb = ShortVector.fromArray(SPECIES, b, i);
+				var vc = va.add(vb);
+				vc.intoArray(c, i);
+			} // Compute elements not fitting in the vector alignment.
+			for (; i < a.length; i++)
+			{
+				c[i] = (short) (a[i] + b[i]);
+			}
+
+			return c;
+		}
+
+		public static short[] vectorSubtract(short[] a, short[] b)
+		{
+			var c = new short[a.length];
+			var upperBound = SPECIES.loopBound(a.length);
+
+			var i = 0;
+			for (; i < upperBound; i += SPECIES.length())
+			{
+				var va = ShortVector.fromArray(SPECIES, a, i);
+				var vb = ShortVector.fromArray(SPECIES, b, i);
+				var vc = va.sub(vb);
+				vc.intoArray(c, i);
+			} // Compute elements not fitting in the vector alignment.
+			for (; i < a.length; i++)
+			{
+				c[i] = (short) (a[i] + b[i]);
+			}
+
+			return c;
+		}
 
 		public NNUEAccumulator(NNUE network, int bucketIndex)
 		{
@@ -72,18 +117,12 @@ public class NNUE
 
 		public void add(int featureIndex)
 		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
-			}
+			values = vectorSum(values, network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE]);
 		}
 
 		public void sub(int featureIndex)
 		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] -= network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
-			}
+			values = vectorSubtract(values, network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE]);
 		}
 
 		public void addsub(int featureIndexToAdd, int featureIndexToSubtract)
