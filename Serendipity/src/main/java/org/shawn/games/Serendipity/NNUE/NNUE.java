@@ -324,44 +324,42 @@ public class NNUE
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
 	{
 		int upperBound = INT_SPECIES.loopBound(HIDDEN_SIZE);
-		
+
 		int[] usValues = new int[HIDDEN_SIZE];
 		int[] themValues = new int[HIDDEN_SIZE];
-		
-		for (int i = 0; i < HIDDEN_SIZE; i ++)
+
+		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
 			usValues[i] = (int) us.values[i];
 			themValues[i] = (int) them.values[i];
 		}
 
 		int i = 0;
-		
+
 		IntVector sum = IntVector.zero(INT_SPECIES);
-		
+
 		for (; i < upperBound; i += INT_SPECIES.length())
 		{
 			IntVector va = IntVector.fromArray(INT_SPECIES, usValues, i);
 			IntVector vb = IntVector.fromArray(INT_SPECIES, themValues, i);
 			IntVector vc = IntVector.fromArray(INT_SPECIES, network.L2Weights[chosenBucket], i);
 			IntVector vd = IntVector.fromArray(INT_SPECIES, network.L2Weights[chosenBucket], i + HIDDEN_SIZE);
-			
+
 			va = va.max(0).min(QA);
 			va = va.mul(va).mul(vc);
-			
+
 			vb = vb.max(0).min(QA);
 			vb = vb.mul(vb).mul(vd);
-			
+
 			sum = sum.add(va).add(vb);
 		}
-		
 
 		int eval = sum.reduceLanes(VectorOperators.ADD);
 
 		for (; i < HIDDEN_SIZE; i++)
 		{
 			eval += screlu[usValues[i] - (int) Short.MIN_VALUE] * network.L2Weights[chosenBucket][i]
-					+ screlu[themValues[i] - (int) Short.MIN_VALUE]
-							* network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
+					+ screlu[themValues[i] - (int) Short.MIN_VALUE] * network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
 		}
 
 		eval /= QA;
