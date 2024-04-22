@@ -41,13 +41,13 @@ public class NNUE
 	private final short outputBiases[];
 
 	private final static int screlu[] = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
-	
 
-	private static final VectorSpecies<Short> SHORT_SPECIES = ShortVector.SPECIES_PREFERRED;
 	private static final VectorSpecies<Integer> INT_SPECIES = IntVector.SPECIES_PREFERRED;
 
 	static
 	{
+		System.out.print(IntVector.SPECIES_PREFERRED);
+		
 		for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++)
 		{
 			screlu[i - (int) Short.MIN_VALUE] = screlu((short) (i));
