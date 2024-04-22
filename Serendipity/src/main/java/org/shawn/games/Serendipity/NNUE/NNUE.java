@@ -323,8 +323,6 @@ public class NNUE
 
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
 	{
-		int eval = 0;
-		
 		int upperBound = INT_SPECIES.loopBound(HIDDEN_SIZE);
 		
 		int[] usValues = new int[HIDDEN_SIZE];
@@ -337,6 +335,8 @@ public class NNUE
 		}
 
 		int i = 0;
+		
+		IntVector sum = IntVector.zero(INT_SPECIES);
 		
 		for (; i < upperBound; i += INT_SPECIES.length())
 		{
@@ -351,8 +351,11 @@ public class NNUE
 			vb = vb.max(0).min(QA);
 			vb = vb.mul(vb).mul(vd);
 			
-			eval += va.add(vb).reduceLanes(VectorOperators.ADD);
+			sum = sum.add(va).add(vb);
 		}
+		
+
+		int eval = sum.reduceLanes(VectorOperators.ADD);
 
 		for (; i < HIDDEN_SIZE; i++)
 		{
