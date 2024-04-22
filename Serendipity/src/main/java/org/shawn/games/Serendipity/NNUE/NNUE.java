@@ -1,6 +1,8 @@
 package org.shawn.games.Serendipity.NNUE;
 
 import java.io.*;
+import java.util.Arrays;
+
 import jdk.incubator.vector.*;
 
 import com.github.bhlangonijr.chesslib.*;
@@ -35,16 +37,20 @@ public class NNUE
 
 	private final short[][] L1Weights;
 	private final short[] L1Biases;
-	private final short[][] L2Weights;
+	private final int[][] L2Weights;
 	private final short outputBiases[];
-	
+
 	private final static int screlu[] = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
 	
+
+	private static final VectorSpecies<Short> SHORT_SPECIES = ShortVector.SPECIES_PREFERRED;
+	private static final VectorSpecies<Integer> INT_SPECIES = IntVector.SPECIES_PREFERRED;
+
 	static
 	{
-		for(int i = Short.MIN_VALUE; i <= Short.MAX_VALUE;i ++)
+		for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++)
 		{
-			screlu[i - (int) Short.MIN_VALUE] = screlu((short)(i));
+			screlu[i - (int) Short.MIN_VALUE] = screlu((short) (i));
 		}
 	}
 
@@ -53,49 +59,47 @@ public class NNUE
 		private short[] values;
 		private int bucketIndex;
 		NNUE network;
-		
+
 		private static final VectorSpecies<Short> SPECIES = ShortVector.SPECIES_PREFERRED;
 
 		public static short[] vectorSum(short[] a, short[] b)
 		{
-			var c = new short[a.length];
-			var upperBound = SPECIES.loopBound(a.length);
+			int upperBound = SPECIES.loopBound(a.length);
 
 			var i = 0;
 			for (; i < upperBound; i += SPECIES.length())
 			{
 				var va = ShortVector.fromArray(SPECIES, a, i);
 				var vb = ShortVector.fromArray(SPECIES, b, i);
-				var vc = va.add(vb);
-				vc.intoArray(c, i);
+				va = va.add(vb);
+				va.intoArray(a, i);
 			} // Compute elements not fitting in the vector alignment.
 			for (; i < a.length; i++)
 			{
-				c[i] = (short) (a[i] + b[i]);
+				a[i] = (short) (a[i] + b[i]);
 			}
 
-			return c;
+			return a;
 		}
 
 		public static short[] vectorSubtract(short[] a, short[] b)
 		{
-			var c = new short[a.length];
-			var upperBound = SPECIES.loopBound(a.length);
+			int upperBound = SPECIES.loopBound(a.length);
 
-			var i = 0;
+			int i = 0;
 			for (; i < upperBound; i += SPECIES.length())
 			{
 				var va = ShortVector.fromArray(SPECIES, a, i);
 				var vb = ShortVector.fromArray(SPECIES, b, i);
-				var vc = va.sub(vb);
-				vc.intoArray(c, i);
+				va = va.sub(vb);
+				va.intoArray(a, i);
 			} // Compute elements not fitting in the vector alignment.
 			for (; i < a.length; i++)
 			{
-				c[i] = (short) (a[i] + b[i]);
+				a[i] = (short) (a[i] - b[i]);
 			}
 
-			return c;
+			return a;
 		}
 
 		public NNUEAccumulator(NNUE network, int bucketIndex)
@@ -117,17 +121,64 @@ public class NNUE
 
 		public void add(int featureIndex)
 		{
-			values = vectorSum(values, network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE]);
+			int upperBound = SPECIES.loopBound(HIDDEN_SIZE);
+
+			var i = 0;
+			for (; i < upperBound; i += SPECIES.length())
+			{
+				var va = ShortVector.fromArray(SPECIES, values, i);
+				var vb = ShortVector.fromArray(SPECIES, network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE],
+						i);
+				va = va.add(vb);
+				va.intoArray(values, i);
+			}
+
+			// Compute elements not fitting in the vector alignment.
+			for (; i < HIDDEN_SIZE; i++)
+			{
+				values[i] += network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
+			}
 		}
 
 		public void sub(int featureIndex)
 		{
-			values = vectorSubtract(values, network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE]);
+			int upperBound = SPECIES.loopBound(HIDDEN_SIZE);
+
+			var i = 0;
+			for (; i < upperBound; i += SPECIES.length())
+			{
+				var va = ShortVector.fromArray(SPECIES, values, i);
+				var vb = ShortVector.fromArray(SPECIES, network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE],
+						i);
+				va = va.sub(vb);
+				va.intoArray(values, i);
+			}
+
+			// Compute elements not fitting in the vector alignment.
+			for (; i < HIDDEN_SIZE; i++)
+			{
+				values[i] -= network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
+			}
 		}
 
 		public void addsub(int featureIndexToAdd, int featureIndexToSubtract)
 		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
+			int upperBound = SPECIES.loopBound(HIDDEN_SIZE);
+
+			var i = 0;
+			for (; i < upperBound; i += SPECIES.length())
+			{
+				var va = ShortVector.fromArray(SPECIES, values, i);
+				var vb = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE], i);
+				var vc = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE], i);
+				va = va.add(vb).sub(vc);
+				va.intoArray(values, i);
+			}
+
+			// Compute elements not fitting in the vector alignment.
+			for (; i < HIDDEN_SIZE; i++)
 			{
 				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
 						- network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
@@ -136,7 +187,24 @@ public class NNUE
 
 		public void addaddsub(int featureIndexToAdd1, int featureIndexToAdd2, int featureIndexToSubtract)
 		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
+			int upperBound = SPECIES.loopBound(HIDDEN_SIZE);
+
+			var i = 0;
+			for (; i < upperBound; i += SPECIES.length())
+			{
+				var va = ShortVector.fromArray(SPECIES, values, i);
+				var vb = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE], i);
+				var vc = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE], i);
+				var vd = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE], i);
+				va = va.add(vb).add(vc).sub(vd);
+				va.intoArray(values, i);
+			}
+
+			// Compute elements not fitting in the vector alignment.
+			for (; i < HIDDEN_SIZE; i++)
 			{
 				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
 						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
@@ -146,7 +214,24 @@ public class NNUE
 
 		public void addsubsub(int featureIndexToAdd, int featureIndexToSubtract1, int featureIndexToSubtract2)
 		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
+			int upperBound = SPECIES.loopBound(HIDDEN_SIZE);
+
+			var i = 0;
+			for (; i < upperBound; i += SPECIES.length())
+			{
+				var va = ShortVector.fromArray(SPECIES, values, i);
+				var vb = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE], i);
+				var vc = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE], i);
+				var vd = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE], i);
+				va = va.add(vb).sub(vc).sub(vd);
+				va.intoArray(values, i);
+			}
+
+			// Compute elements not fitting in the vector alignment.
+			for (; i < HIDDEN_SIZE; i++)
 			{
 				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
 						- network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
@@ -157,7 +242,26 @@ public class NNUE
 		public void addaddsubsub(int featureIndexToAdd1, int featureIndexToAdd2, int featureIndexToSubtract1,
 				int featureIndexToSubtract2)
 		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
+			int upperBound = SPECIES.loopBound(HIDDEN_SIZE);
+
+			var i = 0;
+			for (; i < upperBound; i += SPECIES.length())
+			{
+				var va = ShortVector.fromArray(SPECIES, values, i);
+				var vb = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE], i);
+				var vc = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE], i);
+				var vd = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE], i);
+				var ve = ShortVector.fromArray(SPECIES,
+						network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE], i);
+				va = va.add(vb).add(vc).sub(vd).sub(ve);
+				va.intoArray(values, i);
+			}
+
+			// Compute elements not fitting in the vector alignment.
+			for (; i < HIDDEN_SIZE; i++)
 			{
 				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
 						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
@@ -193,7 +297,7 @@ public class NNUE
 			L1Biases[i] = toLittleEndian(networkData.readShort());
 		}
 
-		L2Weights = new short[OUTPUT_BUCKETS][HIDDEN_SIZE * 2];
+		L2Weights = new int[OUTPUT_BUCKETS][HIDDEN_SIZE * 2];
 
 		for (int i = 0; i < HIDDEN_SIZE * 2; i++)
 		{
@@ -222,11 +326,41 @@ public class NNUE
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
 	{
 		int eval = 0;
-
-		for (int i = 0; i < HIDDEN_SIZE; i++)
+		
+		int upperBound = INT_SPECIES.loopBound(HIDDEN_SIZE);
+		
+		int[] usValues = new int[HIDDEN_SIZE];
+		int[] themValues = new int[HIDDEN_SIZE];
+		
+		for (int i = 0; i < HIDDEN_SIZE; i ++)
 		{
-			eval += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i]
-					+ screlu[them.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
+			usValues[i] = (int) us.values[i];
+			themValues[i] = (int) them.values[i];
+		}
+
+		int i = 0;
+		
+		for (; i < upperBound; i += INT_SPECIES.length())
+		{
+			IntVector va = IntVector.fromArray(INT_SPECIES, usValues, i);
+			IntVector vb = IntVector.fromArray(INT_SPECIES, themValues, i);
+			IntVector vc = IntVector.fromArray(INT_SPECIES, network.L2Weights[chosenBucket], i);
+			IntVector vd = IntVector.fromArray(INT_SPECIES, network.L2Weights[chosenBucket], i + HIDDEN_SIZE);
+			
+			va = va.max(0).min(QA);
+			va = va.mul(va).mul(vc);
+			
+			vb = vb.max(0).min(QA);
+			vb = vb.mul(vb).mul(vd);
+			
+			eval += va.add(vb).reduceLanes(VectorOperators.ADD);
+		}
+
+		for (; i < HIDDEN_SIZE; i++)
+		{
+			eval += screlu[usValues[i] - (int) Short.MIN_VALUE] * network.L2Weights[chosenBucket][i]
+					+ screlu[themValues[i] - (int) Short.MIN_VALUE]
+							* network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
 		}
 
 		eval /= QA;
