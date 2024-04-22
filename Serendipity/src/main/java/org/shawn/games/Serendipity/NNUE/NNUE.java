@@ -46,8 +46,6 @@ public class NNUE
 
 	static
 	{
-		System.out.print(IntVector.SPECIES_PREFERRED);
-		
 		for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++)
 		{
 			screlu[i - (int) Short.MIN_VALUE] = screlu((short) (i));
