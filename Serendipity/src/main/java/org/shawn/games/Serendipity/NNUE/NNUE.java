@@ -1,7 +1,6 @@
 package org.shawn.games.Serendipity.NNUE;
 
 import java.io.*;
-import java.util.Arrays;
 
 import jdk.incubator.vector.*;
 
@@ -59,46 +58,6 @@ public class NNUE
 		NNUE network;
 
 		private static final VectorSpecies<Short> SPECIES = ShortVector.SPECIES_PREFERRED;
-
-		public static short[] vectorSum(short[] a, short[] b)
-		{
-			int upperBound = SPECIES.loopBound(a.length);
-
-			var i = 0;
-			for (; i < upperBound; i += SPECIES.length())
-			{
-				var va = ShortVector.fromArray(SPECIES, a, i);
-				var vb = ShortVector.fromArray(SPECIES, b, i);
-				va = va.add(vb);
-				va.intoArray(a, i);
-			} // Compute elements not fitting in the vector alignment.
-			for (; i < a.length; i++)
-			{
-				a[i] = (short) (a[i] + b[i]);
-			}
-
-			return a;
-		}
-
-		public static short[] vectorSubtract(short[] a, short[] b)
-		{
-			int upperBound = SPECIES.loopBound(a.length);
-
-			int i = 0;
-			for (; i < upperBound; i += SPECIES.length())
-			{
-				var va = ShortVector.fromArray(SPECIES, a, i);
-				var vb = ShortVector.fromArray(SPECIES, b, i);
-				va = va.sub(vb);
-				va.intoArray(a, i);
-			} // Compute elements not fitting in the vector alignment.
-			for (; i < a.length; i++)
-			{
-				a[i] = (short) (a[i] - b[i]);
-			}
-
-			return a;
-		}
 
 		public NNUEAccumulator(NNUE network, int bucketIndex)
 		{
@@ -323,8 +282,6 @@ public class NNUE
 
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
 	{
-		int upperBound = INT_SPECIES.loopBound(HIDDEN_SIZE);
-
 		int[] usValues = new int[HIDDEN_SIZE];
 		int[] themValues = new int[HIDDEN_SIZE];
 
@@ -335,6 +292,7 @@ public class NNUE
 		}
 
 		int i = 0;
+		int upperBound = INT_SPECIES.loopBound(HIDDEN_SIZE);
 
 		IntVector sum = IntVector.zero(INT_SPECIES);
 
