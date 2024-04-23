@@ -34,9 +34,9 @@ public class NNUE
 	private static final int QA = 255;
 	private static final int QB = 64;
 
-	private final short[][] L1Weights;
-	private final short[] L1Biases;
-	private final int[][] L2Weights;
+	private final short[][] featureTransformerWeights;
+	private final short[] featureTransformerBiases;
+	private final int[][] L1Weights;
 	private final short outputBiases[];
 
 	private final static int screlu[] = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
@@ -63,12 +63,12 @@ public class NNUE
 		{
 			this.network = network;
 			this.bucketIndex = bucketIndex;
-			values = network.L1Biases.clone();
+			values = network.featureTransformerBiases.clone();
 		}
 
 		public void reset()
 		{
-			values = network.L1Biases.clone();
+			values = network.featureTransformerBiases.clone();
 		}
 
 		public void setBucketIndex(int bucketIndex)
@@ -84,7 +84,7 @@ public class NNUE
 			for (; i < upperBound; i += SPECIES.length())
 			{
 				var va = ShortVector.fromArray(SPECIES, values, i);
-				var vb = ShortVector.fromArray(SPECIES, network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE],
+				var vb = ShortVector.fromArray(SPECIES, network.featureTransformerWeights[featureIndex + bucketIndex * FEATURE_SIZE],
 						i);
 				va = va.add(vb);
 				va.intoArray(values, i);
@@ -93,7 +93,7 @@ public class NNUE
 			// Compute elements not fitting in the vector alignment.
 			for (; i < HIDDEN_SIZE; i++)
 			{
-				values[i] += network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
+				values[i] += network.featureTransformerWeights[featureIndex + bucketIndex * FEATURE_SIZE][i];
 			}
 		}
 
@@ -105,7 +105,7 @@ public class NNUE
 			for (; i < upperBound; i += SPECIES.length())
 			{
 				var va = ShortVector.fromArray(SPECIES, values, i);
-				var vb = ShortVector.fromArray(SPECIES, network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE],
+				var vb = ShortVector.fromArray(SPECIES, network.featureTransformerWeights[featureIndex + bucketIndex * FEATURE_SIZE],
 						i);
 				va = va.sub(vb);
 				va.intoArray(values, i);
@@ -114,7 +114,7 @@ public class NNUE
 			// Compute elements not fitting in the vector alignment.
 			for (; i < HIDDEN_SIZE; i++)
 			{
-				values[i] -= network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
+				values[i] -= network.featureTransformerWeights[featureIndex + bucketIndex * FEATURE_SIZE][i];
 			}
 		}
 
@@ -127,9 +127,9 @@ public class NNUE
 			{
 				var va = ShortVector.fromArray(SPECIES, values, i);
 				var vb = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToAdd + bucketIndex * FEATURE_SIZE], i);
 				var vc = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE], i);
 				va = va.add(vb).sub(vc);
 				va.intoArray(values, i);
 			}
@@ -137,8 +137,8 @@ public class NNUE
 			// Compute elements not fitting in the vector alignment.
 			for (; i < HIDDEN_SIZE; i++)
 			{
-				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
+				values[i] += network.featureTransformerWeights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
+						- network.featureTransformerWeights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
 			}
 		}
 
@@ -151,11 +151,11 @@ public class NNUE
 			{
 				var va = ShortVector.fromArray(SPECIES, values, i);
 				var vb = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE], i);
 				var vc = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE], i);
 				var vd = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE], i);
 				va = va.add(vb).add(vc).sub(vd);
 				va.intoArray(values, i);
 			}
@@ -163,9 +163,9 @@ public class NNUE
 			// Compute elements not fitting in the vector alignment.
 			for (; i < HIDDEN_SIZE; i++)
 			{
-				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
-						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
+				values[i] += network.featureTransformerWeights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
+						+ network.featureTransformerWeights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
+						- network.featureTransformerWeights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
 			}
 		}
 
@@ -178,11 +178,11 @@ public class NNUE
 			{
 				var va = ShortVector.fromArray(SPECIES, values, i);
 				var vb = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToAdd + bucketIndex * FEATURE_SIZE], i);
 				var vc = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE], i);
 				var vd = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE], i);
 				va = va.add(vb).sub(vc).sub(vd);
 				va.intoArray(values, i);
 			}
@@ -190,9 +190,9 @@ public class NNUE
 			// Compute elements not fitting in the vector alignment.
 			for (; i < HIDDEN_SIZE; i++)
 			{
-				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
+				values[i] += network.featureTransformerWeights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
+						- network.featureTransformerWeights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
+						- network.featureTransformerWeights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
 			}
 		}
 
@@ -206,13 +206,13 @@ public class NNUE
 			{
 				var va = ShortVector.fromArray(SPECIES, values, i);
 				var vb = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE], i);
 				var vc = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE], i);
 				var vd = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE], i);
 				var ve = ShortVector.fromArray(SPECIES,
-						network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE], i);
+						network.featureTransformerWeights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE], i);
 				va = va.add(vb).add(vc).sub(vd).sub(ve);
 				va.intoArray(values, i);
 			}
@@ -220,10 +220,10 @@ public class NNUE
 			// Compute elements not fitting in the vector alignment.
 			for (; i < HIDDEN_SIZE; i++)
 			{
-				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
-						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
+				values[i] += network.featureTransformerWeights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
+						+ network.featureTransformerWeights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
+						- network.featureTransformerWeights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
+						- network.featureTransformerWeights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
 			}
 		}
 	}
@@ -237,30 +237,30 @@ public class NNUE
 	{
 		DataInputStream networkData = new DataInputStream(getClass().getResourceAsStream(filePath));
 
-		L1Weights = new short[FEATURE_SIZE * INPUT_BUCKET_SIZE][HIDDEN_SIZE];
+		featureTransformerWeights = new short[FEATURE_SIZE * INPUT_BUCKET_SIZE][HIDDEN_SIZE];
 
 		for (int i = 0; i < FEATURE_SIZE * INPUT_BUCKET_SIZE; i++)
 		{
 			for (int j = 0; j < HIDDEN_SIZE; j++)
 			{
-				L1Weights[i][j] = toLittleEndian(networkData.readShort());
+				featureTransformerWeights[i][j] = toLittleEndian(networkData.readShort());
 			}
 		}
 
-		L1Biases = new short[HIDDEN_SIZE];
+		featureTransformerBiases = new short[HIDDEN_SIZE];
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
-			L1Biases[i] = toLittleEndian(networkData.readShort());
+			featureTransformerBiases[i] = toLittleEndian(networkData.readShort());
 		}
 
-		L2Weights = new int[OUTPUT_BUCKETS][HIDDEN_SIZE * 2];
+		L1Weights = new int[OUTPUT_BUCKETS][HIDDEN_SIZE * 2];
 
 		for (int i = 0; i < HIDDEN_SIZE * 2; i++)
 		{
 			for (int j = 0; j < OUTPUT_BUCKETS; j++)
 			{
-				L2Weights[j][i] = toLittleEndian(networkData.readShort());
+				L1Weights[j][i] = toLittleEndian(networkData.readShort());
 			}
 		}
 
@@ -300,8 +300,8 @@ public class NNUE
 		{
 			IntVector va = IntVector.fromArray(INT_SPECIES, usValues, i);
 			IntVector vb = IntVector.fromArray(INT_SPECIES, themValues, i);
-			IntVector vc = IntVector.fromArray(INT_SPECIES, network.L2Weights[chosenBucket], i);
-			IntVector vd = IntVector.fromArray(INT_SPECIES, network.L2Weights[chosenBucket], i + HIDDEN_SIZE);
+			IntVector vc = IntVector.fromArray(INT_SPECIES, network.L1Weights[chosenBucket], i);
+			IntVector vd = IntVector.fromArray(INT_SPECIES, network.L1Weights[chosenBucket], i + HIDDEN_SIZE);
 
 			va = va.max(0).min(QA);
 			va = va.mul(va).mul(vc);
@@ -316,8 +316,8 @@ public class NNUE
 
 		for (; i < HIDDEN_SIZE; i++)
 		{
-			eval += screlu[usValues[i] - (int) Short.MIN_VALUE] * network.L2Weights[chosenBucket][i]
-					+ screlu[themValues[i] - (int) Short.MIN_VALUE] * network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
+			eval += screlu[usValues[i] - (int) Short.MIN_VALUE] * network.L1Weights[chosenBucket][i]
+					+ screlu[themValues[i] - (int) Short.MIN_VALUE] * network.L1Weights[chosenBucket][i + HIDDEN_SIZE];
 		}
 
 		eval /= QA;
