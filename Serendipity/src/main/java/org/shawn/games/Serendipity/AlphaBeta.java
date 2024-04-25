@@ -459,6 +459,11 @@ public class AlphaBeta
 				{
 					extension = 1;
 				}
+				
+				else if (singularBeta >= beta)
+				{
+					return singularBeta;
+				}
 
 			}
 
