@@ -84,8 +84,8 @@ public class NNUE
 			for (; i < upperBound; i += SPECIES.length())
 			{
 				var va = ShortVector.fromArray(SPECIES, values, i);
-				var vb = ShortVector.fromArray(SPECIES, network.featureTransformerWeights[featureIndex + bucketIndex * FEATURE_SIZE],
-						i);
+				var vb = ShortVector.fromArray(SPECIES,
+						network.featureTransformerWeights[featureIndex + bucketIndex * FEATURE_SIZE], i);
 				va = va.add(vb);
 				va.intoArray(values, i);
 			}
@@ -105,8 +105,8 @@ public class NNUE
 			for (; i < upperBound; i += SPECIES.length())
 			{
 				var va = ShortVector.fromArray(SPECIES, values, i);
-				var vb = ShortVector.fromArray(SPECIES, network.featureTransformerWeights[featureIndex + bucketIndex * FEATURE_SIZE],
-						i);
+				var vb = ShortVector.fromArray(SPECIES,
+						network.featureTransformerWeights[featureIndex + bucketIndex * FEATURE_SIZE], i);
 				va = va.sub(vb);
 				va.intoArray(values, i);
 			}
