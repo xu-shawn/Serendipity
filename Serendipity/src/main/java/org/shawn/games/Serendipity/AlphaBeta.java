@@ -457,7 +457,7 @@ public class AlphaBeta
 
 				if (singularValue < singularBeta)
 				{
-					extension = 1;
+					extension = 2;
 				}
 
 			}
