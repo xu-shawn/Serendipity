@@ -33,7 +33,7 @@ public class AlphaBeta
 
 	private Move[][] pv;
 	private Move[][] counterMoves;
-	private int[][] history;
+	private PieceToHistory history;
 
 	private int rootDepth;
 	private int selDepth;
@@ -64,7 +64,7 @@ public class AlphaBeta
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.counterMoves = new Move[13][65];
-		this.history = new int[13][65];
+		this.history = new PieceToHistory();
 		this.rootDepth = 0;
 		this.searchStack = newSearchStack();
 
@@ -127,6 +127,16 @@ public class AlphaBeta
 		}
 
 		return 0;
+	}
+	
+	private int stat_bonus(int depth)
+	{
+		return depth * 300 - 300;
+	}
+	
+	private int stat_malus(int depth)
+	{
+		return -stat_bonus(depth);
 	}
 
 	public int evaluate(Board board)
@@ -524,18 +534,14 @@ public class AlphaBeta
 
 					for (Move quietMove : quietMovesFailBeta)
 					{
-						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] = Math
-								.max(history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()]
-										- depth * depth, -32768);
+						history.register(board.getPiece(quietMove.getFrom()), quietMove.getTo(), stat_malus(depth));
 					}
 
 					if (isQuiet)
 					{
 						ss.killer = move;
 
-						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] = Math
-								.min(history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()]
-										+ depth * depth, 32767);
+						history.register(board.getPiece(move.getFrom()), move.getTo(), stat_bonus(depth));
 
 						if (lastMove != null)
 						{
@@ -589,14 +595,6 @@ public class AlphaBeta
 				board.getMoveCounter());
 		this.searchStack = newSearchStack();
 		this.accumulators = new AccumulatorManager(network, board);
-
-		for (int i = 0; i < 13; i++)
-		{
-			for (int j = 0; j < 65; j++)
-			{
-				history[i][j] /= 5;
-			}
-		}
 
 		try
 		{
@@ -656,7 +654,7 @@ public class AlphaBeta
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.searchStack = newSearchStack();
 		this.counterMoves = new Move[13][65];
-		this.history = new int[13][65];
+		this.history = new PieceToHistory();
 		this.rootDepth = 0;
 		this.selDepth = 0;
 	}
