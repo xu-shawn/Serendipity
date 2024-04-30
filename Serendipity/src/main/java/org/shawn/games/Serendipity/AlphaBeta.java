@@ -462,9 +462,9 @@ public class AlphaBeta
 
 			}
 
-			if (givesCheck)
+			else if (givesCheck)
 			{
-				extension ++;
+				extension = 1;
 			}
 
 			newdepth += extension;
