@@ -131,7 +131,7 @@ public class AlphaBeta
 	
 	private int stat_bonus(int depth)
 	{
-		return depth * depth;
+		return depth * 300 - 300;
 	}
 	
 	private int stat_malus(int depth)
