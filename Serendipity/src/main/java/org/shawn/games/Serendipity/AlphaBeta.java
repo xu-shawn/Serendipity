@@ -483,6 +483,7 @@ public class AlphaBeta
 			board.doMove(move);
 
 			int thisMoveEval = MIN_EVAL;
+			int historyScore = history.get(board.getPiece(move.getFrom()), move.getTo());
 
 			if (ss.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
@@ -490,6 +491,7 @@ public class AlphaBeta
 
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
+				r -= historyScore / 8192;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
