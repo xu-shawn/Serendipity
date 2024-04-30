@@ -526,7 +526,7 @@ public class AlphaBeta
 					{
 						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] = Math
 								.max(history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()]
-										- depth * 2, -32768);
+										- depth * depth, -32768);
 					}
 
 					if (isQuiet)
@@ -535,7 +535,7 @@ public class AlphaBeta
 
 						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] = Math
 								.min(history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()]
-										+ depth * 2, 32767);
+										+ depth * depth, 32767);
 
 						if (lastMove != null)
 						{
