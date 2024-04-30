@@ -491,7 +491,7 @@ public class AlphaBeta
 
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
-				r -= historyScore / 8192;
+				r -= historyScore / 16384;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
