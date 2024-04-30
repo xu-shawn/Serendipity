@@ -479,7 +479,7 @@ public class AlphaBeta
 				int r = (int) (1.60 + Math.log(depth) * Math.log(ss.moveCount) / 2.17);
 
 				r += isPV ? 0 : 1;
-				r -= givesCheck ? 1 : 0;
+				r -= extension > 0 ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
@@ -526,7 +526,7 @@ public class AlphaBeta
 					{
 						history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()] = Math
 								.max(history[board.getPiece(quietMove.getFrom()).ordinal()][quietMove.getTo().ordinal()]
-										- depth * depth, -32768);
+										- depth * 2, -32768);
 					}
 
 					if (isQuiet)
@@ -535,7 +535,7 @@ public class AlphaBeta
 
 						history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()] = Math
 								.min(history[board.getPiece(move.getFrom()).ordinal()][move.getTo().ordinal()]
-										+ depth * depth, 32767);
+										+ depth * 2, 32767);
 
 						if (lastMove != null)
 						{
