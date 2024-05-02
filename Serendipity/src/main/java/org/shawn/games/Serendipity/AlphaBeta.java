@@ -64,7 +64,7 @@ public class AlphaBeta
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.counterMoves = new Move[13][65];
-		this.history = new PieceToHistory();
+		this.history = new FromToHistory();
 		this.rootDepth = 0;
 		this.searchStack = newSearchStack();
 
@@ -654,7 +654,7 @@ public class AlphaBeta
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.searchStack = newSearchStack();
 		this.counterMoves = new Move[13][65];
-		this.history = new PieceToHistory();
+		this.history = new FromToHistory();
 		this.rootDepth = 0;
 		this.selDepth = 0;
 	}
