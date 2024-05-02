@@ -128,12 +128,12 @@ public class AlphaBeta
 
 		return 0;
 	}
-	
+
 	private int stat_bonus(int depth)
 	{
 		return depth * 300 - 300;
 	}
-	
+
 	private int stat_malus(int depth)
 	{
 		return -stat_bonus(depth);
@@ -372,7 +372,7 @@ public class AlphaBeta
 								.getBitboard(board.getSideToMove())
 				&& staticEval >= beta && ply > 0)
 		{
-			int r = depth / 3 + 4;
+			int r = depth / 3 + 4 + (staticEval - beta) / 4800;
 
 			board.doNullMove();
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
