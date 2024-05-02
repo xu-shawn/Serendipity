@@ -33,7 +33,7 @@ public class AlphaBeta
 
 	private Move[][] pv;
 	private Move[][] counterMoves;
-	private PieceToHistory history;
+	private History history;
 
 	private int rootDepth;
 	private int selDepth;
@@ -534,14 +534,14 @@ public class AlphaBeta
 
 					for (Move quietMove : quietMovesFailBeta)
 					{
-						history.register(board.getPiece(quietMove.getFrom()), quietMove.getTo(), stat_malus(depth));
+						history.register(board, quietMove, stat_malus(depth));
 					}
 
 					if (isQuiet)
 					{
 						ss.killer = move;
 
-						history.register(board.getPiece(move.getFrom()), move.getTo(), stat_bonus(depth));
+						history.register(board, move, stat_bonus(depth));
 
 						if (lastMove != null)
 						{
