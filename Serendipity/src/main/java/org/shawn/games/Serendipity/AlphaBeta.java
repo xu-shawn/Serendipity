@@ -372,7 +372,7 @@ public class AlphaBeta
 								.getBitboard(board.getSideToMove())
 				&& staticEval >= beta && ply > 0)
 		{
-			int r = depth / 3 + 4 + (staticEval - beta) / 4800;
+			int r = depth / 3 + 4 + Math.min((staticEval - beta) / 4800, 3);
 
 			board.doNullMove();
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
