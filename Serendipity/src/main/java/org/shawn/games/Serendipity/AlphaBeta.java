@@ -33,7 +33,7 @@ public class AlphaBeta
 
 	private Move[][] pv;
 	private Move[][] counterMoves;
-	private PieceToHistory history;
+	private History history;
 
 	private int rootDepth;
 	private int selDepth;
@@ -64,7 +64,7 @@ public class AlphaBeta
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.counterMoves = new Move[13][65];
-		this.history = new PieceToHistory();
+		this.history = new FromToHistory();
 		this.rootDepth = 0;
 		this.searchStack = newSearchStack();
 
@@ -534,14 +534,14 @@ public class AlphaBeta
 
 					for (Move quietMove : quietMovesFailBeta)
 					{
-						history.register(board.getPiece(quietMove.getFrom()), quietMove.getTo(), stat_malus(depth));
+						history.register(board, quietMove, stat_malus(depth));
 					}
 
 					if (isQuiet)
 					{
 						ss.killer = move;
 
-						history.register(board.getPiece(move.getFrom()), move.getTo(), stat_bonus(depth));
+						history.register(board, move, stat_bonus(depth));
 
 						if (lastMove != null)
 						{
@@ -654,7 +654,7 @@ public class AlphaBeta
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.searchStack = newSearchStack();
 		this.counterMoves = new Move[13][65];
-		this.history = new PieceToHistory();
+		this.history = new FromToHistory();
 		this.rootDepth = 0;
 		this.selDepth = 0;
 	}

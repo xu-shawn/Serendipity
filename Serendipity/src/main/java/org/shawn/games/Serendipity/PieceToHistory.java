@@ -3,7 +3,7 @@ package org.shawn.games.Serendipity;
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.Move;
 
-public class PieceToHistory
+public class PieceToHistory implements History
 {
 	private int[][] history;
 
@@ -35,5 +35,17 @@ public class PieceToHistory
 
 		history[piece.ordinal()][to.ordinal()] += clampedValue
 				- history[piece.ordinal()][to.ordinal()] * Math.abs(clampedValue) / MAX_BONUS;
+	}
+
+	@Override
+	public int get(Board board, Move move)
+	{
+		return get(board.getPiece(move.getFrom()), move.getTo());
+	}
+
+	@Override
+	public void register(Board board, Move move, int value)
+	{
+		register(board.getPiece(move.getFrom()), move.getTo(), value);
 	}
 }
