@@ -97,7 +97,7 @@ public class UCI
 		if (Math.abs(score) < AlphaBeta.MATE_EVAL - AlphaBeta.MAX_PLY)
 		{
 			System.out.printf("info depth %d seldepth %d nodes %d nps %d score cp %d time %d pv %s\n", depth, selDepth,
-					nodes, nodes * 1000L / Math.max(1, ms), score / PeSTO.MAX_PHASE, ms, String.join(" ", Arrays
+					nodes, nodes * 1000L / Math.max(1, ms), score, ms, String.join(" ", Arrays
 							.stream(pv).takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
 		}
 

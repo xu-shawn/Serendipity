@@ -9,11 +9,11 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class AlphaBeta
 {
-	private final int PAWN_VALUE = 82;
-	private final int KNIGHT_VALUE = 337;
-	private final int BISHOP_VALUE = 365;
-	private final int ROOK_VALUE = 477;
-	private final int QUEEN_VALUE = 1025;
+	private static final int PAWN_VALUE = 82;
+	private static final int KNIGHT_VALUE = 337;
+	private static final int BISHOP_VALUE = 365;
+	private static final int ROOK_VALUE = 477;
+	private static final int QUEEN_VALUE = 1025;
 
 	public static final int MAX_EVAL = 1000000000;
 	public static final int MIN_EVAL = -1000000000;
@@ -22,7 +22,7 @@ public class AlphaBeta
 
 	public static final int MAX_PLY = 256;
 
-	private final int ASPIRATION_DELTA = 603;
+	private final int ASPIRATION_DELTA = 25;
 
 	private final TranspositionTable tt;
 
@@ -145,8 +145,7 @@ public class AlphaBeta
 				? NNUE.evaluate(network, accumulators.getWhiteAccumulator(), accumulators.getBlackAccumulator(),
 						NNUE.chooseOutputBucket(board))
 				: NNUE.evaluate(network, accumulators.getBlackAccumulator(), accumulators.getWhiteAccumulator(),
-						NNUE.chooseOutputBucket(board)))
-				* 24;
+						NNUE.chooseOutputBucket(board)));
 		return v;
 	}
 
@@ -237,7 +236,7 @@ public class AlphaBeta
 				return alpha;
 			}
 
-			futilityBase = standPat + 4932;
+			futilityBase = standPat + 205;
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
 		}
@@ -361,7 +360,7 @@ public class AlphaBeta
 		}
 
 		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && staticEval > beta
-				&& staticEval - depth * 1687 > beta)
+				&& staticEval - depth * 70 > beta)
 		{
 			return beta;
 		}
@@ -456,7 +455,7 @@ public class AlphaBeta
 							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.LOWERBOUND))
 					&& currentMoveEntry.getDepth() > depth - 2)
 			{
-				int singularBeta = currentMoveEntry.getEvaluation() - 72 * depth;
+				int singularBeta = currentMoveEntry.getEvaluation() - 3 * depth;
 				int singularDepth = depth / 2;
 				int moveCountBackup = ss.moveCount;
 
