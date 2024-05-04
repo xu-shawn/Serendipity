@@ -34,6 +34,7 @@ public class AlphaBeta
 	private Move[][] pv;
 	private Move[][] counterMoves;
 	private History history;
+	private int nmpMinPly;
 
 	private int rootDepth;
 	private int selDepth;
@@ -379,7 +380,21 @@ public class AlphaBeta
 
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
 			{
-				return nullEval;
+				if (this.nmpMinPly != 0 || depth < 12)
+				{
+					return nullEval;
+				}
+				
+				this.nmpMinPly = ply + 3 * (depth - r) / 4;
+				
+				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
+				
+				this.nmpMinPly = 0;
+				
+				if (v > beta)
+				{
+					return nullEval;
+				}
 			}
 		}
 
@@ -594,6 +609,7 @@ public class AlphaBeta
 				board.getMoveCounter());
 		this.searchStack = newSearchStack();
 		this.accumulators = new AccumulatorManager(network, board);
+		this.nmpMinPly = 0;
 
 		try
 		{
