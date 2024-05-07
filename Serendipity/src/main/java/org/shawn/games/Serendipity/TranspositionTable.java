@@ -27,6 +27,15 @@ public class TranspositionTable
 			this.evaluation = evaluation;
 			this.move = move;
 		}
+		
+		public void set(NodeType type, int depth, int evaluation, long signature, Move move)
+		{
+			this.signature = signature;
+			this.type = type;
+			this.depth = depth;
+			this.evaluation = evaluation;
+			this.move = move;
+		}
 
 		public long getSignature()
 		{
@@ -47,7 +56,7 @@ public class TranspositionTable
 		{
 			return evaluation;
 		}
-		
+
 		public Move getMove()
 		{
 			return move;
@@ -72,7 +81,15 @@ public class TranspositionTable
 
 	public void write(long hash, NodeType type, int depth, int evaluation, Move move)
 	{
-		entries[(int) (hash & mask)] = new Entry(type, depth, evaluation, hash, move);
+		Entry e = entries[(int) (hash & mask)];
+		if (e == null)
+		{
+			entries[(int) (hash & mask)] = new Entry(type, depth, evaluation, hash, move);
+		}
+		else
+		{
+			entries[(int) (hash & mask)].set(type, depth, evaluation, hash, move);
+		}
 	}
 
 	public void clear()
