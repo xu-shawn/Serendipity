@@ -195,7 +195,7 @@ public class AlphaBeta
 					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
 			}
 		}
-		
+
 		if (ply >= MAX_PLY)
 		{
 			return evaluate(board);
@@ -298,6 +298,17 @@ public class AlphaBeta
 		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3) || board.getHalfMoveCounter() > 100)
 		{
 			return DRAW_EVAL;
+		}
+
+		if (ply > 0)
+		{
+			alpha = Math.max(alpha, -MATE_EVAL + ply);
+			beta = Math.min(beta, MATE_EVAL - ply - 1);
+			
+			if (alpha >= beta)
+			{
+				return alpha;
+			}
 		}
 
 		if (depth <= 0 || ply >= MAX_PLY)
@@ -593,7 +604,8 @@ public class AlphaBeta
 
 		try
 		{
-			for (int i = 1; i <= limits.getDepth() && (i < 4 || !timeManager.stopIterativeDeepening()); i++)
+			for (int i = 1; i <= limits.getDepth() && (i < 4 || !timeManager.stopIterativeDeepening())
+					&& i < MAX_PLY; i++)
 			{
 				rootDepth = i;
 				selDepth = 0;
@@ -620,13 +632,13 @@ public class AlphaBeta
 						}
 						break;
 					}
-					
+
 					else if (newScore <= alpha)
 					{
 						beta = (alpha + beta) / 2;
 						alpha = Math.max(alpha - delta, MIN_EVAL);
 					}
-					
+
 					else
 					{
 						beta = Math.min(beta + delta, MAX_EVAL);
@@ -664,7 +676,7 @@ public class AlphaBeta
 
 		this.internalBoard = board.clone();
 		this.limits = limits.clone();
-		
+
 		iterativeDeepening(suppressOutput);
 
 		return lastCompletePV[0];
