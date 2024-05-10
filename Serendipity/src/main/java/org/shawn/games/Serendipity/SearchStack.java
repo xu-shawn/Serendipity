@@ -27,14 +27,6 @@ public class SearchStack
 	
 	public SearchState get(int index)
 	{
-		if (index < 0 || index >= stack.length)
-		{
-			return null;
-		}
-		
-		else
-		{
-			return stack[index];
-		}
+		return stack[index + 2];
 	}
 }
