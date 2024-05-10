@@ -22,8 +22,6 @@ public class AlphaBeta
 
 	public static final int MAX_PLY = 256;
 
-	private final int ASPIRATION_DELTA = 25;
-
 	private final TranspositionTable tt;
 
 	private TimeManager timeManager;
@@ -32,6 +30,7 @@ public class AlphaBeta
 	private int nodesLimit;
 
 	private Move[][] pv;
+	private Move[] lastCompletePV;
 	private Move[][] counterMoves;
 	private History history;
 	private int nmpMinPly;
@@ -43,6 +42,9 @@ public class AlphaBeta
 	private AccumulatorManager accumulators;
 
 	private SearchStack ss;
+
+	private Board internalBoard;
+	private Limits limits;
 
 	public AlphaBeta(NNUE network)
 	{
@@ -570,24 +572,19 @@ public class AlphaBeta
 		return bestValue;
 	}
 
-	public Move nextMove(Board board, Limits limits)
+	public void iterativeDeepening(boolean suppressOutput)
 	{
-		return nextMove(board, limits, false);
-	}
+		int currentScore;
+		int alpha, beta;
+		int delta;
 
-	public Move nextMove(Board board, Limits limits, boolean supressOutput)
-	{
-		int currentScore = MIN_EVAL;
+		currentScore = MIN_EVAL;
 		counterMoves = new Move[13][65];
+		lastCompletePV = null;
+		alpha = MIN_EVAL;
+		beta = MAX_EVAL;
+		delta = 25;
 		clearPV();
-		Move[] lastCompletePV = null;
-		this.nodesCount = 0;
-		this.nodesLimit = limits.getNodes();
-		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
-				board.getMoveCounter());
-		this.ss = new SearchStack(MAX_PLY);
-		this.accumulators = new AccumulatorManager(network, board);
-		this.nmpMinPly = 0;
 
 		try
 		{
@@ -595,29 +592,42 @@ public class AlphaBeta
 			{
 				rootDepth = i;
 				selDepth = 0;
+
 				if (i > 3)
 				{
-					int newScore = mainSearch(board, i, currentScore - ASPIRATION_DELTA,
-							currentScore + ASPIRATION_DELTA, 0, false);
-					if (newScore > currentScore - ASPIRATION_DELTA && newScore < currentScore + ASPIRATION_DELTA)
-					{
-						currentScore = newScore;
-						lastCompletePV = pv[0].clone();
-						if (!supressOutput)
-						{
-							UCI.report(i, selDepth, nodesCount, currentScore, timeManager.timePassed(), lastCompletePV);
-						}
-						continue;
-					}
+					delta = 25;
+					alpha = currentScore - delta;
+					beta = currentScore + delta;
 				}
 
-				currentScore = mainSearch(board, i, MIN_EVAL, MAX_EVAL, 0, false);
-
-				lastCompletePV = pv[0].clone();
-
-				if (!supressOutput)
+				while (true)
 				{
-					UCI.report(i, selDepth, nodesCount, currentScore, timeManager.timePassed(), lastCompletePV);
+					int newScore = mainSearch(this.internalBoard, i, alpha, beta, 0, false);
+
+					if (newScore > alpha && newScore < beta)
+					{
+						currentScore = newScore;
+						this.lastCompletePV = pv[0].clone();
+						if (!suppressOutput)
+						{
+							UCI.report(i, selDepth, nodesCount, currentScore, timeManager.timePassed(),
+									this.lastCompletePV);
+						}
+						break;
+					}
+					
+					else if (newScore <= alpha)
+					{
+						beta = (alpha + beta) / 2;
+						alpha = Math.max(alpha - delta, MIN_EVAL);
+					}
+					
+					else
+					{
+						beta = Math.min(beta + delta, MAX_EVAL);
+					}
+
+					delta += delta * 3;
 				}
 			}
 		}
@@ -626,10 +636,31 @@ public class AlphaBeta
 		{
 		}
 
-		if (!supressOutput)
+		if (!suppressOutput)
 		{
 			UCI.reportBestMove(lastCompletePV[0]);
 		}
+	}
+
+	public Move nextMove(Board board, Limits limits)
+	{
+		return nextMove(board, limits, false);
+	}
+
+	public Move nextMove(Board board, Limits limits, boolean suppressOutput)
+	{
+		this.nodesCount = 0;
+		this.nodesLimit = limits.getNodes();
+		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
+				board.getMoveCounter());
+		this.ss = new SearchStack(MAX_PLY);
+		this.accumulators = new AccumulatorManager(network, board);
+		this.nmpMinPly = 0;
+
+		this.internalBoard = board.clone();
+		this.limits = limits.clone();
+		
+		iterativeDeepening(suppressOutput);
 
 		return lastCompletePV[0];
 	}
