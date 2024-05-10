@@ -14,6 +14,7 @@ public class AlphaBeta
 	private static final int BISHOP_VALUE = 365;
 	private static final int ROOK_VALUE = 477;
 	private static final int QUEEN_VALUE = 1025;
+	private static final int VALUE_NONE = 32002;
 
 	public static final int MAX_EVAL = 1000000000;
 	public static final int MIN_EVAL = -1000000000;
@@ -280,15 +281,21 @@ public class AlphaBeta
 		this.nodesCount++;
 		this.pv[ply][0] = null;
 		this.ss.get(ply + 2).killer = null;
-		var sse = ss.get(ply);
-		sse.moveCount = 0;
-		boolean isPV = beta - alpha > 1;
-		boolean inCheck = sse.inCheck = board.isKingAttacked();
-		boolean givesCheck;
-		boolean inSingularSearch = sse.excludedMove != null;
-		Move bestMove = null;
-		int bestValue = MIN_EVAL;
 		this.selDepth = Math.max(this.selDepth, ply);
+
+		boolean improving, isPV, inCheck, givesCheck, inSingularSearch;
+		Move bestMove;
+		int bestValue;
+		int eval;
+
+		var sse = ss.get(ply);
+
+		bestValue = MIN_EVAL;
+		bestMove = null;
+		sse.moveCount = 0;
+		isPV = beta - alpha > 1;
+		inCheck = sse.inCheck = board.isKingAttacked();
+		inSingularSearch = sse.excludedMove != null;
 
 		if ((nodesCount & 1023) == 0 && (timeManager.stop() || (nodesLimit > 0 && nodesCount > nodesLimit)))
 		{
@@ -304,7 +311,7 @@ public class AlphaBeta
 		{
 			alpha = Math.max(alpha, -MATE_EVAL + ply);
 			beta = Math.min(beta, MATE_EVAL - ply - 1);
-			
+
 			if (alpha >= beta)
 			{
 				return alpha;
@@ -324,7 +331,7 @@ public class AlphaBeta
 		if (!inSingularSearch && !isPV && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
 		{
-			int eval = currentMoveEntry.getEvaluation();
+			eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getType())
 			{
 				case EXACT:
@@ -346,18 +353,22 @@ public class AlphaBeta
 			}
 		}
 
-		int staticEval;
-
-		if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+		if (inCheck)
 		{
-			staticEval = currentMoveEntry.getEvaluation();
+			eval = sse.staticEval = VALUE_NONE;
+		}
+		else if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+		{
+			eval = sse.staticEval = currentMoveEntry.getEvaluation();
 		}
 		else
 		{
-			staticEval = evaluate(board);
+			eval = sse.staticEval = evaluate(board);
 		}
+		
+		improving = ss.get(-2).staticEval != VALUE_NONE && ss.get(-2).staticEval < sse.staticEval;
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 70 > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 70 > beta)
 		{
 			return beta;
 		}
@@ -366,7 +377,7 @@ public class AlphaBeta
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
-				&& staticEval >= beta && ply > 0)
+				&& eval >= beta && ply > 0)
 		{
 			int r = depth / 3 + 4;
 
@@ -410,10 +421,7 @@ public class AlphaBeta
 
 		int oldAlpha = alpha;
 
-//		Move ttMove = sortMoves(legalMoves, board, ply);
-
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
-
 		MoveBackup lastMove = board.getBackup().peekLast();
 		Move counterMove = null;
 
@@ -446,7 +454,7 @@ public class AlphaBeta
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
-			if (isQuiet && !isPV && !givesCheck && depth <= 6 && sse.moveCount > 3 + depth * depth
+			if (isQuiet && !isPV && !givesCheck && depth <= 6 && sse.moveCount > 3 + depth * depth / (improving ? 1 : 2)
 					&& alpha > -MATE_EVAL + 1024)
 			{
 				continue;

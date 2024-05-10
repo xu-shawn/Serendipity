@@ -9,6 +9,7 @@ public class SearchStack
 		public boolean inCheck;
 		public boolean ttHit;
 		public int moveCount;
+		public int staticEval;
 		public Move killer;
 		public Move excludedMove;
 	}
