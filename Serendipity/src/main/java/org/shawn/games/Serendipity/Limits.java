@@ -72,4 +72,9 @@ public class Limits
 	{
 		this.depth = depth;
 	}
+
+	public Limits clone()
+	{
+		return new Limits(time, increment, movesToGo, nodes, depth);
+	}
 }
