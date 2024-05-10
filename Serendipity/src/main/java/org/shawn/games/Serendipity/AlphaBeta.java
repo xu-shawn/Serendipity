@@ -195,6 +195,11 @@ public class AlphaBeta
 					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
 			}
 		}
+		
+		if (ply >= MAX_PLY)
+		{
+			return evaluate(board);
+		}
 
 		int futilityBase;
 		boolean inCheck = ss.get(ply).inCheck = board.isKingAttacked();
