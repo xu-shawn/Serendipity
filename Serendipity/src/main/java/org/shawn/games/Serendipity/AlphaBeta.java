@@ -269,7 +269,7 @@ public class AlphaBeta
 		return bestScore;
 	}
 
-	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed)
+	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed, boolean isPV)
 			throws TimeOutException
 	{
 		this.nodesCount++;
@@ -277,7 +277,6 @@ public class AlphaBeta
 		this.ss.get(ply + 2).killer = null;
 		var sse = ss.get(ply);
 		sse.moveCount = 0;
-		boolean isPV = beta - alpha > 1;
 		boolean inCheck = sse.inCheck = board.isKingAttacked();
 		boolean givesCheck;
 		boolean inSingularSearch = sse.excludedMove != null;
@@ -355,7 +354,7 @@ public class AlphaBeta
 			int r = depth / 3 + 4;
 
 			board.doNullMove();
-			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
+			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false, false);
 			board.undoMove();
 
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
@@ -367,7 +366,7 @@ public class AlphaBeta
 
 				this.nmpMinPly = ply + 3 * (depth - r) / 4;
 
-				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
+				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false, false);
 
 				this.nmpMinPly = 0;
 
@@ -455,7 +454,7 @@ public class AlphaBeta
 				int moveCountBackup = sse.moveCount;
 
 				sse.excludedMove = move;
-				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, false);
+				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, false, false);
 				sse.excludedMove = null;
 				sse.moveCount = moveCountBackup;
 
@@ -487,22 +486,22 @@ public class AlphaBeta
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
-				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1, true);
+				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1, true, false);
 
 				if (thisMoveEval > alpha)
 				{
-					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
+					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true, false);
 				}
 			}
 
 			else if (!isPV || sse.moveCount > 1)
 			{
-				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
+				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true, false);
 			}
 
 			if (isPV && (sse.moveCount == 1 || thisMoveEval > alpha))
 			{
-				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
+				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true, true);
 			}
 
 			board.undoMove();
@@ -595,14 +594,14 @@ public class AlphaBeta
 
 				if (i > 3)
 				{
-					delta = 25;
+					delta = 15;
 					alpha = currentScore - delta;
 					beta = currentScore + delta;
 				}
 
 				while (true)
 				{
-					int newScore = mainSearch(this.internalBoard, i, alpha, beta, 0, false);
+					int newScore = mainSearch(this.internalBoard, i, alpha, beta, 0, false, true);
 
 					if (newScore > alpha && newScore < beta)
 					{
