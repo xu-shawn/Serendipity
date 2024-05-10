@@ -612,7 +612,7 @@ public class AlphaBeta
 
 				if (i > 3)
 				{
-					delta = 25;
+					delta = 20;
 					alpha = currentScore - delta;
 					beta = currentScore + delta;
 				}
