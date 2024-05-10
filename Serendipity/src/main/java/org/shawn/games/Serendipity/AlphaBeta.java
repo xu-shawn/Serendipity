@@ -42,16 +42,7 @@ public class AlphaBeta
 	private NNUE network;
 	private AccumulatorManager accumulators;
 
-	private class SearchState
-	{
-		public boolean inCheck;
-		public boolean ttHit;
-		public int moveCount;
-		public Move killer;
-		public Move excludedMove;
-	}
-
-	private SearchState[] searchStack;
+	private SearchStack ss;
 
 	public AlphaBeta(NNUE network)
 	{
@@ -67,21 +58,9 @@ public class AlphaBeta
 		this.counterMoves = new Move[13][65];
 		this.history = new FromToHistory();
 		this.rootDepth = 0;
-		this.searchStack = newSearchStack();
+		this.ss = new SearchStack(MAX_PLY);
 
 		this.network = network;
-	}
-
-	private SearchState[] newSearchStack()
-	{
-		SearchState[] newss = new SearchState[MAX_PLY + 10];
-
-		for (int i = 0; i < newss.length; i++)
-		{
-			newss[i] = new SearchState();
-		}
-
-		return newss;
 	}
 
 	private void updatePV(Move move, int ply)
@@ -129,12 +108,12 @@ public class AlphaBeta
 
 		return 0;
 	}
-	
+
 	private int stat_bonus(int depth)
 	{
 		return depth * 300 - 300;
 	}
-	
+
 	private int stat_malus(int depth)
 	{
 		return -stat_bonus(depth);
@@ -216,7 +195,7 @@ public class AlphaBeta
 		}
 
 		int futilityBase;
-		boolean inCheck = searchStack[ply].inCheck = board.isKingAttacked();
+		boolean inCheck = ss.get(ply).inCheck = board.isKingAttacked();
 		final List<Move> moves;
 
 		if (inCheck)
@@ -291,15 +270,15 @@ public class AlphaBeta
 	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean nullAllowed)
 			throws TimeOutException
 	{
-		SearchState ss = searchStack[ply];
 		this.nodesCount++;
 		this.pv[ply][0] = null;
-		this.searchStack[ply + 2].killer = null;
-		ss.moveCount = 0;
+		this.ss.get(ply + 2).killer = null;
+		var sse = ss.get(ply);
+		sse.moveCount = 0;
 		boolean isPV = beta - alpha > 1;
-		boolean inCheck = ss.inCheck = board.isKingAttacked();
+		boolean inCheck = sse.inCheck = board.isKingAttacked();
 		boolean givesCheck;
-		boolean inSingularSearch = ss.excludedMove != null;
+		boolean inSingularSearch = sse.excludedMove != null;
 		Move bestMove = null;
 		int bestValue = MIN_EVAL;
 		this.selDepth = Math.max(this.selDepth, ply);
@@ -322,7 +301,7 @@ public class AlphaBeta
 
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
-		ss.ttHit = currentMoveEntry != null;
+		sse.ttHit = currentMoveEntry != null;
 
 		if (!inSingularSearch && !isPV && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
 				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
@@ -360,8 +339,7 @@ public class AlphaBeta
 			staticEval = evaluate(board);
 		}
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && staticEval > beta
-				&& staticEval - depth * 70 > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && staticEval > beta && staticEval - depth * 70 > beta)
 		{
 			return beta;
 		}
@@ -384,13 +362,13 @@ public class AlphaBeta
 				{
 					return nullEval;
 				}
-				
+
 				this.nmpMinPly = ply + 3 * (depth - r) / 4;
-				
+
 				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
-				
+
 				this.nmpMinPly = 0;
-				
+
 				if (v > beta)
 				{
 					return nullEval;
@@ -425,7 +403,7 @@ public class AlphaBeta
 			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
 					.getTo().ordinal()];
 
-		MoveSort.sortMoves(legalMoves, ttMove, ss.killer, counterMove, history, board);
+		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, board);
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
@@ -436,12 +414,12 @@ public class AlphaBeta
 
 		for (Move move : legalMoves)
 		{
-			if (move.equals(ss.excludedMove))
+			if (move.equals(sse.excludedMove))
 			{
 				continue;
 			}
 
-			ss.moveCount++;
+			sse.moveCount++;
 			int newdepth = depth - 1;
 			board.doMove(move);
 			givesCheck = board.isKingAttacked();
@@ -450,7 +428,7 @@ public class AlphaBeta
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
-			if (isQuiet && !isPV && !givesCheck && depth <= 6 && ss.moveCount > 3 + depth * depth
+			if (isQuiet && !isPV && !givesCheck && depth <= 6 && sse.moveCount > 3 + depth * depth
 					&& alpha > -MATE_EVAL + 1024)
 			{
 				continue;
@@ -472,12 +450,12 @@ public class AlphaBeta
 			{
 				int singularBeta = currentMoveEntry.getEvaluation() - 3 * depth;
 				int singularDepth = depth / 2;
-				int moveCountBackup = ss.moveCount;
+				int moveCountBackup = sse.moveCount;
 
-				ss.excludedMove = move;
+				sse.excludedMove = move;
 				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, false);
-				ss.excludedMove = null;
-				ss.moveCount = moveCountBackup;
+				sse.excludedMove = null;
+				sse.moveCount = moveCountBackup;
 
 				if (singularValue < singularBeta)
 				{
@@ -498,9 +476,9 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (ss.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
+			if (sse.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
-				int r = (int) (1.60 + Math.log(depth) * Math.log(ss.moveCount) / 2.17);
+				int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
 
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
@@ -515,12 +493,12 @@ public class AlphaBeta
 				}
 			}
 
-			else if (!isPV || ss.moveCount > 1)
+			else if (!isPV || sse.moveCount > 1)
 			{
 				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
 			}
 
-			if (isPV && (ss.moveCount == 1 || thisMoveEval > alpha))
+			if (isPV && (sse.moveCount == 1 || thisMoveEval > alpha))
 			{
 				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
 			}
@@ -553,7 +531,7 @@ public class AlphaBeta
 
 					if (isQuiet)
 					{
-						ss.killer = move;
+						sse.killer = move;
 
 						history.register(board, move, stat_bonus(depth));
 
@@ -574,7 +552,7 @@ public class AlphaBeta
 			}
 		}
 
-		if (ss.moveCount == 0)
+		if (sse.moveCount == 0)
 		{
 			return -MATE_EVAL + ply;
 		}
@@ -607,7 +585,7 @@ public class AlphaBeta
 		this.nodesLimit = limits.getNodes();
 		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
 				board.getMoveCounter());
-		this.searchStack = newSearchStack();
+		this.ss = new SearchStack(MAX_PLY);
 		this.accumulators = new AccumulatorManager(network, board);
 		this.nmpMinPly = 0;
 
@@ -667,7 +645,7 @@ public class AlphaBeta
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
-		this.searchStack = newSearchStack();
+		this.ss = new SearchStack(MAX_PLY);
 		this.counterMoves = new Move[13][65];
 		this.history = new FromToHistory();
 		this.rootDepth = 0;
