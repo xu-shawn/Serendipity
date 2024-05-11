@@ -9,7 +9,7 @@ public class SearchStack
 		public boolean inCheck;
 		public boolean ttHit;
 		public int moveCount;
-		public int staticEval;
+		public int staticEval = AlphaBeta.VALUE_NONE;
 		public Move killer;
 		public Move excludedMove;
 	}

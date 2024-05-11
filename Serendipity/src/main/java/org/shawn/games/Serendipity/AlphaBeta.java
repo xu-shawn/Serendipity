@@ -14,8 +14,8 @@ public class AlphaBeta
 	private static final int BISHOP_VALUE = 365;
 	private static final int ROOK_VALUE = 477;
 	private static final int QUEEN_VALUE = 1025;
-	private static final int VALUE_NONE = 32002;
-
+	
+	public static final int VALUE_NONE = 32002;
 	public static final int MAX_EVAL = 1000000000;
 	public static final int MIN_EVAL = -1000000000;
 	public static final int MATE_EVAL = 500000000;
