@@ -455,7 +455,7 @@ public class AlphaBeta
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
-			if (isQuiet && !isPV && !givesCheck && depth <= 6 && sse.moveCount > 3 + depth * depth / (improving ? 2 : 1)
+			if (isQuiet && !isPV && !givesCheck && depth <= 6 && sse.moveCount > 3 + depth * depth
 					&& alpha > -MATE_EVAL + 1024)
 			{
 				continue;
