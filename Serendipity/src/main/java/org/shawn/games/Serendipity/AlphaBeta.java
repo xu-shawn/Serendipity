@@ -14,7 +14,7 @@ public class AlphaBeta
 	private static final int BISHOP_VALUE = 365;
 	private static final int ROOK_VALUE = 477;
 	private static final int QUEEN_VALUE = 1025;
-	
+
 	public static final int VALUE_NONE = 32002;
 	public static final int MAX_EVAL = 1000000000;
 	public static final int MIN_EVAL = -1000000000;
@@ -366,7 +366,8 @@ public class AlphaBeta
 			eval = sse.staticEval = evaluate(board);
 		}
 
-		improving = !inCheck && ss.get(-2).staticEval != VALUE_NONE && ss.get(-2).staticEval < sse.staticEval;
+		improving = !inCheck && (ss.get(-2).staticEval != VALUE_NONE ? (ss.get(-2).staticEval < sse.staticEval)
+				: (ss.get(-4).staticEval != VALUE_NONE && ss.get(-4).staticEval < sse.staticEval));
 
 		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 70 > beta)
 		{
