@@ -28,6 +28,6 @@ public class SearchStack
 	
 	public SearchState get(int index)
 	{
-		return stack[index + 2];
+		return stack[index + 5];
 	}
 }
