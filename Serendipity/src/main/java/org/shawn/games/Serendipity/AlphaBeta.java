@@ -366,8 +366,8 @@ public class AlphaBeta
 			eval = sse.staticEval = evaluate(board);
 		}
 
-		improving = !inCheck && (ss.get(-2).staticEval != VALUE_NONE ? (ss.get(-2).staticEval < sse.staticEval)
-				: (ss.get(-4).staticEval != VALUE_NONE && ss.get(-4).staticEval < sse.staticEval));
+		improving = !inCheck && ((ss.get(-2).staticEval != VALUE_NONE ? (ss.get(-2).staticEval < sse.staticEval)
+				: (ss.get(-4).staticEval != VALUE_NONE && ss.get(-4).staticEval < sse.staticEval)));
 
 		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 70 > beta)
 		{
@@ -455,7 +455,7 @@ public class AlphaBeta
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
-			if (isQuiet && !isPV && !givesCheck && depth <= 6 && sse.moveCount > 3 + depth * depth
+			if (isQuiet && !isPV && !givesCheck && depth <= 6 && sse.moveCount > 3 + depth * depth / (improving ? 1 : 2)
 					&& alpha > -MATE_EVAL + 1024)
 			{
 				continue;
