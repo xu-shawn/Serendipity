@@ -366,8 +366,24 @@ public class AlphaBeta
 			eval = sse.staticEval = evaluate(board);
 		}
 
-		improving = !inCheck && ((ss.get(-2).staticEval != VALUE_NONE ? (ss.get(-2).staticEval < sse.staticEval)
-				: (ss.get(-4).staticEval != VALUE_NONE && ss.get(-4).staticEval < sse.staticEval)));
+		improving = false;
+
+		if (!inCheck)
+		{
+			if (ss.get(-2).staticEval != VALUE_NONE)
+			{
+				improving = ss.get(-2).staticEval < sse.staticEval;
+			}
+
+			else if (ss.get(-4).staticEval != VALUE_NONE)
+			{
+				improving = ss.get(-4).staticEval < sse.staticEval;
+			}
+			else
+			{
+				improving = true;
+			}
+		}
 
 		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 70 > beta)
 		{
