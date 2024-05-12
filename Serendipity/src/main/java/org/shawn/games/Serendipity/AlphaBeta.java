@@ -381,7 +381,7 @@ public class AlphaBeta
 			}
 			else
 			{
-				improving = false;
+				improving = true;
 			}
 		}
 
@@ -471,7 +471,7 @@ public class AlphaBeta
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
-			if (isQuiet && !isPV && !givesCheck && sse.moveCount > 3 + depth * depth / (improving ? 1 : 2)
+			if (isQuiet && !isPV && !givesCheck && sse.moveCount > (3 + depth * depth) / (improving ? 1 : 2)
 					&& alpha > -MATE_EVAL + 1024)
 			{
 				continue;
