@@ -390,7 +390,7 @@ public class AlphaBeta
 			return beta;
 		}
 
-		if (!inSingularSearch && nullAllowed && beta < MATE_EVAL - 1024 && !inCheck
+		if (!isPV && !inSingularSearch && nullAllowed && beta < MATE_EVAL - 1024 && !inCheck
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove())
