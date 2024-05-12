@@ -381,7 +381,7 @@ public class AlphaBeta
 			}
 			else
 			{
-				improving = true;
+				improving = false;
 			}
 		}
 
