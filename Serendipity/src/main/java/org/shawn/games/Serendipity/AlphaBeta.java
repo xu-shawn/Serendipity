@@ -359,7 +359,8 @@ public class AlphaBeta
 		}
 		else if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
 		{
-			eval = sse.staticEval = currentMoveEntry.getEvaluation();
+			eval = currentMoveEntry.getEvaluation();
+			sse.staticEval = evaluate(board);
 		}
 		else
 		{
