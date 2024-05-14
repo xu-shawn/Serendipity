@@ -126,10 +126,10 @@ public class AlphaBeta
 	{
 		int margin = depth * 70;
 
-		if (improving)
-		{
-			margin -= 70;
-		}
+//		if (improving)
+//		{
+//			margin -= 70;
+//		}
 
 		return margin;
 	}
