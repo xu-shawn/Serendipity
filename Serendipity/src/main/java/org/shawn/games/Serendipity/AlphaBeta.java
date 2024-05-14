@@ -397,7 +397,8 @@ public class AlphaBeta
 			}
 		}
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval - depth * 70 > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta
+				&& eval - futility_margin(depth, improving) > beta)
 		{
 			return beta;
 		}
