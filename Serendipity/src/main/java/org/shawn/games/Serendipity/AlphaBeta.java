@@ -122,6 +122,18 @@ public class AlphaBeta
 		return -stat_bonus(depth);
 	}
 
+	private int futility_margin(int depth, boolean improving)
+	{
+		int margin = depth * 70;
+
+		if (improving)
+		{
+			margin -= 70;
+		}
+
+		return margin;
+	}
+
 	public int evaluate(Board board)
 	{
 		int v = (Side.WHITE.equals(board.getSideToMove())
@@ -385,7 +397,7 @@ public class AlphaBeta
 			}
 		}
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - (improving ? depth - 1 : depth) * 70 > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval - depth * 70 > beta)
 		{
 			return beta;
 		}
