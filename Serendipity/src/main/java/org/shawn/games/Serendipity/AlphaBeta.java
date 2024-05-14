@@ -385,7 +385,7 @@ public class AlphaBeta
 			}
 		}
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * (improving ? 60 : 70) > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - (improving ? depth - 1 : depth) * 70 > beta)
 		{
 			return beta;
 		}
