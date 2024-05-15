@@ -126,7 +126,7 @@ public class AlphaBeta
 	{
 		int margin = depth * 70;
 
-		if (improving)
+		if (!improving)
 		{
 			margin -= 50;
 		}
