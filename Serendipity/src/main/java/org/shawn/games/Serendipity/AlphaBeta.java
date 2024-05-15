@@ -128,7 +128,7 @@ public class AlphaBeta
 
 		if (!improving)
 		{
-			margin -= 50;
+			margin -= 70;
 		}
 
 		return margin;
