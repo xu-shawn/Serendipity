@@ -360,10 +360,10 @@ public class AlphaBeta
 		}
 		else
 		{
-			sse.staticEval = evaluate(board);
 
 			if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
 			{
+				sse.staticEval = currentMoveEntry.getStaticEval();
 				eval = currentMoveEntry.getEvaluation();
 				switch (currentMoveEntry.getType())
 				{
@@ -387,7 +387,7 @@ public class AlphaBeta
 			}
 			else
 			{
-				eval = sse.staticEval;
+				eval = sse.staticEval = evaluate(board);
 			}
 		}
 
