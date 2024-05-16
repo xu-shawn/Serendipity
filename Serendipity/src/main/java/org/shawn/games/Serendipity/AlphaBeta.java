@@ -360,7 +360,35 @@ public class AlphaBeta
 		}
 		else
 		{
-			eval = sse.staticEval = evaluate(board);
+			sse.staticEval = evaluate(board);
+
+			if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+			{
+				eval = currentMoveEntry.getEvaluation();
+				switch (currentMoveEntry.getType())
+				{
+					case EXACT:
+						break;
+					case UPPERBOUND:
+						if (eval < sse.staticEval)
+						{
+							return eval;
+						}
+						break;
+					case LOWERBOUND:
+						if (eval > sse.staticEval)
+						{
+							return eval;
+						}
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
+				}
+			}
+			else
+			{
+				eval = sse.staticEval;
+			}
 		}
 
 		improving = false;
