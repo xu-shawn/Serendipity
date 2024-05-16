@@ -360,7 +360,7 @@ public class AlphaBeta
 		}
 		else
 		{
-			sse.staticEval = evaluate(board);
+			eval = sse.staticEval = evaluate(board);
 		}
 
 		improving = false;
