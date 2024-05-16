@@ -358,19 +358,9 @@ public class AlphaBeta
 		{
 			eval = sse.staticEval = VALUE_NONE;
 		}
-		else if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
-		{
-			eval = sse.staticEval = currentMoveEntry.getStaticEval();
-
-			if (currentMoveEntry
-					.getType() != (currentMoveEntry.getEvaluation() > eval ? NodeType.UPPERBOUND : NodeType.LOWERBOUND))
-			{
-				eval = currentMoveEntry.getEvaluation();
-			}
-		}
 		else
 		{
-			eval = sse.staticEval = evaluate(board);
+			sse.staticEval = evaluate(board);
 		}
 
 		improving = false;
