@@ -370,15 +370,15 @@ public class AlphaBeta
 					case EXACT:
 						break;
 					case UPPERBOUND:
-						if (eval < sse.staticEval)
+						if (eval > sse.staticEval)
 						{
-							return eval;
+							eval = sse.staticEval;
 						}
 						break;
 					case LOWERBOUND:
-						if (eval > sse.staticEval)
+						if (eval < sse.staticEval)
 						{
-							return eval;
+							eval = sse.staticEval;
 						}
 						break;
 					default:
