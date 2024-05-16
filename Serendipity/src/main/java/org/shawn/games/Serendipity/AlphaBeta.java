@@ -363,7 +363,7 @@ public class AlphaBeta
 			eval = sse.staticEval = currentMoveEntry.getStaticEval();
 
 			if (currentMoveEntry
-					.getType() != (currentMoveEntry.getEvaluation() > eval ? NodeType.LOWERBOUND : NodeType.UPPERBOUND))
+					.getType() != (currentMoveEntry.getEvaluation() > eval ? NodeType.UPPERBOUND : NodeType.LOWERBOUND))
 			{
 				eval = currentMoveEntry.getEvaluation();
 			}
