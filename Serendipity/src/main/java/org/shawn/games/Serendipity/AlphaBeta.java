@@ -352,6 +352,8 @@ public class AlphaBeta
 				default:
 					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
 			}
+			
+			depth ++;
 		}
 
 		if (inCheck)
