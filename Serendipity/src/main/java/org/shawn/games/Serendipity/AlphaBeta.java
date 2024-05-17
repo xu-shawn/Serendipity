@@ -113,6 +113,11 @@ public class AlphaBeta
 		return 0;
 	}
 
+	private int futility_margin(int depth, boolean improving)
+	{
+		return depth * 70 - (improving ? 70 : 0);
+	}
+
 	private int stat_bonus(int depth)
 	{
 		return depth * 300 - 300;
@@ -410,7 +415,8 @@ public class AlphaBeta
 			}
 		}
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 70 > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta
+				&& eval - futility_margin(depth, improving) > beta)
 		{
 			return beta;
 		}
