@@ -2,6 +2,7 @@ package org.shawn.games.Serendipity;
 
 import java.util.*;
 
+import org.shawn.games.Serendipity.TranspositionTable.NodeType;
 import org.shawn.games.Serendipity.NNUE.*;
 
 import com.github.bhlangonijr.chesslib.*;
@@ -357,13 +358,37 @@ public class AlphaBeta
 		{
 			eval = sse.staticEval = VALUE_NONE;
 		}
-		else if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
-		{
-			eval = sse.staticEval = currentMoveEntry.getEvaluation();
-		}
 		else
 		{
-			eval = sse.staticEval = evaluate(board);
+
+			if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+			{
+				sse.staticEval = currentMoveEntry.getStaticEval();
+				eval = currentMoveEntry.getEvaluation();
+				switch (currentMoveEntry.getType())
+				{
+					case EXACT:
+						break;
+					case UPPERBOUND:
+						if (eval > sse.staticEval)
+						{
+							eval = sse.staticEval;
+						}
+						break;
+					case LOWERBOUND:
+						if (eval < sse.staticEval)
+						{
+							eval = sse.staticEval;
+						}
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
+				}
+			}
+			else
+			{
+				eval = sse.staticEval = evaluate(board);
+			}
 		}
 
 		improving = false;
@@ -565,7 +590,7 @@ public class AlphaBeta
 				if (alpha >= beta)
 				{
 					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
-							bestMove);
+							bestMove, sse.staticEval);
 
 					for (Move quietMove : quietMovesFailBeta)
 					{
@@ -602,12 +627,14 @@ public class AlphaBeta
 
 		if (alpha == oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue, ttMove);
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue, ttMove,
+					sse.staticEval);
 		}
 
 		else if (alpha > oldAlpha)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, bestValue, bestMove);
+			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, bestValue, bestMove,
+					sse.staticEval);
 		}
 
 		return bestValue;
