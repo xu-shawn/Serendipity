@@ -75,7 +75,7 @@ public class AlphaBeta
 	private static final IntegerOption i1 = new IntegerOption(3, 1, 7, "i1");// Step: 0.5
 	private static final IntegerOption i2 = new IntegerOption(1, 1, 7, "i2");// Step: 0.5
 	private static final IntegerOption i3 = new IntegerOption(2, 1, 7, "i3");// Step: 0.5
-	private static final IntegerOption i4 = new IntegerOption(130, 0, 300, "i4");// Step: 10
+	private static final IntegerOption i4 = new IntegerOption(160, 0, 300, "i4");// Step: 10
 	private static final IntegerOption i5 = new IntegerOption(217, 0, 300, "i5");// Step: 10
 
 	private static final IntegerOption asp = new IntegerOption(25, 0, 50, "asp");// Step: 1
@@ -578,7 +578,7 @@ public class AlphaBeta
 
 			if (sse.moveCount > i1.get() + (ply == 0 ? i2.get() : 0) && depth > i3.get())
 			{
-				int r = (int) (i4.get() / 100.0 + Math.log(depth) * Math.log(sse.moveCount) * i5.get() / 100.0);
+				int r = (int) (i4.get() / 100.0 + Math.log(depth) * Math.log(sse.moveCount) * 100 / i5.get());
 
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
