@@ -147,7 +147,7 @@ public class AlphaBeta
 
 	private int stat_bonus(int depth)
 	{
-		return depth * a1.get() - 300 * a2.get();
+		return depth * a1.get() - a2.get();
 	}
 
 	private int stat_malus(int depth)
