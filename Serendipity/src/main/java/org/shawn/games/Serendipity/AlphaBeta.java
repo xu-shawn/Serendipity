@@ -2,7 +2,6 @@ package org.shawn.games.Serendipity;
 
 import java.util.*;
 
-import org.shawn.games.Serendipity.TranspositionTable.NodeType;
 import org.shawn.games.Serendipity.NNUE.*;
 
 import com.github.bhlangonijr.chesslib.*;
@@ -47,6 +46,39 @@ public class AlphaBeta
 
 	private Board internalBoard;
 	private Limits limits;
+
+	private static final IntegerOption a1 = new IntegerOption(300, 0, 600, "a1"); // Step: 20
+	private static final IntegerOption a2 = new IntegerOption(300, -600, 600, "a2"); // Step: 40
+
+	private static final IntegerOption b1 = new IntegerOption(205, 0, 300, "b1"); // Step: 10
+
+	private static final IntegerOption c1 = new IntegerOption(20, 0, 40, "c1");// Step: 2
+
+	private static final IntegerOption d1 = new IntegerOption(7, 1, 15, "d1");// Step: 0.5
+	private static final IntegerOption d2 = new IntegerOption(70, 10, 150, "d2");// Step: 5
+
+	private static final IntegerOption e1 = new IntegerOption(4, 1, 10, "e1");// Step: 0.5
+	private static final IntegerOption e2 = new IntegerOption(200, 10, 500, "e2");// Step: 10
+	private static final IntegerOption e3 = new IntegerOption(3, 1, 10, "e3");// Step: 0.5
+
+	private static final IntegerOption f1 = new IntegerOption(5, 1, 10, "f1");// Step: 0.5
+	private static final IntegerOption f2 = new IntegerOption(2, 1, 5, "f2");// Step: 0.3
+
+	private static final IntegerOption g1 = new IntegerOption(9, 1, 15, "g1");// Step: 0.5
+	private static final IntegerOption g2 = new IntegerOption(65, 1, 100, "g2");// Step: 2
+	private static final IntegerOption g3 = new IntegerOption(38, 1, 100, "g3");// Step: 2
+
+	private static final IntegerOption h1 = new IntegerOption(8, 1, 13, "h1");// Step: 0.5
+	private static final IntegerOption h2 = new IntegerOption(2, 1, 5, "h2");// Step: 0.3
+	private static final IntegerOption h3 = new IntegerOption(300, 1, 500, "h3");// Step: 20
+
+	private static final IntegerOption i1 = new IntegerOption(3, 1, 7, "i1");// Step: 0.5
+	private static final IntegerOption i2 = new IntegerOption(1, 1, 7, "i2");// Step: 0.5
+	private static final IntegerOption i3 = new IntegerOption(2, 1, 7, "i3");// Step: 0.5
+	private static final IntegerOption i4 = new IntegerOption(130, 0, 300, "i4");// Step: 10
+	private static final IntegerOption i5 = new IntegerOption(217, 0, 300, "i5");// Step: 10
+
+	private static final IntegerOption asp = new IntegerOption(25, 0, 50, "asp");// Step: 1
 
 	public AlphaBeta(NNUE network)
 	{
@@ -115,7 +147,7 @@ public class AlphaBeta
 
 	private int stat_bonus(int depth)
 	{
-		return depth * 300 - 300;
+		return depth * a1.get() - 300 * a2.get();
 	}
 
 	private int stat_malus(int depth)
@@ -225,7 +257,7 @@ public class AlphaBeta
 				return alpha;
 			}
 
-			futilityBase = standPat + 205;
+			futilityBase = standPat + b1.get();
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
 		}
@@ -246,7 +278,7 @@ public class AlphaBeta
 				continue;
 			}
 
-			if (!inCheck && !SEE.staticExchangeEvaluation(board, move, -20))
+			if (!inCheck && !SEE.staticExchangeEvaluation(board, move, -c1.get()))
 			{
 				continue;
 			}
@@ -410,7 +442,7 @@ public class AlphaBeta
 			}
 		}
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 70 > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < d1.get() && eval > beta && eval - depth * d2.get() > beta)
 		{
 			return beta;
 		}
@@ -421,7 +453,7 @@ public class AlphaBeta
 								.getBitboard(board.getSideToMove())
 				&& eval >= beta && ply > 0)
 		{
-			int r = depth / 3 + 4 + Math.min((eval - beta) / 200, 3);
+			int r = depth / 3 + e1.get() + Math.min((eval - beta) / e2.get(), e3.get());
 
 			board.doNullMove();
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
@@ -475,9 +507,9 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
+		if (isPV && ttMove == null && rootDepth > 1 && depth > f1.get())
 		{
-			depth -= 2;
+			depth -= f2.get();
 		}
 
 		for (Move move : legalMoves)
@@ -502,21 +534,21 @@ public class AlphaBeta
 				continue;
 			}
 
-			if (alpha > -MATE_EVAL + 1024 && depth < 9
-					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
+			if (alpha > -MATE_EVAL + 1024 && depth < g1.get() && !SEE.staticExchangeEvaluation(board, move,
+					isQuiet ? -g2.get() * depth : -g3.get() * depth * depth))
 			{
 				continue;
 			}
 
 			int extension = 0;
 
-			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth > 8
+			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth > h1.get()
 					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
 					&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)
 							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.LOWERBOUND))
-					&& currentMoveEntry.getDepth() > depth - 2)
+					&& currentMoveEntry.getDepth() > depth - h2.get())
 			{
-				int singularBeta = currentMoveEntry.getEvaluation() - 3 * depth;
+				int singularBeta = currentMoveEntry.getEvaluation() - h3.get() * depth / 100;
 				int singularDepth = depth / 2;
 				int moveCountBackup = sse.moveCount;
 
@@ -544,9 +576,9 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (sse.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
+			if (sse.moveCount > i1.get() + (ply == 0 ? i2.get() : 0) && depth > i3.get())
 			{
-				int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
+				int r = (int) (i4.get() / 100.0 + Math.log(depth) * Math.log(sse.moveCount) * i5.get() / 100.0);
 
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
@@ -651,7 +683,7 @@ public class AlphaBeta
 		lastCompletePV = null;
 		alpha = MIN_EVAL;
 		beta = MAX_EVAL;
-		delta = 25;
+		delta = asp.get();
 		clearPV();
 
 		try
@@ -664,7 +696,7 @@ public class AlphaBeta
 
 				if (i > 3)
 				{
-					delta = 25;
+					delta = asp.get();
 					alpha = currentScore - delta;
 					beta = currentScore + delta;
 				}
