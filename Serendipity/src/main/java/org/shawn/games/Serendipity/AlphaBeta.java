@@ -75,8 +75,8 @@ public class AlphaBeta
 	private static final IntegerOption i1 = new IntegerOption(3, 1, 7, "i1");// Step: 0.5
 	private static final IntegerOption i2 = new IntegerOption(1, 1, 7, "i2");// Step: 0.5
 	private static final IntegerOption i3 = new IntegerOption(2, 1, 7, "i3");// Step: 0.5
-	private static final IntegerOption i4 = new IntegerOption(160, 0, 300, "i4");// Step: 10
-	private static final IntegerOption i5 = new IntegerOption(217, 0, 300, "i5");// Step: 10
+	private static final IntegerOption i4 = new IntegerOption(160, 0, 400, "i4");// Step: 10
+	private static final IntegerOption i5 = new IntegerOption(217, 0, 400, "i5");// Step: 10
 
 	private static final IntegerOption asp = new IntegerOption(25, 0, 50, "asp");// Step: 1
 
