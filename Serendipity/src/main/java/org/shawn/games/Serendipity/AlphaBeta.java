@@ -115,7 +115,7 @@ public class AlphaBeta
 
 	private int stat_bonus(int depth)
 	{
-		return depth * 300 - 300;
+		return depth * 324 - 264;
 	}
 
 	private int stat_malus(int depth)
@@ -225,7 +225,7 @@ public class AlphaBeta
 				return alpha;
 			}
 
-			futilityBase = standPat + 205;
+			futilityBase = standPat + 186;
 			moves = board.pseudoLegalCaptures();
 			sortCaptures(moves, board);
 		}
@@ -246,7 +246,7 @@ public class AlphaBeta
 				continue;
 			}
 
-			if (!inCheck && !SEE.staticExchangeEvaluation(board, move, -20))
+			if (!inCheck && !SEE.staticExchangeEvaluation(board, move, -23))
 			{
 				continue;
 			}
@@ -410,7 +410,7 @@ public class AlphaBeta
 			}
 		}
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 70 > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 69 > beta)
 		{
 			return beta;
 		}
@@ -421,7 +421,7 @@ public class AlphaBeta
 								.getBitboard(board.getSideToMove())
 				&& eval >= beta && ply > 0)
 		{
-			int r = depth / 3 + 4 + Math.min((eval - beta) / 200, 3);
+			int r = depth / 3 + 3 + Math.min((eval - beta) / 190, 3);
 
 			board.doNullMove();
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
@@ -502,8 +502,8 @@ public class AlphaBeta
 				continue;
 			}
 
-			if (alpha > -MATE_EVAL + 1024 && depth < 9
-					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
+			if (alpha > -MATE_EVAL + 1024 && depth < 10
+					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -39 * depth * depth))
 			{
 				continue;
 			}
@@ -516,7 +516,7 @@ public class AlphaBeta
 							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.LOWERBOUND))
 					&& currentMoveEntry.getDepth() > depth - 2)
 			{
-				int singularBeta = currentMoveEntry.getEvaluation() - 3 * depth;
+				int singularBeta = currentMoveEntry.getEvaluation() - 283 * depth / 100;
 				int singularDepth = depth / 2;
 				int moveCountBackup = sse.moveCount;
 
@@ -546,7 +546,7 @@ public class AlphaBeta
 
 			if (sse.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
-				int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
+				int r = (int) (1.55 + Math.log(depth) * Math.log(sse.moveCount) / 2.20);
 
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
