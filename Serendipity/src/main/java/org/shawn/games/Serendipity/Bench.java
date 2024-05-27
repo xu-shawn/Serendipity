@@ -84,7 +84,7 @@ public class Bench
 			}
 			else
 			{
-				System.out.printf("%d nodes %d nps", totalNodes, totalNodes * 1000L / (endTime - startTime));
+				System.out.printf("%d nodes %d nps", totalNodes, totalNodes * 10000000000000L / (endTime - startTime));
 			}
 		}
 
