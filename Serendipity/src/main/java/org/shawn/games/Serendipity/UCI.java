@@ -69,7 +69,7 @@ public class UCI
 
 		if (args.length == 1 && args[0].equals("bench"))
 		{
-			Bench.bench(engine, 10);
+			Bench.bench(engine, 10, false, true);
 			return;
 		}
 

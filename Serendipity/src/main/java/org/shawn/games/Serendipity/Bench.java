@@ -57,7 +57,12 @@ public class Bench
 		bench(ai, depth, false);
 	}
 
-	public static double bench(AlphaBeta ai, int depth, boolean supressOutput)
+	public static double bench(AlphaBeta ai, int depth, boolean suppressOutput)
+	{
+		return bench(ai, depth, suppressOutput, false);
+	}
+
+	public static double bench(AlphaBeta ai, int depth, boolean supressOutput, boolean OBStandard)
 	{
 		long totalNodes = 0;
 		long startTime = System.nanoTime();
@@ -72,8 +77,15 @@ public class Bench
 
 		if (!supressOutput)
 		{
-			System.out.printf("Total time (ms)\t: %d\nNodes searched\t: %d\nNodes/second\t: %d\n",
-					(endTime - startTime) / 1000000L, totalNodes, totalNodes * 1000000000L / (endTime - startTime));
+			if (!OBStandard)
+			{
+				System.out.printf("Total time (ms)\t: %d\nNodes searched\t: %d\nNodes/second\t: %d\n",
+						(endTime - startTime) / 1000000L, totalNodes, totalNodes * 1000000000L / (endTime - startTime));
+			}
+			else
+			{
+				System.out.printf("%d nodes %d nps", totalNodes, totalNodes * 1000000000L / (endTime - startTime));
+			}
 		}
 
 		return (double) (totalNodes) * 1000000000L / (endTime - startTime);
