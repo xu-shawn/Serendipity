@@ -97,8 +97,8 @@ public class UCI
 		if (Math.abs(score) < AlphaBeta.MATE_EVAL - AlphaBeta.MAX_PLY)
 		{
 			System.out.printf("info depth %d seldepth %d nodes %d nps %d score cp %d time %d pv %s\n", depth, selDepth,
-					nodes, nodes * 1000L / Math.max(1, ms), score, ms, String.join(" ", Arrays
-							.stream(pv).takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
+					nodes, nodes * 1000L / Math.max(1, ms), score, ms, String.join(" ", Arrays.stream(pv)
+							.takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
 		}
 
 		else
@@ -173,6 +173,7 @@ public class UCI
 					System.out.println("uciok");
 					break;
 				case "ucinewgame":
+					System.gc();
 					internalBoard = new Board();
 					engine = new AlphaBeta(network);
 					break;
