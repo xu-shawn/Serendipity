@@ -533,7 +533,7 @@ public class AlphaBeta
 				
 				else if (singularBeta >= beta)
 				{
-					return beta;
+					return singularBeta;
 				}
 
 			}
