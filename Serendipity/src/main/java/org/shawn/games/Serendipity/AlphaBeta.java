@@ -496,7 +496,7 @@ public class AlphaBeta
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
-			
+
 			int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
 			int lmrDepth = depth - r;
 
@@ -505,21 +505,22 @@ public class AlphaBeta
 			{
 				continue;
 			}
-			
-			if (bestValue > -MATE_EVAL + 1024 && ply > 0 && (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
-					| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
-					.getBitboard(board.getSideToMove()))
+
+			if (bestValue > -MATE_EVAL + 1024 && ply > 0
+					&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
+							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
+									.getBitboard(board.getSideToMove()))
 			{
 				if (!inCheck && isQuiet && lmrDepth <= 8 && sse.staticEval + lmrDepth * 150 + 150 <= alpha)
 				{
 					continue;
 				}
-			}
 
-			if (alpha > -MATE_EVAL + 1024 && depth < 9
-					&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
-			{
-				continue;
+				if (depth < 9
+						&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
+				{
+					continue;
+				}
 			}
 
 			int extension = 0;
