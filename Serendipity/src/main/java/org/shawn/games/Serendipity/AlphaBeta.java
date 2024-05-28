@@ -515,6 +515,8 @@ public class AlphaBeta
 				{
 					continue;
 				}
+				
+				lmrDepth = Math.max(lmrDepth, 0);
 
 				if (depth < 9
 						&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * lmrDepth * lmrDepth))
