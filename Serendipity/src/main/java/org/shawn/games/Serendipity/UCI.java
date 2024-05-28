@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.openjdk.jol.info.ClassLayout;
 import org.shawn.games.Serendipity.NNUE.NNUE;
 import org.shawn.games.Serendipity.NNUE.NNUE.NNUEAccumulator;
 
@@ -66,6 +67,8 @@ public class UCI
 
 		internalBoard = new Board();
 		engine = new AlphaBeta(network);
+		
+		System.out.println(ClassLayout.parseClass(TranspositionTable.Entry.class).toPrintable());
 
 		if (args.length == 1 && args[0].equals("bench"))
 		{
