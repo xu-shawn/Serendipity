@@ -16,10 +16,10 @@ public class AlphaBeta
 	private static final int ROOK_VALUE = 477;
 	private static final int QUEEN_VALUE = 1025;
 
-	public static final int VALUE_NONE = 32002;
-	public static final int MAX_EVAL = 1000000000;
-	public static final int MIN_EVAL = -1000000000;
-	public static final int MATE_EVAL = 500000000;
+	public static final int VALUE_NONE = 30002;
+	public static final int MAX_EVAL = 32767;
+	public static final int MIN_EVAL = -32767;
+	public static final int MATE_EVAL = 32700;
 	public static final int DRAW_EVAL = 0;
 
 	public static final int MAX_PLY = 256;
@@ -130,6 +130,7 @@ public class AlphaBeta
 						NNUE.chooseOutputBucket(board))
 				: NNUE.evaluate(network, accumulators.getBlackAccumulator(), accumulators.getWhiteAccumulator(),
 						NNUE.chooseOutputBucket(board)));
+		
 		return v;
 	}
 
