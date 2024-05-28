@@ -517,7 +517,7 @@ public class AlphaBeta
 				}
 
 				if (depth < 9
-						&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
+						&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * lmrDepth * lmrDepth))
 				{
 					continue;
 				}
