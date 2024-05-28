@@ -515,7 +515,7 @@ public class AlphaBeta
 				{
 					continue;
 				}
-				
+
 				lmrDepth = Math.max(lmrDepth, 0);
 
 				if (depth < 9
