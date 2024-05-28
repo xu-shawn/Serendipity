@@ -19,7 +19,7 @@ public class TranspositionTable
 		// NodeType: 2 bits
 		// evaluation: 16 bits
 		// staticEval: 16 bits
-		// Square: 64 bits
+		// Square: 6 bits
 		// Signature: 16 bits
 
 		private short signature16;
