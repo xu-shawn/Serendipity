@@ -496,11 +496,24 @@ public class AlphaBeta
 			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
+			
+			int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
+			int lmrDepth = depth - r;
 
 			if (isQuiet && !isPV && !givesCheck && sse.moveCount > 3 + depth * depth / (improving ? 1 : 2)
 					&& alpha > -MATE_EVAL + 1024)
 			{
 				continue;
+			}
+			
+			if (bestValue > -MATE_EVAL + 1024 && ply > 0 && (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
+					| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
+					.getBitboard(board.getSideToMove()))
+			{
+				if (!inCheck && isQuiet && lmrDepth <= 8 && sse.staticEval + lmrDepth * 150 + 150 <= alpha)
+				{
+					continue;
+				}
 			}
 
 			if (alpha > -MATE_EVAL + 1024 && depth < 9
@@ -547,8 +560,6 @@ public class AlphaBeta
 
 			if (sse.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
-				int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
-
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
 //
