@@ -14,7 +14,6 @@ public class TranspositionTable
 
 	public class Entry
 	{
-
 		// depth: (0-255) 8 bits
 		// NodeType: 2 bits
 		// evaluation: 16 bits
