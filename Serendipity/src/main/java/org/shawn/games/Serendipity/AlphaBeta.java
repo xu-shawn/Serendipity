@@ -130,7 +130,7 @@ public class AlphaBeta
 						NNUE.chooseOutputBucket(board))
 				: NNUE.evaluate(network, accumulators.getBlackAccumulator(), accumulators.getWhiteAccumulator(),
 						NNUE.chooseOutputBucket(board)));
-		
+
 		return v;
 	}
 
@@ -175,7 +175,7 @@ public class AlphaBeta
 
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
-		if (!isPV && currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+		if (!isPV && currentMoveEntry != null && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 		{
 			int eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getType())
@@ -331,7 +331,7 @@ public class AlphaBeta
 		sse.ttHit = currentMoveEntry != null;
 
 		if (!inSingularSearch && !isPV && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
-				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+				&& currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 		{
 			eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getType())
@@ -362,7 +362,7 @@ public class AlphaBeta
 		else
 		{
 
-			if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+			if (currentMoveEntry != null && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 			{
 				sse.staticEval = currentMoveEntry.getStaticEval();
 				eval = currentMoveEntry.getEvaluation();

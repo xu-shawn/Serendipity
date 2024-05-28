@@ -20,9 +20,9 @@ public class TranspositionTable
 		// evaluation: 16 bits
 		// staticEval: 16 bits
 		// Square: 64 bits
-		//
+		// Signature: 16 bits
 
-		private long signature;
+		private short signature16;
 		private short depthAndType;
 		private short evaluation;
 		private short staticEval;
@@ -30,7 +30,7 @@ public class TranspositionTable
 
 		public Entry(NodeType type, short depth, int evaluation, long signature, Move move, int staticEval)
 		{
-			this.signature = signature;
+			this.signature16 = (short) (signature >> 48);
 			this.depthAndType = (short) ((depth << 2) + typeToByte(type));
 			this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
 			this.evaluation = (short) evaluation;
@@ -47,9 +47,14 @@ public class TranspositionTable
 			};
 		}
 
-		public long getSignature()
+		public short getSignature()
 		{
-			return signature;
+			return signature16;
+		}
+
+		public boolean verifySignature(long signature)
+		{
+			return signature >> 48 == signature16;
 		}
 
 		public NodeType getType()
@@ -80,8 +85,9 @@ public class TranspositionTable
 
 		public Move getMove()
 		{
-			//System.out.print(this.originalMove + " " + this.originalMove != null ? 0 : this.originalMove.getTo().ordinal() + " ");
-			//System.out.println(Integer.toBinaryString(this.move));
+			// System.out.print(this.originalMove + " " + this.originalMove != null ? 0 :
+			// this.originalMove.getTo().ordinal() + " ");
+			// System.out.println(Integer.toBinaryString(this.move));
 			return move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
 		}
 	}
