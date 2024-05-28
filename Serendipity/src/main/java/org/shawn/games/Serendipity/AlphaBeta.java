@@ -16,10 +16,10 @@ public class AlphaBeta
 	private static final int ROOK_VALUE = 477;
 	private static final int QUEEN_VALUE = 1025;
 
-	public static final int VALUE_NONE = 32002;
-	public static final int MAX_EVAL = 1000000000;
-	public static final int MIN_EVAL = -1000000000;
-	public static final int MATE_EVAL = 500000000;
+	public static final int VALUE_NONE = 30002;
+	public static final int MAX_EVAL = 32767;
+	public static final int MIN_EVAL = -32767;
+	public static final int MATE_EVAL = 32700;
 	public static final int DRAW_EVAL = 0;
 
 	public static final int MAX_PLY = 256;
@@ -130,6 +130,7 @@ public class AlphaBeta
 						NNUE.chooseOutputBucket(board))
 				: NNUE.evaluate(network, accumulators.getBlackAccumulator(), accumulators.getWhiteAccumulator(),
 						NNUE.chooseOutputBucket(board)));
+
 		return v;
 	}
 
@@ -174,7 +175,7 @@ public class AlphaBeta
 
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
-		if (!isPV && currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+		if (!isPV && currentMoveEntry != null && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 		{
 			int eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getType())
@@ -330,7 +331,7 @@ public class AlphaBeta
 		sse.ttHit = currentMoveEntry != null;
 
 		if (!inSingularSearch && !isPV && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
-				&& currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+				&& currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 		{
 			eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getType())
@@ -361,7 +362,7 @@ public class AlphaBeta
 		else
 		{
 
-			if (currentMoveEntry != null && currentMoveEntry.getSignature() == board.getIncrementalHashKey())
+			if (currentMoveEntry != null && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 			{
 				sse.staticEval = currentMoveEntry.getStaticEval();
 				eval = currentMoveEntry.getEvaluation();

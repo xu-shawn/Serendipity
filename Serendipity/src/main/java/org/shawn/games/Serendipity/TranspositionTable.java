@@ -2,6 +2,7 @@ package org.shawn.games.Serendipity;
 
 import java.util.Arrays;
 
+import com.github.bhlangonijr.chesslib.Square;
 import com.github.bhlangonijr.chesslib.move.*;
 
 public class TranspositionTable
@@ -13,21 +14,36 @@ public class TranspositionTable
 
 	public class Entry
 	{
+		// depth: (0-255) 8 bits
+		// NodeType: 2 bits
+		// evaluation: 16 bits
+		// staticEval: 16 bits
+		// Square: 6 bits
+		// Signature: 64 bits
+
 		private long signature;
-		private NodeType type;
-		private short depth;
-		private int evaluation;
-		private int staticEval;
-		private Move move;
+		private short depthAndType;
+		private short evaluation;
+		private short staticEval;
+		private short move;
 
 		public Entry(NodeType type, short depth, int evaluation, long signature, Move move, int staticEval)
 		{
 			this.signature = signature;
-			this.type = type;
-			this.depth = depth;
-			this.evaluation = evaluation;
-			this.move = move;
-			this.staticEval = staticEval;
+			this.depthAndType = (short) ((depth << 2) + typeToByte(type));
+			this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
+			this.evaluation = (short) evaluation;
+			this.staticEval = (short) staticEval;
+		}
+
+		private byte typeToByte(NodeType type)
+		{
+			return switch (type)
+			{
+				case EXACT -> 0;
+				case LOWERBOUND -> 1;
+				case UPPERBOUND -> 2;
+			};
 		}
 
 		public long getSignature()
@@ -35,21 +51,32 @@ public class TranspositionTable
 			return signature;
 		}
 
+		public boolean verifySignature(long signature)
+		{
+			return signature == this.signature;
+		}
+
 		public NodeType getType()
 		{
-			return type;
+			return switch (this.depthAndType & 0b11)
+			{
+				case 0 -> NodeType.EXACT;
+				case 1 -> NodeType.LOWERBOUND;
+				case 2 -> NodeType.UPPERBOUND;
+				default -> throw new IllegalArgumentException("Unexpected value: " + (this.depthAndType & 0b11));
+			};
 		}
 
 		public short getDepth()
 		{
-			return depth;
+			return (short) (depthAndType >> 2);
 		}
 
 		public int getEvaluation()
 		{
 			return evaluation;
 		}
-		
+
 		public int getStaticEval()
 		{
 			return staticEval;
@@ -57,7 +84,10 @@ public class TranspositionTable
 
 		public Move getMove()
 		{
-			return move;
+			// System.out.print(this.originalMove + " " + this.originalMove != null ? 0 :
+			// this.originalMove.getTo().ordinal() + " ");
+			// System.out.println(Integer.toBinaryString(this.move));
+			return move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
 		}
 	}
 

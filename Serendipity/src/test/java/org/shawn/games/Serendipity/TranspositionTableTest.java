@@ -17,6 +17,6 @@ public class TranspositionTableTest
 		tt.write(board.getIncrementalHashKey(), NodeType.EXACT, 12, 2, null, 0);
 		assertTrue(tt.probe(board.getIncrementalHashKey()).getDepth() == 12);
 		assertTrue(tt.probe(board.getIncrementalHashKey()).getEvaluation() == 2);
-		assertTrue(tt.probe(board.getIncrementalHashKey()).getSignature() == board.getIncrementalHashKey());
+		assertTrue(tt.probe(board.getIncrementalHashKey()).verifySignature(board.getIncrementalHashKey()));
 	}
 }
