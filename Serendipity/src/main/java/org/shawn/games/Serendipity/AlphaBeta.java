@@ -696,7 +696,7 @@ public class AlphaBeta
 						beta = Math.min(beta + delta, MAX_EVAL);
 					}
 
-					delta += delta / 3;
+					delta += delta / 2;
 				}
 			}
 		}
