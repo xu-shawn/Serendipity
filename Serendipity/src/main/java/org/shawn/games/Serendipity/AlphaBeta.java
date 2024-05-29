@@ -84,33 +84,8 @@ public class AlphaBeta
 		{
 			return 0;
 		}
-
-		if (p.getPieceType().equals(PieceType.PAWN))
-		{
-			return PAWN_VALUE;
-		}
-
-		if (p.getPieceType().equals(PieceType.KNIGHT))
-		{
-			return KNIGHT_VALUE;
-		}
-
-		if (p.getPieceType().equals(PieceType.BISHOP))
-		{
-			return BISHOP_VALUE;
-		}
-
-		if (p.getPieceType().equals(PieceType.ROOK))
-		{
-			return ROOK_VALUE;
-		}
-
-		if (p.getPieceType().equals(PieceType.QUEEN))
-		{
-			return QUEEN_VALUE;
-		}
-
-		return 0;
+		
+		return p.getPieceType().ordinal() + 1;
 	}
 
 	private int stat_bonus(int depth)
@@ -544,8 +519,8 @@ public class AlphaBeta
 				{
 					extension = 2;
 				}
-				
-				else if (singularBeta > beta)
+
+				else if (singularBeta >= beta)
 				{
 					return beta;
 				}
