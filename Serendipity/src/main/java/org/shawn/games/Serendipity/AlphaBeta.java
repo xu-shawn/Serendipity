@@ -497,7 +497,7 @@ public class AlphaBeta
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
-			int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
+			int r = (int) (0.1 + Math.log(depth) * Math.log(sse.moveCount) / 2.15);
 			int lmrDepth = depth - r;
 
 			if (isQuiet && !isPV && !givesCheck && sse.moveCount > 3 + depth * depth / (improving ? 1 : 2)
