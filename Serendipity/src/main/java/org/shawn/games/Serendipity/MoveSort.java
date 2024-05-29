@@ -14,32 +14,7 @@ public class MoveSort
 			return 0;
 		}
 
-		if (p.getPieceType().equals(PieceType.PAWN))
-		{
-			return 1;
-		}
-
-		if (p.getPieceType().equals(PieceType.KNIGHT))
-		{
-			return 2;
-		}
-
-		if (p.getPieceType().equals(PieceType.BISHOP))
-		{
-			return 3;
-		}
-
-		if (p.getPieceType().equals(PieceType.ROOK))
-		{
-			return 4;
-		}
-
-		if (p.getPieceType().equals(PieceType.QUEEN))
-		{
-			return 5;
-		}
-
-		return 0;
+		return p.getPieceType().ordinal() + 1;
 	}
 
 	public static int moveValue(Move move, Move ttMove, Move killer, Move counterMove, History history, Board board)
