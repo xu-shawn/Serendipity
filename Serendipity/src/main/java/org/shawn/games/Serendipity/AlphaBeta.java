@@ -48,6 +48,9 @@ public class AlphaBeta
 	private Board internalBoard;
 	private Limits limits;
 
+	private Tunable lmrBase = new Tunable(160, 10, 500, 50, 0.002, "lmrBase");
+	private Tunable lmrDiv = new Tunable(217, 10, 600, 50, 0.002, "lmrDiv");
+
 	public AlphaBeta(NNUE network)
 	{
 		this(1, network);
@@ -497,7 +500,7 @@ public class AlphaBeta
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
-			int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
+			int r = (int) ((lmrBase.get() / 100.0) + Math.log(depth) * Math.log(sse.moveCount) / (lmrDiv.get() / 100.0));
 			int lmrDepth = depth - r;
 
 			if (isQuiet && !isPV && !givesCheck && sse.moveCount > 3 + depth * depth / (improving ? 1 : 2)
@@ -559,7 +562,7 @@ public class AlphaBeta
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (sse.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
+			if (sse.moveCount > 1 + (ply == 0 ? 2 : 0) && depth > 2)
 			{
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
