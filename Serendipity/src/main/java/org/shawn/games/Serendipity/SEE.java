@@ -9,11 +9,11 @@ public class SEE
 	{
 		return switch (piece)
 		{
-			case PAWN -> 103;
-			case KNIGHT -> 422;
-			case BISHOP -> 437;
-			case ROOK -> 694;
-			case QUEEN -> 1313;
+			case PAWN -> 100;
+			case KNIGHT -> 300;
+			case BISHOP -> 300;
+			case ROOK -> 500;
+			case QUEEN -> 900;
 			default -> 0;
 		};
 	}
