@@ -547,7 +547,7 @@ public class AlphaBeta
 
 			}
 
-			if (givesCheck)
+			else if (givesCheck)
 			{
 				extension = 1;
 			}
