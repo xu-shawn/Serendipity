@@ -36,14 +36,14 @@ public class NNUE
 	private final short[] L1Biases;
 	private final short[][] L2Weights;
 	private final short outputBiases[];
-	
+
 	private final static int screlu[] = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
-	
+
 	static
 	{
-		for(int i = Short.MIN_VALUE; i <= Short.MAX_VALUE;i ++)
+		for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++)
 		{
-			screlu[i - (int) Short.MIN_VALUE] = screlu((short)(i));
+			screlu[i - (int) Short.MIN_VALUE] = screlu((short) (i));
 		}
 	}
 
@@ -177,18 +177,26 @@ public class NNUE
 	private static int screlu(short i)
 	{
 		int v = Math.max(0, Math.min(i, QA));
-		return v * v;
+		return v;
 	}
 
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
 	{
 		int eval = 0;
 
+		int usSum = 0;
+		int themSum = 0;
+
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
-			eval += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i]
-					+ screlu[them.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
+			usSum += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i];
+			themSum += screlu[them.values[i] - (int) Short.MIN_VALUE]
+					* (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
 		}
+		
+		eval = usSum + themSum;
+		
+		System.out.println(usSum + "\n" + themSum);
 
 		eval /= QA;
 		eval += network.outputBiases[chosenBucket];
