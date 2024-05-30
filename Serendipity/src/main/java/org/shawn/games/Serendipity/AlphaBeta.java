@@ -580,13 +580,13 @@ public class AlphaBeta
 					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
 							bestMove, sse.staticEval);
 
-					for (Move quietMove : quietMovesFailBeta)
-					{
-						history.register(board, quietMove, stat_malus(depth));
-					}
-
 					if (isQuiet)
 					{
+						for (Move quietMove : quietMovesFailBeta)
+						{
+							history.register(board, quietMove, stat_malus(depth));
+						}
+						
 						sse.killer = move;
 
 						history.register(board, move, stat_bonus(depth));
