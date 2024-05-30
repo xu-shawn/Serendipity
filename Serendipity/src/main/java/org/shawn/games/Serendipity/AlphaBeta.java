@@ -35,6 +35,7 @@ public class AlphaBeta
 	private Move[] lastCompletePV;
 	private Move[][] counterMoves;
 	private History history;
+	private History captureHistory;
 	private int nmpMinPly;
 
 	private int rootDepth;
@@ -61,6 +62,7 @@ public class AlphaBeta
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.counterMoves = new Move[13][65];
 		this.history = new FromToHistory();
+		this.captureHistory = new CaptureHistory();
 		this.rootDepth = 0;
 		this.ss = new SearchStack(MAX_PLY);
 
@@ -580,14 +582,14 @@ public class AlphaBeta
 					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
 							bestMove, sse.staticEval);
 
-					for (Move quietMove : quietMovesFailBeta)
-					{
-						history.register(board, quietMove, stat_malus(depth));
-					}
-
 					if (isQuiet)
 					{
 						sse.killer = move;
+						
+						for (Move quietMove : quietMovesFailBeta)
+						{
+							history.register(board, quietMove, stat_malus(depth));
+						}
 
 						history.register(board, move, stat_bonus(depth));
 
@@ -596,6 +598,12 @@ public class AlphaBeta
 							counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
 									.getTo().ordinal()] = move;
 						}
+					}
+
+					else
+					{
+						captureHistory.register(board, move, stat_bonus(depth));
+						
 					}
 
 					return bestValue;
