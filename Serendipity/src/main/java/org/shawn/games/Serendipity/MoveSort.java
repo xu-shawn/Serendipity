@@ -17,7 +17,8 @@ public class MoveSort
 		return p.getPieceType().ordinal() + 1;
 	}
 
-	public static int moveValue(Move move, Move ttMove, Move killer, Move counterMove, History history, Board board)
+	public static int moveValue(Move move, Move ttMove, Move killer, Move counterMove, History history,
+			History captureHistory, Board board)
 	{
 		if (move.equals(ttMove))
 		{
@@ -39,7 +40,7 @@ public class MoveSort
 						&& move.getTo() == board.getEnPassant()))
 		{
 			int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;
-			score += pieceValue(board.getPiece(move.getTo())) * 100000 - pieceValue(board.getPiece(move.getFrom()));
+			score += pieceValue(board.getPiece(move.getTo())) * 100000 + captureHistory.get(board, move);
 			return score;
 		}
 
@@ -57,14 +58,14 @@ public class MoveSort
 	}
 
 	public static void sortMoves(List<Move> moves, Move ttMove, Move killer, Move counterMove, History history,
-			Board board)
+			History captureHistory, Board board)
 	{
 		moves.sort(new Comparator<Move>() {
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return Integer.compare(moveValue(m2, ttMove, killer, counterMove, history, board),
-						moveValue(m1, ttMove, killer, counterMove, history, board));
+				return Integer.compare(moveValue(m2, ttMove, killer, counterMove, history, captureHistory, board),
+						moveValue(m1, ttMove, killer, counterMove, history, captureHistory, board));
 			}
 		});
 	}

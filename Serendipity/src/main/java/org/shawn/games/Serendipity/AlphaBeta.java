@@ -116,18 +116,18 @@ public class AlphaBeta
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
-		MoveSort.sortMoves(moves, ttMove, null, null, history, board);
+		MoveSort.sortMoves(moves, ttMove, null, null, history, captureHistory, board);
 	}
 
-	private List<Move> sortCaptures(List<Move> moves, Board board)
+	private List<Move> sortCaptures(List<Move> moves, Board board, History captureHistory)
 	{
 		moves.sort(new Comparator<Move>() {
 
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return pieceValue(board.getPiece(m2.getTo())) * 100 - pieceValue(board.getPiece(m2.getFrom()))
-						- (pieceValue(board.getPiece(m1.getTo())) * 100 - pieceValue(board.getPiece(m1.getFrom())));
+				return pieceValue(board.getPiece(m2.getTo())) * 1000000 + captureHistory.get(board, m2)
+						- (pieceValue(board.getPiece(m1.getTo())) * 1000000 + captureHistory.get(board, m1));
 			}
 
 		});
@@ -205,7 +205,7 @@ public class AlphaBeta
 
 			futilityBase = standPat + 205;
 			moves = board.pseudoLegalCaptures();
-			sortCaptures(moves, board);
+			sortCaptures(moves, board, captureHistory);
 		}
 
 		for (Move move : moves)
@@ -449,9 +449,10 @@ public class AlphaBeta
 			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
 					.getTo().ordinal()];
 
-		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, board);
+		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory, board);
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
+		List<Move> capturesFailBeta = new ArrayList<>();
 
 		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
 		{
@@ -585,7 +586,7 @@ public class AlphaBeta
 					if (isQuiet)
 					{
 						sse.killer = move;
-						
+
 						for (Move quietMove : quietMovesFailBeta)
 						{
 							history.register(board, quietMove, stat_malus(depth));
@@ -603,7 +604,11 @@ public class AlphaBeta
 					else
 					{
 						captureHistory.register(board, move, stat_bonus(depth));
-						
+
+						for (Move capture : capturesFailBeta)
+						{
+							captureHistory.register(board, capture, stat_malus(depth));
+						}
 					}
 
 					return bestValue;
@@ -613,6 +618,10 @@ public class AlphaBeta
 			if (isQuiet)
 			{
 				quietMovesFailBeta.add(move);
+			}
+			else
+			{
+				capturesFailBeta.add(move);
 			}
 		}
 

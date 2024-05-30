@@ -35,12 +35,34 @@ public class CaptureHistory implements History
 	@Override
 	public int get(Board board, Move move)
 	{
+		if (move.getTo().equals(board.getEnPassant()))
+		{
+			return get(board.getPiece(move.getFrom()), move.getTo(), PieceType.PAWN);
+		}
+
+		else if (board.getPiece(move.getTo()) == Piece.NONE)
+		{
+			return get(board.getPiece(move.getFrom()), move.getTo(), PieceType.NONE);
+		}
+		
 		return get(board.getPiece(move.getFrom()), move.getTo(), board.getPiece(move.getTo()).getPieceType());
 	}
 
 	@Override
 	public void register(Board board, Move move, int value)
 	{
+		if (move.getTo().equals(board.getEnPassant()))
+		{
+			register(board.getPiece(move.getFrom()), move.getTo(), PieceType.PAWN, value);
+			return;
+		}
+
+		else if (board.getPiece(move.getTo()) == Piece.NONE)
+		{
+			register(board.getPiece(move.getFrom()), move.getTo(), PieceType.NONE, value);
+			return;
+		}
+
 		register(board.getPiece(move.getFrom()), move.getTo(), board.getPiece(move.getTo()).getPieceType(), value);
 	}
 }
