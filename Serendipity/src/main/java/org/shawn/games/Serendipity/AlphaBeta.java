@@ -279,7 +279,7 @@ public class AlphaBeta
 			throw new TimeOutException();
 		}
 
-		if ((board.isRepetition(2) && ply > 0) || board.isRepetition(3) || board.getHalfMoveCounter() > 100)
+		if (ply > 0 && (board.isRepetition(2) || board.getHalfMoveCounter() > 100 || board.isInsufficientMaterial()))
 		{
 			return DRAW_EVAL;
 		}
