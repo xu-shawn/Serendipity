@@ -58,15 +58,15 @@ public class UCI
 		{
 			System.out.print("Error Loading NNUE");
 		}
+
+		internalBoard = new Board();
+		engine = new AlphaBeta(network);
 		
 		if (args.length == 1 && args[0].equals("bench"))
 		{
 			Bench.bench(engine, 10, false);
 			return;
 		}
-
-		internalBoard = new Board();
-		engine = new AlphaBeta(network);
 
 		UCIMainLoop();
 	}
