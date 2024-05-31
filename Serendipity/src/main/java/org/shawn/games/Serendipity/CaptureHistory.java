@@ -35,34 +35,27 @@ public class CaptureHistory implements History
 	@Override
 	public int get(Board board, Move move)
 	{
-		if (move.getTo().equals(board.getEnPassant()))
+		Piece movedPiece = board.getPiece(move.getFrom());
+
+		if (move.getTo().equals(board.getEnPassant()) && movedPiece.getPieceType().equals(PieceType.PAWN))
 		{
-			return get(board.getPiece(move.getFrom()), move.getTo(), PieceType.PAWN);
+			return get(movedPiece, board.getEnPassant(), PieceType.PAWN);
 		}
 
-		else if (board.getPiece(move.getTo()) == Piece.NONE)
-		{
-			return get(board.getPiece(move.getFrom()), move.getTo(), PieceType.NONE);
-		}
-		
-		return get(board.getPiece(move.getFrom()), move.getTo(), board.getPiece(move.getTo()).getPieceType());
+		return get(movedPiece, move.getTo(), board.getPiece(move.getTo()).getPieceType());
 	}
 
 	@Override
 	public void register(Board board, Move move, int value)
 	{
-		if (move.getTo().equals(board.getEnPassant()))
+		Piece movedPiece = board.getPiece(move.getFrom());
+
+		if (move.getTo().equals(board.getEnPassant()) && movedPiece.getPieceType().equals(PieceType.PAWN))
 		{
-			register(board.getPiece(move.getFrom()), move.getTo(), PieceType.PAWN, value);
+			register(movedPiece, board.getEnPassant(), PieceType.PAWN, value);
 			return;
 		}
 
-		else if (board.getPiece(move.getTo()) == Piece.NONE)
-		{
-			register(board.getPiece(move.getFrom()), move.getTo(), PieceType.NONE, value);
-			return;
-		}
-
-		register(board.getPiece(move.getFrom()), move.getTo(), board.getPiece(move.getTo()).getPieceType(), value);
+		register(movedPiece, move.getTo(), board.getPiece(move.getTo()).getPieceType(), value);
 	}
 }

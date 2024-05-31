@@ -119,6 +119,16 @@ public class AlphaBeta
 		MoveSort.sortMoves(moves, ttMove, null, null, history, captureHistory, board);
 	}
 
+	private int captureValue(Board board, Move move, History captureHistory)
+	{
+		if (!move.getPromotion().equals(Piece.NONE))
+		{
+			return move.getPromotion().getPieceType().equals(PieceType.QUEEN) ? 2000000001 : -2000000001;
+		}
+
+		return pieceValue(board.getPiece(move.getTo())) * 10000 + captureHistory.get(board, move);
+	}
+
 	private List<Move> sortCaptures(List<Move> moves, Board board, History captureHistory)
 	{
 		moves.sort(new Comparator<Move>() {
@@ -126,8 +136,7 @@ public class AlphaBeta
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return pieceValue(board.getPiece(m2.getTo())) * 10000 + captureHistory.get(board, m2)
-						- (pieceValue(board.getPiece(m1.getTo())) * 10000 + captureHistory.get(board, m1));
+				return captureValue(board, m2, captureHistory) - captureValue(board, m1, captureHistory);
 			}
 
 		});
@@ -601,8 +610,7 @@ public class AlphaBeta
 						}
 					}
 
-					else if (move.getPromotion().equals(Piece.NONE)
-							|| (move.getPromotion().getPieceType().equals(PieceType.QUEEN)))
+					else if (move.getPromotion().equals(Piece.NONE))
 					{
 						captureHistory.register(board, move, stat_bonus(depth));
 
@@ -620,8 +628,7 @@ public class AlphaBeta
 			{
 				quietMovesFailBeta.add(move);
 			}
-			else if (move.getPromotion().equals(Piece.NONE)
-					|| (move.getPromotion().getPieceType().equals(PieceType.QUEEN)))
+			else if (move.getPromotion().equals(Piece.NONE))
 			{
 				capturesFailBeta.add(move);
 			}
