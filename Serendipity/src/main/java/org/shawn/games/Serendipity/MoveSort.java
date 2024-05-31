@@ -40,7 +40,7 @@ public class MoveSort
 						&& move.getTo() == board.getEnPassant()))
 		{
 			int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;
-			score += pieceValue(board.getPiece(move.getTo())) * 100000 + captureHistory.get(board, move);
+			score += pieceValue(board.getPiece(move.getTo())) * 10000 + captureHistory.get(board, move);
 			return score;
 		}
 

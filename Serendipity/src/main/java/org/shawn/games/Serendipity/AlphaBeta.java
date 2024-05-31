@@ -126,8 +126,8 @@ public class AlphaBeta
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return pieceValue(board.getPiece(m2.getTo())) * 1000000 + captureHistory.get(board, m2)
-						- (pieceValue(board.getPiece(m1.getTo())) * 1000000 + captureHistory.get(board, m1));
+				return pieceValue(board.getPiece(m2.getTo())) * 10000 + captureHistory.get(board, m2)
+						- (pieceValue(board.getPiece(m1.getTo())) * 10000 + captureHistory.get(board, m1));
 			}
 
 		});
