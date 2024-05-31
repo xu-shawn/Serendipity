@@ -126,7 +126,7 @@ public class AlphaBeta
 			return move.getPromotion().getPieceType().equals(PieceType.QUEEN) ? 2000000001 : -2000000001;
 		}
 
-		return pieceValue(board.getPiece(move.getTo())) * 10000 + captureHistory.get(board, move);
+		return pieceValue(board.getPiece(move.getTo())) * 100000 + captureHistory.get(board, move);
 	}
 
 	private List<Move> sortCaptures(List<Move> moves, Board board, History captureHistory)
