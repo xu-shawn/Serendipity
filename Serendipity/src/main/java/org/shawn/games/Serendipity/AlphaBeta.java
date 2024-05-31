@@ -213,6 +213,11 @@ public class AlphaBeta
 				continue;
 			}
 
+			if (!move.getPromotion().equals(Piece.NONE) && !move.getPromotion().getPieceType().equals(PieceType.QUEEN))
+			{
+				continue;
+			}
+
 			if (bestScore > -MATE_EVAL + 1024 && futilityBase < alpha && !SEE.staticExchangeEvaluation(board, move, 1)
 					&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
