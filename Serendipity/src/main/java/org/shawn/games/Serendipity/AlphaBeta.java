@@ -601,7 +601,8 @@ public class AlphaBeta
 						}
 					}
 
-					else
+					else if (move.getPromotion().equals(Piece.NONE)
+							|| (move.getPromotion().getPieceType().equals(PieceType.QUEEN)))
 					{
 						captureHistory.register(board, move, stat_bonus(depth));
 
@@ -619,7 +620,8 @@ public class AlphaBeta
 			{
 				quietMovesFailBeta.add(move);
 			}
-			else
+			else if (move.getPromotion().equals(Piece.NONE)
+					|| (move.getPromotion().getPieceType().equals(PieceType.QUEEN)))
 			{
 				capturesFailBeta.add(move);
 			}
