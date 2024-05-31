@@ -50,7 +50,7 @@ public class AlphaBeta
 
 	public AlphaBeta(NNUE network)
 	{
-		this(8, network);
+		this(1, network);
 	}
 
 	public AlphaBeta(int n, NNUE network)
