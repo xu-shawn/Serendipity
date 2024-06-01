@@ -213,18 +213,22 @@ public class AlphaBeta
 				continue;
 			}
 
-			if (bestScore > -MATE_EVAL + 1024 && futilityBase < alpha && !SEE.staticExchangeEvaluation(board, move, 1)
-					&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
-							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
-									.getBitboard(board.getSideToMove()))
+			if ((board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
+					| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
+							.getBitboard(board.getSideToMove()))
 			{
-				bestScore = Math.max(bestScore, futilityBase);
-				continue;
-			}
 
-			if (!inCheck && !SEE.staticExchangeEvaluation(board, move, -20))
-			{
-				continue;
+				if (bestScore > -MATE_EVAL + 1024 && futilityBase < alpha
+						&& !SEE.staticExchangeEvaluation(board, move, 1))
+				{
+					bestScore = Math.max(bestScore, futilityBase);
+					continue;
+				}
+
+				if (!inCheck && !SEE.staticExchangeEvaluation(board, move, -20))
+				{
+					continue;
+				}
 			}
 
 			accumulators.updateAccumulators(board, move, false);
