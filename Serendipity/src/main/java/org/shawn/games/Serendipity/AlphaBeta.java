@@ -522,11 +522,6 @@ public class AlphaBeta
 
 			}
 
-			else if (givesCheck)
-			{
-				extension = 1;
-			}
-
 			newdepth += extension;
 
 			accumulators.updateAccumulators(board, move, false);
