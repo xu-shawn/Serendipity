@@ -109,7 +109,14 @@ public class TranspositionTable
 
 	public void write(long hash, NodeType type, int depth, int evaluation, Move move, int staticEval)
 	{
-		entries[(int) (hash & mask)] = new Entry(type, (short) depth, evaluation, hash, move, staticEval);
+		Entry original = entries[(int) (hash & mask)];
+
+		if (original == null || original.getDepth() <= depth || type == NodeType.EXACT
+				|| !original.verifySignature(hash))
+		{
+			entries[(int) (hash & mask)] = new Entry(type, (short) depth, evaluation, hash, move, staticEval);
+		}
+
 	}
 
 	public void clear()
