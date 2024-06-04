@@ -177,7 +177,7 @@ public class NNUE
 	private static int screlu(short i)
 	{
 		int v = Math.max(0, Math.min(i, QA));
-		return v;
+		return v * v;
 	}
 
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
@@ -196,7 +196,7 @@ public class NNUE
 		
 		eval = usSum + themSum;
 		
-		System.out.println(usSum + "\n" + themSum);
+		// System.out.println(usSum + "\n" + themSum);
 
 		eval /= QA;
 		eval += network.outputBiases[chosenBucket];

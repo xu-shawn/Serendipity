@@ -558,7 +558,7 @@ public class AlphaBeta
 			board.doMove(move);
 
 			int thisMoveEval = MIN_EVAL;
-
+ 
 			if (sse.moveCount > 3 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
 				r += isPV ? 0 : 1;
