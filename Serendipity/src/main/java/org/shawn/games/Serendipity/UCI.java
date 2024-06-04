@@ -260,7 +260,7 @@ public class UCI
 						{
 							limits.setTime(Long.parseLong(fullCommand[i + 1]));
 							limits.setIncrement(0);
-							limits.setMovesToGo(1);
+							limits.setMovesToGo(-1);
 						}
 
 						if (fullCommand[i].equals("movestogo"))

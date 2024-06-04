@@ -24,10 +24,20 @@ public class TimeManager
 			movesToGo = 20;
 		}
 
+		if (movesToGo == -1)
+		{
+			this.hardLimit = this.softLimit = this.timeLeft;
+
+			this.startTime = System.nanoTime();
+			this.hardLimitTimeStamp = this.softLimitTimeStamp = startTime + 1000000L * this.timeLeft;
+			
+			return;
+		}
+
 		this.movesToGo = movesToGo;
 
 		this.hardLimit = this.timeLeft / this.movesToGo + this.increment * 3 / 4 - this.moveOverHead;
-		this.softLimit = this.movesToGo != 1 ? this.hardLimit / 2 : this.hardLimit;
+		this.softLimit = this.hardLimit / 2;
 
 		this.startTime = System.nanoTime();
 		this.hardLimitTimeStamp = startTime + 1000000L * this.hardLimit;
