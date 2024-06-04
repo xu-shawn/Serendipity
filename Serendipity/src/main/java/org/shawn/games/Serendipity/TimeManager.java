@@ -15,29 +15,44 @@ public class TimeManager
 
 	public TimeManager(long timeLeft, long increment, int movesToGo, long moveOverHead, int moves)
 	{
-		this.timeLeft = timeLeft;
+		if (timeLeft < 0)
+		{
+			timeLeft = 1000;
+		}
+
+		this.timeLeft = timeLeft - Math.min(moveOverHead, timeLeft) / 2;
 		this.increment = increment;
 		this.moveOverHead = moveOverHead;
 
-		if (movesToGo == 0)
+		if (movesToGo != 0)
 		{
-			movesToGo = 20;
+			this.movesToGo = movesToGo;
+
+			this.hardLimit = this.timeLeft / this.movesToGo + this.increment * 3 / 4;
+			this.softLimit = this.hardLimit / 2;
+
+			this.startTime = System.nanoTime();
+			this.hardLimitTimeStamp = startTime + 1000000L * this.hardLimit;
+			this.softLimitTimeStamp = startTime + 1000000L * this.softLimit;
+
+			return;
 		}
 
-		if (movesToGo == -1)
+		else if (movesToGo == -1)
 		{
 			this.hardLimit = this.softLimit = this.timeLeft;
 
 			this.startTime = System.nanoTime();
 			this.hardLimitTimeStamp = this.softLimitTimeStamp = startTime + 1000000L * this.timeLeft;
-			
+
 			return;
 		}
 
-		this.movesToGo = movesToGo;
+		int baseTime = (int) (this.timeLeft * 0.054 + this.increment * 0.85);
+		int maxTime = (int) (this.timeLeft * 0.76);
 
-		this.hardLimit = this.timeLeft / this.movesToGo + this.increment * 3 / 4 - this.moveOverHead;
-		this.softLimit = this.hardLimit / 2;
+		this.hardLimit = Math.min(maxTime, (int) (baseTime * 3.04));
+		this.softLimit = Math.min(maxTime, (int) (baseTime * 0.76));
 
 		this.startTime = System.nanoTime();
 		this.hardLimitTimeStamp = startTime + 1000000L * this.hardLimit;
