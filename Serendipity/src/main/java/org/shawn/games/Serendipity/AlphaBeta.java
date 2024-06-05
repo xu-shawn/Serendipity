@@ -423,6 +423,16 @@ public class AlphaBeta
 			}
 		}
 
+		if (depth <= 5 && eval + 256 * depth < alpha)
+		{
+			int razorValue = quiesce(board, alpha, alpha + 1, ply);
+
+			if (razorValue <= alpha)
+			{
+				return razorValue;
+			}
+		}
+
 		final List<Move> legalMoves = board.legalMoves();
 
 		if (legalMoves.isEmpty())
