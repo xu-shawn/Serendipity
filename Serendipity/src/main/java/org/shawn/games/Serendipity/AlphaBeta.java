@@ -610,6 +610,8 @@ public class AlphaBeta
 
 					return bestValue;
 				}
+				
+				depth --;
 			}
 
 			if (isQuiet)
