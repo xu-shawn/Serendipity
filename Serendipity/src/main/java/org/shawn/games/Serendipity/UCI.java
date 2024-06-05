@@ -212,6 +212,8 @@ public class UCI
 							blackAccumulator.add(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.BLACK));
 						}
 					}
+					
+					blackAccumulator.showValues();
 
 					System.out.println(internalBoard);
 					System.out.println(Side.WHITE.equals(internalBoard.getSideToMove())
