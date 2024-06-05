@@ -7,7 +7,6 @@ public class TimeManager
 	private int movesToGo;
 	private long hardLimit;
 	private long softLimit;
-	private long moveOverHead;
 
 	private long startTime;
 	private long hardLimitTimeStamp;
@@ -22,7 +21,6 @@ public class TimeManager
 
 		this.timeLeft = timeLeft - Math.min(moveOverHead, timeLeft) / 2;
 		this.increment = increment;
-		this.moveOverHead = moveOverHead;
 
 		if (movesToGo != 0)
 		{
