@@ -611,7 +611,8 @@ public class AlphaBeta
 					return bestValue;
 				}
 				
-				depth --;
+				if (depth > 4 && depth < 10 && Math.abs(bestValue) < MATE_EVAL - 1024)
+					depth --;
 			}
 
 			if (isQuiet)
