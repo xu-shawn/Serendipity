@@ -9,7 +9,7 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-	private static final int HIDDEN_SIZE = 768;
+	private static final int HIDDEN_SIZE = 1024;
 	private static final int FEATURE_SIZE = 768;
 	private static final int OUTPUT_BUCKETS = 1;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
@@ -185,7 +185,7 @@ public class NNUE
 	private static int screlu(short i)
 	{
 		int v = Math.max(0, Math.min(i, QA));
-		return v;
+		return v * v;
 	}
 
 	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
@@ -195,7 +195,7 @@ public class NNUE
 		int usSum = 0;
 		int themSum = 0;
 
-		System.out.println(us.values[12] + "\n" + them.values[12]);
+		// System.out.println(us.values[12] + "\n" + them.values[12]);
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{

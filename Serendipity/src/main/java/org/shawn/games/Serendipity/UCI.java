@@ -39,7 +39,7 @@ public class UCI
 
 			catch (IOException e)
 			{
-				System.out.print("Error Loading NNUE");
+				System.out.print("Error Loading NNUE\n" + e);
 				return;
 			}
 
@@ -50,7 +50,7 @@ public class UCI
 	public static void main(String args[])
 	{
 		options = new HashMap<>();
-		networkName = new NNUEOption("simple.nnue", "nnuefile");
+		networkName = new NNUEOption("nn.net", "nnuefile");
 		threads = new IntegerOption(1, 1, 1, "Threads");
 		hash = new IntegerOption(8, 8, 8, "Hash");
 
@@ -213,7 +213,7 @@ public class UCI
 						}
 					}
 					
-					blackAccumulator.showValues();
+					whiteAccumulator.showValues();
 
 					System.out.println(internalBoard);
 					System.out.println(Side.WHITE.equals(internalBoard.getSideToMove())
