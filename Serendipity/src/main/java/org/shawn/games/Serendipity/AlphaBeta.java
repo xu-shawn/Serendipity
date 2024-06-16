@@ -527,7 +527,12 @@ public class AlphaBeta
 
 				if (singularValue < singularBeta)
 				{
-					extension = 2;
+					extension = 1;
+					
+					if (!isPV && singularValue < singularBeta - 20)
+					{
+						extension = 2;
+					}
 				}
 
 			}
