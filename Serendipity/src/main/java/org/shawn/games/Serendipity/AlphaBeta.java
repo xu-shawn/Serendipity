@@ -33,7 +33,7 @@ public class AlphaBeta
 
 	private Move[][] pv;
 	private Move[] lastCompletePV;
-	private Move[][] counterMoves;
+	private Move[][][] counterMoves;
 	private History history;
 	private int nmpMinPly;
 
@@ -59,7 +59,7 @@ public class AlphaBeta
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
-		this.counterMoves = new Move[13][65];
+		this.counterMoves = new Move[2][13][65];
 		this.history = new FromToHistory();
 		this.rootDepth = 0;
 		this.ss = new SearchStack(MAX_PLY);
@@ -454,8 +454,8 @@ public class AlphaBeta
 		Move counterMove = null;
 
 		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
-					.getTo().ordinal()];
+			counterMove = counterMoves[board.getSideToMove().ordinal()][board.getPiece(lastMove.getMove().getFrom())
+					.ordinal()][lastMove.getMove().getTo().ordinal()];
 
 		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, board);
 
@@ -603,8 +603,8 @@ public class AlphaBeta
 
 						if (lastMove != null)
 						{
-							counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
-									.getTo().ordinal()] = move;
+							counterMoves[board.getSideToMove().ordinal()][board.getPiece(lastMove.getMove().getFrom())
+									.ordinal()][lastMove.getMove().getTo().ordinal()] = move;
 						}
 					}
 
@@ -645,7 +645,7 @@ public class AlphaBeta
 		int delta;
 
 		currentScore = MIN_EVAL;
-		counterMoves = new Move[13][65];
+		counterMoves = new Move[2][13][65];
 		lastCompletePV = null;
 		alpha = MIN_EVAL;
 		beta = MAX_EVAL;
@@ -744,7 +744,7 @@ public class AlphaBeta
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.ss = new SearchStack(MAX_PLY);
-		this.counterMoves = new Move[13][65];
+		this.counterMoves = new Move[2][13][65];
 		this.history = new FromToHistory();
 		this.rootDepth = 0;
 		this.selDepth = 0;
