@@ -461,11 +461,6 @@ public class AlphaBeta
 
 		List<Move> quietMovesFailBeta = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
-		{
-			depth -= 2;
-		}
-
 		for (Move move : legalMoves)
 		{
 			if (move.equals(sse.excludedMove))
