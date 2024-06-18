@@ -100,13 +100,7 @@ public class AlphaBeta
 
 	public int evaluate(Board board)
 	{
-		int v = (Side.WHITE.equals(board.getSideToMove())
-				? NNUE.evaluate(network, accumulators.getWhiteAccumulator(), accumulators.getBlackAccumulator(),
-						NNUE.chooseOutputBucket(board))
-				: NNUE.evaluate(network, accumulators.getBlackAccumulator(), accumulators.getWhiteAccumulator(),
-						NNUE.chooseOutputBucket(board)));
-
-		return v;
+		return PeSTO.evaluate(board);
 	}
 
 	private void sortMoves(List<Move> moves, Board board, int ply)
