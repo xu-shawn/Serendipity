@@ -530,6 +530,10 @@ public class AlphaBeta
 					extension = 2;
 				}
 
+				else if (singularBeta >= beta)
+				{
+					return singularBeta;
+				}
 			}
 
 			else if (givesCheck)
