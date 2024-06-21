@@ -117,22 +117,6 @@ public class AlphaBeta
 		MoveSort.sortMoves(moves, ttMove, null, null, history, board);
 	}
 
-	private List<Move> sortCaptures(List<Move> moves, Board board)
-	{
-		moves.sort(new Comparator<Move>() {
-
-			@Override
-			public int compare(Move m1, Move m2)
-			{
-				return pieceValue(board.getPiece(m2.getTo())) * 100 - pieceValue(board.getPiece(m2.getFrom()))
-						- (pieceValue(board.getPiece(m1.getTo())) * 100 - pieceValue(board.getPiece(m1.getFrom())));
-			}
-
-		});
-
-		return moves;
-	}
-
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
 	{
 		this.nodesCount++;
@@ -203,7 +187,7 @@ public class AlphaBeta
 
 			futilityBase = standPat + 205;
 			moves = board.pseudoLegalCaptures();
-			sortCaptures(moves, board);
+			MoveSort.sortCaptures(moves, board);
 		}
 
 		for (Move move : moves)
