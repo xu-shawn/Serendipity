@@ -75,12 +75,12 @@ public class MoveSort
 				{
 					return 1;
 				}
-				
+
 				else if (((ScoredMove) m2).getScore() == ((ScoredMove) m1).getScore())
 				{
 					return 0;
 				}
-				
+
 				return -1;
 			}
 		});
