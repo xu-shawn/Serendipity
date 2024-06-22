@@ -78,16 +78,6 @@ public class AlphaBeta
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 	}
 
-	private int pieceValue(Piece p)
-	{
-		if (p.getPieceType() == null)
-		{
-			return 0;
-		}
-
-		return p.getPieceType().ordinal();
-	}
-
 	private int stat_bonus(int depth)
 	{
 		return depth * 300 - 300;
