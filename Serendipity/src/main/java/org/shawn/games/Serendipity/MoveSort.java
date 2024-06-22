@@ -59,13 +59,46 @@ public class MoveSort
 	public static void sortMoves(List<Move> moves, Move ttMove, Move killer, Move counterMove, History history,
 			Board board)
 	{
+
+		for (int i = 0; i < moves.size(); i++)
+		{
+			Move move = moves.get(i);
+			int value = moveValue(move, ttMove, killer, counterMove, history, board);
+			moves.set(i, new ScoredMove(move, value));
+		}
+
 		moves.sort(new Comparator<Move>() {
 			@Override
 			public int compare(Move m1, Move m2)
 			{
-				return Integer.compare(moveValue(m2, ttMove, killer, counterMove, history, board),
-						moveValue(m1, ttMove, killer, counterMove, history, board));
+				if (((ScoredMove) m2).getScore() > ((ScoredMove) m1).getScore())
+				{
+					return 1;
+				}
+
+				else if (((ScoredMove) m2).getScore() == ((ScoredMove) m1).getScore())
+				{
+					return 0;
+				}
+
+				return -1;
 			}
 		});
+	}
+
+	public static List<Move> sortCaptures(List<Move> moves, Board board)
+	{
+		moves.sort(new Comparator<Move>() {
+
+			@Override
+			public int compare(Move m1, Move m2)
+			{
+				return pieceValue(board.getPiece(m2.getTo())) * 100 - pieceValue(board.getPiece(m2.getFrom()))
+						- (pieceValue(board.getPiece(m1.getTo())) * 100 - pieceValue(board.getPiece(m1.getFrom())));
+			}
+
+		});
+
+		return moves;
 	}
 }
