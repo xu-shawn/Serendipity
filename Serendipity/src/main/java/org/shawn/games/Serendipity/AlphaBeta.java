@@ -504,6 +504,11 @@ public class AlphaBeta
 					extension = 2;
 				}
 
+				else if (singularValue >= beta)
+				{
+					return singularValue;
+				}
+
 			}
 
 			else if (givesCheck)
