@@ -196,7 +196,7 @@ public class AlphaBeta
 				continue;
 			}
 
-			if (!inCheck && !SEE.staticExchangeEvaluation(board, move, -20))
+			if (!inCheck && !SEE.staticExchangeEvaluation(board, move, -111))
 			{
 				continue;
 			}
