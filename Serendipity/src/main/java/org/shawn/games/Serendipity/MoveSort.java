@@ -97,6 +97,10 @@ public class MoveSort
 		{
 			Move move = moves.get(i);
 			int value = captureValue(move, board);
+			if (SEE.staticExchangeEvaluation(board, move, 1))
+			{
+				value += 9000000;
+			}
 			moves.set(i, new ScoredMove(move, value));
 		}
 
