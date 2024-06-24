@@ -80,7 +80,7 @@ public class AlphaBeta
 
 	private int stat_bonus(int depth)
 	{
-		return depth * 300 - 300;
+		return Math.min(depth * 300 - 300, 4000);
 	}
 
 	private int stat_malus(int depth)
