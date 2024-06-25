@@ -17,12 +17,28 @@ public class MoveSort
 		return p.getPieceType().ordinal() + 1;
 	}
 
-	private static int captureValue(Move move, Board board)
+	private static int captureValue(Move move, Board board, History captureHistory)
 	{
-		return pieceValue(board.getPiece(move.getTo())) * 100 - pieceValue(board.getPiece(move.getFrom()));
+		return pieceValue(board.getPiece(move.getTo())) * 100 + captureHistory.get(board, move) / 256;
 	}
 
-	public static int moveValue(Move move, Move ttMove, Move killer, Move counterMove, History history, Board board)
+	private static int qSearchValue(Move move, Board board, History captureHistory)
+	{
+		if (!move.getPromotion().equals(Piece.NONE))
+		{
+			return switch (move.getPromotion().getPieceType())
+			{
+				case QUEEN -> 2000000001;
+				case KNIGHT -> 2000000000;
+				default -> -2000000001;
+			};
+		}
+
+		return captureValue(move, board, captureHistory);
+	}
+
+	public static int moveValue(Move move, Move ttMove, Move killer, Move counterMove, History history,
+			History captureHistory, Board board)
 	{
 		if (move.equals(ttMove))
 		{
@@ -44,7 +60,7 @@ public class MoveSort
 						&& move.getTo() == board.getEnPassant()))
 		{
 			int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;
-			score += captureValue(move, board);
+			score += captureValue(move, board, captureHistory);
 			return score;
 		}
 
@@ -61,14 +77,14 @@ public class MoveSort
 		return history.get(board, move);
 	}
 
-	public static void sortMoves(List<Move> moves, Move ttMove, Move killer, Move counterMove, History history,
+	public static void sortMoves(List<Move> moves, Move ttMove, Move killer, Move counterMove, History history, History captureHistory,
 			Board board)
 	{
 
 		for (int i = 0; i < moves.size(); i++)
 		{
 			Move move = moves.get(i);
-			int value = moveValue(move, ttMove, killer, counterMove, history, board);
+			int value = moveValue(move, ttMove, killer, counterMove, history, captureHistory, board);
 			moves.set(i, new ScoredMove(move, value));
 		}
 
@@ -91,12 +107,12 @@ public class MoveSort
 		});
 	}
 
-	public static List<Move> sortCaptures(List<Move> moves, Board board)
+	public static List<Move> sortCaptures(List<Move> moves, Board board, History captureHistory)
 	{
 		for (int i = 0; i < moves.size(); i++)
 		{
 			Move move = moves.get(i);
-			int value = captureValue(move, board);
+			int value = qSearchValue(move, board, captureHistory);
 			moves.set(i, new ScoredMove(move, value));
 		}
 

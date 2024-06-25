@@ -35,6 +35,7 @@ public class AlphaBeta
 	private Move[] lastCompletePV;
 	private Move[][] counterMoves;
 	private History history;
+	private History captureHistory;
 	private int nmpMinPly;
 
 	private int rootDepth;
@@ -61,6 +62,7 @@ public class AlphaBeta
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.counterMoves = new Move[13][65];
 		this.history = new FromToHistory();
+		this.captureHistory = new CaptureHistory();
 		this.rootDepth = 0;
 		this.ss = new SearchStack(MAX_PLY);
 
@@ -104,7 +106,7 @@ public class AlphaBeta
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
-		MoveSort.sortMoves(moves, ttMove, null, null, history, board);
+		MoveSort.sortMoves(moves, ttMove, null, null, history, captureHistory, board);
 	}
 
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
@@ -177,7 +179,7 @@ public class AlphaBeta
 
 			futilityBase = standPat + 205;
 			moves = board.pseudoLegalCaptures();
-			MoveSort.sortCaptures(moves, board);
+			MoveSort.sortCaptures(moves, board, captureHistory);
 		}
 
 		for (Move move : moves)
@@ -431,9 +433,10 @@ public class AlphaBeta
 			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
 					.getTo().ordinal()];
 
-		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, board);
+		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory, board);
 
 		List<Move> quietsSearched = new ArrayList<>();
+		List<Move> capturesSearched = new ArrayList<>();
 
 		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
 		{
@@ -581,6 +584,15 @@ public class AlphaBeta
 									.getTo().ordinal()] = move;
 						}
 					}
+					else
+					{
+						captureHistory.register(board, move, stat_bonus(depth));
+
+						for (Move capture : capturesSearched)
+						{
+							captureHistory.register(board, capture, stat_malus(depth));
+						}
+					}
 
 					return bestValue;
 				}
@@ -589,6 +601,10 @@ public class AlphaBeta
 			if (isQuiet)
 			{
 				quietsSearched.add(move);
+			}
+			else
+			{
+				capturesSearched.add(move);
 			}
 		}
 
@@ -720,6 +736,7 @@ public class AlphaBeta
 		this.ss = new SearchStack(MAX_PLY);
 		this.counterMoves = new Move[13][65];
 		this.history = new FromToHistory();
+		this.captureHistory = new CaptureHistory();
 		this.rootDepth = 0;
 		this.selDepth = 0;
 	}
