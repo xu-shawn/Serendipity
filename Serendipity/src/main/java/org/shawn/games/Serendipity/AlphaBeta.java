@@ -364,7 +364,7 @@ public class AlphaBeta
 
 		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 70 > beta)
 		{
-			return beta;
+			return beta > -MATE_EVAL + 1024 ? beta + (eval - beta) / 3 : eval;
 		}
 
 		if (!inSingularSearch && nullAllowed && beta < MATE_EVAL - 1024 && !inCheck
