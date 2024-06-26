@@ -69,7 +69,7 @@ public class UCI
 
 		if (args.length == 1 && args[0].equals("bench"))
 		{
-			Bench.bench(engine, 10, false, true);
+			Bench.bench(engine, 5, false, true);
 			return;
 		}
 
@@ -322,7 +322,7 @@ public class UCI
 					}
 					break;
 				case "bench":
-					depth = 10;
+					depth = 5;
 					if (fullCommand.length > 1)
 					{
 						depth = Integer.parseInt(fullCommand[1]);
