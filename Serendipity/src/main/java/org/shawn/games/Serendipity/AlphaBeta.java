@@ -512,7 +512,7 @@ public class AlphaBeta
 				{
 					extension = 2;
 					
-					if (!ttCapture && !isPV)
+					if (!ttCapture && !isPV && singularValue < singularBeta - 200)
 					{
 						extension ++;
 					}
