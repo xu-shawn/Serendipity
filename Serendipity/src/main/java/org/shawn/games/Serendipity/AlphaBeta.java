@@ -100,7 +100,7 @@ public class AlphaBeta
 
 	public int evaluate(Board board)
 	{
-		return PeSTO.evaluate(board);
+		return PeSTO.evaluate(board) / 24;
 	}
 
 	private void sortMoves(List<Move> moves, Board board, int ply)
