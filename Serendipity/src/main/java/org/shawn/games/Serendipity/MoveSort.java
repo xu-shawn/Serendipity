@@ -24,16 +24,6 @@ public class MoveSort
 
 	private static int qSearchValue(Move move, Board board, History captureHistory)
 	{
-		if (!move.getPromotion().equals(Piece.NONE))
-		{
-			return switch (move.getPromotion().getPieceType())
-			{
-				case QUEEN -> 2000000001;
-				case KNIGHT -> 2000000000;
-				default -> -2000000001;
-			};
-		}
-
 		return captureValue(move, board, captureHistory);
 	}
 
