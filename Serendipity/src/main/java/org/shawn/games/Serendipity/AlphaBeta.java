@@ -483,6 +483,11 @@ public class AlphaBeta
 				{
 					continue;
 				}
+				
+				if (history.get(board, move) < -4000 * depth)
+				{
+					continue;
+				}
 			}
 
 			int extension = 0;
