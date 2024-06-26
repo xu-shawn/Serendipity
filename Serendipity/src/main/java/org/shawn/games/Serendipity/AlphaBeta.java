@@ -493,7 +493,7 @@ public class AlphaBeta
 							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.LOWERBOUND))
 					&& currentMoveEntry.getDepth() > depth - 2)
 			{
-				int singularBeta = currentMoveEntry.getEvaluation() - 3 * depth;
+				int singularBeta = currentMoveEntry.getEvaluation() - 2 * depth;
 				int singularDepth = depth / 2;
 				int moveCountBackup = sse.moveCount;
 
