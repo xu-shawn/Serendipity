@@ -89,6 +89,13 @@ public class AlphaBeta
 	{
 		return -stat_bonus(depth);
 	}
+	
+	private boolean isQuiet(Board board, Move move)
+	{
+		return Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
+				&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
+						&& move.getTo() == board.getEnPassant());
+	}
 
 	public int evaluate(Board board)
 	{
@@ -236,7 +243,7 @@ public class AlphaBeta
 		this.ss.get(ply + 2).killer = null;
 		this.selDepth = Math.max(this.selDepth, ply);
 
-		boolean improving, isPV, inCheck, givesCheck, inSingularSearch;
+		boolean improving, isPV, inCheck, givesCheck, inSingularSearch, ttCapture;
 		Move bestMove;
 		int bestValue;
 		int eval;
@@ -426,6 +433,7 @@ public class AlphaBeta
 		int oldAlpha = alpha;
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
+		ttCapture = ttMove == null ? false : !isQuiet(board, ttMove);
 		MoveBackup lastMove = board.getBackup().peekLast();
 		Move counterMove = null;
 
@@ -455,9 +463,7 @@ public class AlphaBeta
 			board.doMove(move);
 			givesCheck = board.isKingAttacked();
 			board.undoMove();
-			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
-					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
-							&& move.getTo() == board.getEnPassant());
+			boolean isQuiet = isQuiet(board, move);
 
 			int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
 			int lmrDepth = depth - r;
@@ -525,6 +531,7 @@ public class AlphaBeta
 			{
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
+				r += ttCapture ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
