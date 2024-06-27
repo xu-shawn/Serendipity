@@ -487,13 +487,13 @@ public class AlphaBeta
 
 			int extension = 0;
 
-			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth > 8
+			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth >= 8
 					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
 					&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)
 							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.LOWERBOUND))
-					&& currentMoveEntry.getDepth() > depth - 2)
+					&& currentMoveEntry.getDepth() > depth - 4)
 			{
-				int singularBeta = currentMoveEntry.getEvaluation() - 3 * depth;
+				int singularBeta = currentMoveEntry.getEvaluation() - 2 * depth;
 				int singularDepth = depth / 2;
 				int moveCountBackup = sse.moveCount;
 
@@ -504,7 +504,7 @@ public class AlphaBeta
 
 				if (singularValue < singularBeta)
 				{
-					extension = 2;
+					extension = 1;
 				}
 
 			}
