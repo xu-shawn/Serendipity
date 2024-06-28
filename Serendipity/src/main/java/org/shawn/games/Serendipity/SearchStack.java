@@ -11,6 +11,7 @@ public class SearchStack
 		public int moveCount;
 		public int staticEval = AlphaBeta.VALUE_NONE;
 		public Move killer;
+		public Move move;
 		public Move excludedMove;
 	}
 	

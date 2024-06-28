@@ -426,12 +426,17 @@ public class AlphaBeta
 		int oldAlpha = alpha;
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
-		MoveBackup lastMove = board.getBackup().peekLast();
+		Move lastMove = ss.get(ply - 1).move;
+		
+		if (lastMove != null && !lastMove.equals(board.getBackup().peekLast().getMove()))
+		{
+			return 0/0;
+		}
+		
 		Move counterMove = null;
 
 		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
-					.getTo().ordinal()];
+			counterMove = counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo().ordinal()];
 
 		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory, board);
 
@@ -451,6 +456,7 @@ public class AlphaBeta
 			}
 
 			sse.moveCount++;
+			sse.move = move;
 			int newdepth = depth - 1;
 			board.doMove(move);
 			givesCheck = board.isKingAttacked();
@@ -580,8 +586,8 @@ public class AlphaBeta
 
 						if (lastMove != null)
 						{
-							counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
-									.getTo().ordinal()] = move;
+							counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo()
+									.ordinal()] = move;
 						}
 					}
 					else
