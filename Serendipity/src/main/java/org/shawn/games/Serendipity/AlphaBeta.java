@@ -376,6 +376,7 @@ public class AlphaBeta
 			int r = depth / 3 + 4 + Math.min((eval - beta) / 200, 3);
 
 			board.doNullMove();
+			sse.move = Constants.emptyMove;
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
 
@@ -388,7 +389,7 @@ public class AlphaBeta
 
 				this.nmpMinPly = ply + 3 * (depth - r) / 4;
 
-				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
+				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply, false);
 
 				this.nmpMinPly = 0;
 
@@ -427,12 +428,6 @@ public class AlphaBeta
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 		Move lastMove = ss.get(ply - 1).move;
-		
-		if (lastMove != null && !lastMove.equals(board.getBackup().peekLast().getMove()))
-		{
-			return 0/0;
-		}
-		
 		Move counterMove = null;
 
 		if (lastMove != null)
@@ -456,7 +451,6 @@ public class AlphaBeta
 			}
 
 			sse.moveCount++;
-			sse.move = move;
 			int newdepth = depth - 1;
 			board.doMove(move);
 			givesCheck = board.isKingAttacked();
@@ -524,6 +518,7 @@ public class AlphaBeta
 
 			accumulators.updateAccumulators(board, move, false);
 			board.doMove(move);
+			sse.move = move;
 
 			int thisMoveEval = MIN_EVAL;
 
