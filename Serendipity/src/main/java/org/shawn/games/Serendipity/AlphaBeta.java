@@ -376,6 +376,7 @@ public class AlphaBeta
 			int r = depth / 3 + 4 + Math.min((eval - beta) / 200, 3);
 
 			board.doNullMove();
+			sse.move = Constants.emptyMove;
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
 			board.undoMove();
 
@@ -388,7 +389,7 @@ public class AlphaBeta
 
 				this.nmpMinPly = ply + 3 * (depth - r) / 4;
 
-				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, false);
+				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply, false);
 
 				this.nmpMinPly = 0;
 
@@ -426,12 +427,11 @@ public class AlphaBeta
 		int oldAlpha = alpha;
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
-		MoveBackup lastMove = board.getBackup().peekLast();
+		Move lastMove = ss.get(ply - 1).move;
 		Move counterMove = null;
 
 		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
-					.getTo().ordinal()];
+			counterMove = counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo().ordinal()];
 
 		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory, board);
 
@@ -518,6 +518,7 @@ public class AlphaBeta
 
 			accumulators.updateAccumulators(board, move, false);
 			board.doMove(move);
+			sse.move = move;
 
 			int thisMoveEval = MIN_EVAL;
 
@@ -580,8 +581,8 @@ public class AlphaBeta
 
 						if (lastMove != null)
 						{
-							counterMoves[board.getPiece(lastMove.getMove().getFrom()).ordinal()][lastMove.getMove()
-									.getTo().ordinal()] = move;
+							counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo()
+									.ordinal()] = move;
 						}
 					}
 					else
