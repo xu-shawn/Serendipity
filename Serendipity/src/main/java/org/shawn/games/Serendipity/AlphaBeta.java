@@ -505,6 +505,11 @@ public class AlphaBeta
 				if (singularValue < singularBeta)
 				{
 					extension = 1;
+					
+					if (!isPV)
+					{
+						extension = 2;
+					}
 				}
 
 			}
