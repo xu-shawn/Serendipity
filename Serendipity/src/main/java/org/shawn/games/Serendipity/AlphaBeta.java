@@ -542,9 +542,25 @@ public class AlphaBeta
 				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, true);
 			}
 
-			if (isPV && (sse.moveCount == 1 || thisMoveEval > alpha))
+			if (isPV)
 			{
-				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
+
+				if (sse.moveCount != 1 && thisMoveEval > alpha)
+				{
+					int blendedScore = (alpha + thisMoveEval) / 2;
+
+					thisMoveEval = -mainSearch(board, newdepth, -beta, -(blendedScore), ply + 1, true);
+					
+					if (thisMoveEval < blendedScore)
+					{
+						thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
+					}
+				}
+
+				else if (sse.moveCount == 1)
+				{
+					thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
+				}
 			}
 
 			board.undoMove();
