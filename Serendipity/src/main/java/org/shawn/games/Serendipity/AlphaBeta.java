@@ -550,11 +550,6 @@ public class AlphaBeta
 					int blendedScore = (alpha + thisMoveEval) / 2;
 
 					thisMoveEval = -mainSearch(board, newdepth, -beta, -(blendedScore), ply + 1, true);
-					
-					if (thisMoveEval < blendedScore)
-					{
-						thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, true);
-					}
 				}
 
 				else if (sse.moveCount == 1)
