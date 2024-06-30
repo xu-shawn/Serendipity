@@ -506,7 +506,7 @@ public class AlphaBeta
 				{
 					extension = 1;
 					
-					if (!isPV)
+					if (!isPV || singularValue < singularBeta - 20)
 					{
 						extension = 2;
 					}
