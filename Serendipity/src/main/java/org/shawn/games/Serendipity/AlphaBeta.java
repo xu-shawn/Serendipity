@@ -23,7 +23,7 @@ public class AlphaBeta
 	public static final int DRAW_EVAL = 0;
 
 	public static final int MAX_PLY = 256;
-	
+
 	public static final int[][] reduction = new int[256][256];
 
 	private final TranspositionTable tt;
@@ -69,10 +69,10 @@ public class AlphaBeta
 		this.ss = new SearchStack(MAX_PLY);
 
 		this.network = network;
-		
-		for (int i = 0; i < reduction.length; i ++)
+
+		for (int i = 0; i < reduction.length; i++)
 		{
-			for (int j = 0; j < reduction[0].length; j ++)
+			for (int j = 0; j < reduction[0].length; j++)
 			{
 				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
 			}
@@ -515,13 +515,13 @@ public class AlphaBeta
 				if (singularValue < singularBeta)
 				{
 					extension = 1;
-					
+
 					if (!isPV)
 					{
 						extension = 2;
 					}
 				}
-				
+
 				else if (singularValue > beta)
 				{
 					return singularValue;
@@ -689,7 +689,7 @@ public class AlphaBeta
 						if (!suppressOutput)
 						{
 							UCI.report(i, selDepth, nodesCount, currentScore, timeManager.timePassed(),
-									this.lastCompletePV);
+									this.internalBoard, this.lastCompletePV);
 						}
 						break;
 					}
@@ -760,10 +760,10 @@ public class AlphaBeta
 		this.captureHistory = new CaptureHistory();
 		this.rootDepth = 0;
 		this.selDepth = 0;
-		
-		for (int i = 0; i < reduction.length; i ++)
+
+		for (int i = 0; i < reduction.length; i++)
 		{
-			for (int j = 0; j < reduction[0].length; j ++)
+			for (int j = 0; j < reduction[0].length; j++)
 			{
 				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
 			}

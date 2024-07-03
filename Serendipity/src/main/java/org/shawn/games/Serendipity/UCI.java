@@ -92,22 +92,38 @@ public class UCI
 		myOption.set(value);
 	}
 
-	public static void report(int depth, int selDepth, int nodes, int score, long ms, Move[] pv)
+	public static void report(int depth, int selDepth, int nodes, int score, long ms, Board board, Move[] pv)
 	{
+		String pvString = String.join(" ",
+				Arrays.stream(pv).takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList()));
+
 		if (Math.abs(score) < AlphaBeta.MATE_EVAL - AlphaBeta.MAX_PLY)
 		{
-			System.out.printf("info depth %d seldepth %d nodes %d nps %d score cp %d time %d pv %s\n", depth, selDepth,
-					nodes, nodes * 1000L / Math.max(1, ms), score, ms, String.join(" ", Arrays.stream(pv)
-							.takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
+			int cp = WDLModel.normalizeEval(score, board);
+			int[] wdl = WDLModel.calculateWDL(score, board);
+
+			System.out.printf("info depth %d seldepth %d nodes %d nps %d score cp %d wdl %d %d %d time %d pv %s\n",
+					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), cp, wdl[0], wdl[1], wdl[2], ms, pvString);
 		}
 
 		else
 		{
 			int mateInPly = AlphaBeta.MATE_EVAL - Math.abs(score);
-			System.out.printf("info depth %d seldepth %d nodes %d nps %d score mate %d time %d pv %s\n", depth,
-					selDepth, nodes, nodes * 1000L / Math.max(1, ms),
-					mateInPly % 2 != 0 ? (mateInPly + 1) / 2 : -mateInPly / 2, ms, String.join(" ", Arrays.stream(pv)
-							.takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList())));
+			int mateValue = mateInPly % 2 != 0 ? (mateInPly + 1) / 2 : -mateInPly / 2;
+			int[] wdl;
+
+			if (mateValue < 0)
+			{
+				wdl = new int[] { 0, 0, 1000 };
+			}
+			else
+			{
+				wdl = new int[] { 1000, 0, 0 };
+			}
+
+			System.out.printf("info depth %d seldepth %d nodes %d nps %d score mate %d wdl %d %d %d time %d pv %s\n",
+					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), mateValue, wdl[0], wdl[1], wdl[2], ms,
+					pvString);
 		}
 	}
 
