@@ -760,5 +760,13 @@ public class AlphaBeta
 		this.captureHistory = new CaptureHistory();
 		this.rootDepth = 0;
 		this.selDepth = 0;
+		
+		for (int i = 0; i < reduction.length; i ++)
+		{
+			for (int j = 0; j < reduction[0].length; j ++)
+			{
+				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
+			}
+		}
 	}
 }
