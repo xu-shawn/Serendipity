@@ -23,6 +23,8 @@ public class AlphaBeta
 	public static final int DRAW_EVAL = 0;
 
 	public static final int MAX_PLY = 256;
+	
+	public static final int[][] reduction = new int[256][256];
 
 	private final TranspositionTable tt;
 
@@ -67,6 +69,14 @@ public class AlphaBeta
 		this.ss = new SearchStack(MAX_PLY);
 
 		this.network = network;
+		
+		for (int i = 0; i < reduction.length; i ++)
+		{
+			for (int j = 0; j < reduction[0].length; j ++)
+			{
+				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
+			}
+		}
 	}
 
 	private void updatePV(Move move, int ply)
@@ -459,7 +469,7 @@ public class AlphaBeta
 					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 							&& move.getTo() == board.getEnPassant());
 
-			int r = (int) (1.60 + Math.log(depth) * Math.log(sse.moveCount) / 2.17);
+			int r = reduction[depth][sse.moveCount];
 			int lmrDepth = depth - r;
 
 			if (isQuiet && !isPV && !givesCheck && sse.moveCount > 3 + depth * depth / (improving ? 1 : 2)
@@ -750,5 +760,13 @@ public class AlphaBeta
 		this.captureHistory = new CaptureHistory();
 		this.rootDepth = 0;
 		this.selDepth = 0;
+		
+		for (int i = 0; i < reduction.length; i ++)
+		{
+			for (int j = 0; j < reduction[0].length; j ++)
+			{
+				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
+			}
+		}
 	}
 }
