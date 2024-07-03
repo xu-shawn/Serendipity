@@ -233,7 +233,7 @@ public class AlphaBeta
 	{
 		this.nodesCount++;
 		this.pv[ply][0] = null;
-		this.ss.get(ply + 2).killer = null;
+		this.ss.get(ply + 1).killer = null;
 		this.selDepth = Math.max(this.selDepth, ply);
 
 		boolean improving, isPV, inCheck, givesCheck, inSingularSearch;
