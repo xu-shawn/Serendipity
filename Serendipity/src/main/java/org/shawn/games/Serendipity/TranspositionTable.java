@@ -147,6 +147,37 @@ public class TranspositionTable
 		this.entries = new Entry[this.size];
 	}
 	
+	public int hashfull()
+	{
+		int hashfull = 0;
+		
+		for (int i = 0;i < 1000; i ++)
+		{
+			if (this.entries[i] != null)
+			{
+				hashfull ++;
+			}
+		}
+		
+		return hashfull;
+	}
+	
+	public int hashfull_accurate()
+	{
+		int hashfull = 0;
+		int minimum_hash = 1048576 / ENTRY_SIZE;
+		
+		for (int i = 0; i < minimum_hash; i++)
+		{
+			if (this.entries[i] != null)
+			{
+				hashfull ++;
+			}
+		}
+		
+		return hashfull * 1000 / minimum_hash;
+	}
+	
 	public int getSize()
 	{
 		return this.size * ENTRY_SIZE / 1048576;

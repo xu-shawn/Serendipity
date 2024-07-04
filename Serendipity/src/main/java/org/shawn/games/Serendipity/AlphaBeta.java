@@ -675,7 +675,7 @@ public class AlphaBeta
 						this.lastCompletePV = pv[0].clone();
 						if (!suppressOutput)
 						{
-							UCI.report(i, selDepth, nodesCount, currentScore, timeManager.timePassed(),
+							UCI.report(i, selDepth, nodesCount, tt.hashfull(), currentScore, timeManager.timePassed(),
 									this.internalBoard, this.lastCompletePV);
 						}
 						break;
