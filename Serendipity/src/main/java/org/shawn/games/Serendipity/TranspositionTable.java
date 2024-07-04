@@ -7,7 +7,7 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class TranspositionTable
 {
-	public enum NodeType
+	public static enum NodeType
 	{
 		EXACT, LOWERBOUND, UPPERBOUND
 	}
@@ -103,9 +103,13 @@ public class TranspositionTable
 	public final int size;
 	private final int mask;
 	private Entry[] entries;
+	
+	private static final int ENTRY_SIZE = 32;
 
 	public TranspositionTable(int size)
 	{
+		size *= 1048576 / ENTRY_SIZE;
+		
 		this.size = Integer.highestOneBit(size);
 		this.mask = this.size - 1;
 		this.entries = new Entry[this.size];

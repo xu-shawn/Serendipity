@@ -52,7 +52,7 @@ public class UCI
 		options = new HashMap<>();
 		networkName = new NNUEOption("simple.nnue", "nnuefile");
 		threads = new IntegerOption(1, 1, 1, "Threads");
-		hash = new IntegerOption(8, 8, 8, "Hash");
+		hash = new IntegerOption(32, 8, 1024, "Hash");
 
 		try
 		{
@@ -65,7 +65,7 @@ public class UCI
 		}
 
 		internalBoard = new Board();
-		engine = new AlphaBeta(network);
+		engine = new AlphaBeta(hash.get(), network);
 
 		if (args.length == 1 && args[0].equals("bench"))
 		{
@@ -191,7 +191,7 @@ public class UCI
 				case "ucinewgame":
 					System.gc();
 					internalBoard = new Board();
-					engine = new AlphaBeta(network);
+					engine = new AlphaBeta(hash.get(), network);
 					break;
 				case "quit":
 					input.close();

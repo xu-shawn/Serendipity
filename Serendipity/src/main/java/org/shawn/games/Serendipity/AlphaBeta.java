@@ -53,12 +53,12 @@ public class AlphaBeta
 
 	public AlphaBeta(NNUE network)
 	{
-		this(1, network);
+		this(32, network);
 	}
 
 	public AlphaBeta(int n, NNUE network)
 	{
-		this.tt = new TranspositionTable(1048576 * n);
+		this.tt = new TranspositionTable(n);
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
