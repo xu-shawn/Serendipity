@@ -15,11 +15,12 @@ public class UCI
 	private static Board internalBoard;
 	private static Map<String, UCIOption> options;
 	private static AlphaBeta engine;
+	private static TranspositionTable transpositionTable;
 	private static NNUE network;
 
 	private static StringOption networkName;
 	private static IntegerOption threads;
-	private static IntegerOption hash;
+	private static HashOption hash;
 
 	public static class NNUEOption extends StringOption
 	{
@@ -34,7 +35,7 @@ public class UCI
 			try
 			{
 				network = new NNUE("/" + value);
-				engine = new AlphaBeta(network);
+				engine = new AlphaBeta(transpositionTable, network);
 			}
 
 			catch (IOException e)
@@ -47,12 +48,31 @@ public class UCI
 		}
 	}
 
+	public static class HashOption extends IntegerOption
+	{
+		private TranspositionTable tt;
+
+		public HashOption(int value, int lowerBound, int upperBound, TranspositionTable tt, String name)
+		{
+			super(value, lowerBound, upperBound, name);
+			this.tt = tt;
+		}
+
+		@Override
+		public void set(String value)
+		{
+			super.set(value);
+			tt.resize(Integer.parseInt(value));
+		}
+	}
+
 	public static void main(String args[])
 	{
+		transpositionTable = new TranspositionTable(32);
 		options = new HashMap<>();
 		networkName = new NNUEOption("simple.nnue", "nnuefile");
 		threads = new IntegerOption(1, 1, 1, "Threads");
-		hash = new IntegerOption(32, 8, 1024, "Hash");
+		hash = new HashOption(32, 8, 4096, transpositionTable, "Hash");
 
 		try
 		{
@@ -65,7 +85,7 @@ public class UCI
 		}
 
 		internalBoard = new Board();
-		engine = new AlphaBeta(hash.get(), network);
+		engine = new AlphaBeta(transpositionTable, network);
 
 		if (args.length == 1 && args[0].equals("bench"))
 		{
@@ -191,7 +211,8 @@ public class UCI
 				case "ucinewgame":
 					System.gc();
 					internalBoard = new Board();
-					engine = new AlphaBeta(hash.get(), network);
+					transpositionTable.clear();
+					engine.reset();
 					break;
 				case "quit":
 					input.close();

@@ -20,6 +20,8 @@ public class TranspositionTable
 		// staticEval: 16 bits
 		// Square: 6 bits
 		// Signature: 64 bits
+		
+		// Total: 32 Bytes (Padding and Class Header)
 
 		private long signature;
 		private short depthAndType;
@@ -100,7 +102,7 @@ public class TranspositionTable
 		}
 	}
 
-	public final int size;
+	private int size;
 	private final int mask;
 	private Entry[] entries;
 	
@@ -135,5 +137,18 @@ public class TranspositionTable
 	public void clear()
 	{
 		Arrays.fill(entries, null);
+	}
+	
+	public void resize(int size)
+	{
+		size *= 1048576 / ENTRY_SIZE;
+		this.size = Integer.highestOneBit(size);
+		
+		entries = new Entry[this.size];
+	}
+	
+	public int getSize()
+	{
+		return this.size * ENTRY_SIZE / 1048576;
 	}
 }

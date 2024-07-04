@@ -2,7 +2,6 @@ package org.shawn.games.Serendipity;
 
 import java.util.*;
 
-import org.shawn.games.Serendipity.TranspositionTable.NodeType;
 import org.shawn.games.Serendipity.NNUE.*;
 
 import com.github.bhlangonijr.chesslib.*;
@@ -10,12 +9,6 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class AlphaBeta
 {
-	private static final int PAWN_VALUE = 82;
-	private static final int KNIGHT_VALUE = 337;
-	private static final int BISHOP_VALUE = 365;
-	private static final int ROOK_VALUE = 477;
-	private static final int QUEEN_VALUE = 1025;
-
 	public static final int VALUE_NONE = 30002;
 	public static final int MAX_EVAL = 32767;
 	public static final int MIN_EVAL = -32767;
@@ -26,7 +19,7 @@ public class AlphaBeta
 
 	public static final int[][] reduction = new int[256][256];
 
-	private final TranspositionTable tt;
+	private TranspositionTable tt;
 
 	private TimeManager timeManager;
 
@@ -51,14 +44,8 @@ public class AlphaBeta
 	private Board internalBoard;
 	private Limits limits;
 
-	public AlphaBeta(NNUE network)
+	public AlphaBeta(TranspositionTable tt, NNUE network)
 	{
-		this(32, network);
-	}
-
-	public AlphaBeta(int n, NNUE network)
-	{
-		this.tt = new TranspositionTable(n);
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
@@ -67,6 +54,7 @@ public class AlphaBeta
 		this.captureHistory = new CaptureHistory();
 		this.rootDepth = 0;
 		this.ss = new SearchStack(MAX_PLY);
+		this.tt = tt;
 
 		this.network = network;
 
@@ -749,7 +737,6 @@ public class AlphaBeta
 
 	public void reset()
 	{
-		this.tt.clear();
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
