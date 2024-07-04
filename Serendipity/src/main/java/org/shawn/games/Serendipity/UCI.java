@@ -62,7 +62,7 @@ public class UCI
 		public void set(String value)
 		{
 			super.set(value);
-			tt.resize(Integer.parseInt(value));
+			tt.resize(super.value);
 		}
 	}
 
@@ -365,6 +365,7 @@ public class UCI
 						depth = Integer.parseInt(fullCommand[1]);
 					}
 					Bench.bench(engine, depth);
+					transpositionTable.clear();
 					break;
 				case "benches":
 					int iterations = Integer.parseInt(fullCommand[1]);

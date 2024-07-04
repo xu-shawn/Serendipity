@@ -103,7 +103,7 @@ public class TranspositionTable
 	}
 
 	private int size;
-	private final int mask;
+	private int mask;
 	private Entry[] entries;
 	
 	private static final int ENTRY_SIZE = 32;
@@ -143,8 +143,8 @@ public class TranspositionTable
 	{
 		size *= 1048576 / ENTRY_SIZE;
 		this.size = Integer.highestOneBit(size);
-		
-		entries = new Entry[this.size];
+		this.mask = this.size - 1;
+		this.entries = new Entry[this.size];
 	}
 	
 	public int getSize()
