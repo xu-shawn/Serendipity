@@ -87,6 +87,8 @@ public class Bench
 				System.out.printf("%d nodes %d nps", totalNodes, totalNodes * 1000000000L / (endTime - startTime));
 			}
 		}
+		
+		ai.reset();
 
 		return (double) (totalNodes) * 1000000000L / (endTime - startTime);
 	}

@@ -15,11 +15,12 @@ public class UCI
 	private static Board internalBoard;
 	private static Map<String, UCIOption> options;
 	private static AlphaBeta engine;
+	private static TranspositionTable transpositionTable;
 	private static NNUE network;
 
 	private static StringOption networkName;
 	private static IntegerOption threads;
-	private static IntegerOption hash;
+	private static HashOption hash;
 
 	public static class NNUEOption extends StringOption
 	{
@@ -34,7 +35,7 @@ public class UCI
 			try
 			{
 				network = new NNUE("/" + value);
-				engine = new AlphaBeta(network);
+				engine = new AlphaBeta(transpositionTable, network);
 			}
 
 			catch (IOException e)
@@ -47,12 +48,31 @@ public class UCI
 		}
 	}
 
+	public static class HashOption extends IntegerOption
+	{
+		private TranspositionTable tt;
+
+		public HashOption(int value, int lowerBound, int upperBound, TranspositionTable tt, String name)
+		{
+			super(value, lowerBound, upperBound, name);
+			this.tt = tt;
+		}
+
+		@Override
+		public void set(String value)
+		{
+			super.set(value);
+			tt.resize(super.value);
+		}
+	}
+
 	public static void main(String args[])
 	{
+		transpositionTable = new TranspositionTable(32);
 		options = new HashMap<>();
 		networkName = new NNUEOption("simple.nnue", "nnuefile");
 		threads = new IntegerOption(1, 1, 1, "Threads");
-		hash = new IntegerOption(8, 8, 8, "Hash");
+		hash = new HashOption(32, 8, 4096, transpositionTable, "Hash");
 
 		try
 		{
@@ -65,7 +85,7 @@ public class UCI
 		}
 
 		internalBoard = new Board();
-		engine = new AlphaBeta(network);
+		engine = new AlphaBeta(transpositionTable, network);
 
 		if (args.length == 1 && args[0].equals("bench"))
 		{
@@ -92,7 +112,7 @@ public class UCI
 		myOption.set(value);
 	}
 
-	public static void report(int depth, int selDepth, int nodes, int score, long ms, Board board, Move[] pv)
+	public static void report(int depth, int selDepth, int nodes, int hashfull, int score, long ms, Board board, Move[] pv)
 	{
 		String pvString = String.join(" ",
 				Arrays.stream(pv).takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList()));
@@ -102,8 +122,8 @@ public class UCI
 			int cp = WDLModel.normalizeEval(score, board);
 			int[] wdl = WDLModel.calculateWDL(score, board);
 
-			System.out.printf("info depth %d seldepth %d nodes %d nps %d score cp %d wdl %d %d %d time %d pv %s\n",
-					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), cp, wdl[0], wdl[1], wdl[2], ms, pvString);
+			System.out.printf("info depth %d seldepth %d nodes %d nps %d hashfull %d score cp %d wdl %d %d %d time %d pv %s\n",
+					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), hashfull, cp, wdl[0], wdl[1], wdl[2], ms, pvString);
 		}
 
 		else
@@ -121,8 +141,8 @@ public class UCI
 				wdl = new int[] { 1000, 0, 0 };
 			}
 
-			System.out.printf("info depth %d seldepth %d nodes %d nps %d score mate %d wdl %d %d %d time %d pv %s\n",
-					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), mateValue, wdl[0], wdl[1], wdl[2], ms,
+			System.out.printf("info depth %d seldepth %d nodes %d nps %d hashfull %d score mate %d wdl %d %d %d time %d pv %s\n",
+					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), hashfull, mateValue, wdl[0], wdl[1], wdl[2], ms,
 					pvString);
 		}
 	}
@@ -191,7 +211,8 @@ public class UCI
 				case "ucinewgame":
 					System.gc();
 					internalBoard = new Board();
-					engine = new AlphaBeta(network);
+					transpositionTable.clear();
+					engine.reset();
 					break;
 				case "quit":
 					input.close();
@@ -344,6 +365,7 @@ public class UCI
 						depth = Integer.parseInt(fullCommand[1]);
 					}
 					Bench.bench(engine, depth);
+					transpositionTable.clear();
 					break;
 				case "benches":
 					int iterations = Integer.parseInt(fullCommand[1]);
