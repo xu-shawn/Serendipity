@@ -78,14 +78,21 @@ public class AlphaBeta
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 	}
 
-	private int stat_bonus(int depth)
+	private static int stat_bonus(int depth)
 	{
 		return depth * 300 - 300;
 	}
 
-	private int stat_malus(int depth)
+	private static int stat_malus(int depth)
 	{
 		return -stat_bonus(depth);
+	}
+
+	public static boolean isQuiet(Move move, Board board)
+	{
+		return Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
+				&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
+						&& move.getTo() == board.getEnPassant());
 	}
 
 	public int evaluate(Board board)
@@ -452,9 +459,7 @@ public class AlphaBeta
 			board.doMove(move);
 			givesCheck = board.isKingAttacked();
 			board.undoMove();
-			boolean isQuiet = Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
-					&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
-							&& move.getTo() == board.getEnPassant());
+			boolean isQuiet = isQuiet(move, board);
 
 			int r = reduction[depth][sse.moveCount];
 			int lmrDepth = depth - r;

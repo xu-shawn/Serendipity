@@ -45,9 +45,7 @@ public class MoveSort
 			};
 		}
 
-		if (!board.getPiece(move.getTo()).equals(Piece.NONE)
-				|| (PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
-						&& move.getTo() == board.getEnPassant()))
+		if (!AlphaBeta.isQuiet(move, board))
 		{
 			int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;
 			score += captureValue(move, board, captureHistory);
