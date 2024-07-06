@@ -240,7 +240,7 @@ public class AlphaBeta
 		this.ss.get(ply + 2).killer = null;
 		this.selDepth = Math.max(this.selDepth, ply);
 
-		boolean improving, isPV, inCheck, givesCheck, inSingularSearch;
+		boolean improving, isPV, inCheck, givesCheck, inSingularSearch, ttCapture;
 		Move bestMove;
 		int bestValue;
 		int eval;
@@ -434,6 +434,8 @@ public class AlphaBeta
 		Move lastMove = ss.get(ply - 1).move;
 		Move counterMove = null;
 
+		ttCapture = ttMove != null && !isQuiet(ttMove, board);
+
 		if (lastMove != null)
 			counterMove = counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo().ordinal()];
 
@@ -538,6 +540,7 @@ public class AlphaBeta
 			{
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
+				r += ttCapture ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
