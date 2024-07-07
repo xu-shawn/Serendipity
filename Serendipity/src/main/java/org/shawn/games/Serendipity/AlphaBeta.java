@@ -538,6 +538,7 @@ public class AlphaBeta
 			{
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
+				r += (!improving && isQuiet) ? 1 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
