@@ -9,7 +9,7 @@ public class WDLModel
 	private final static double[] bs = { -47.75093113, 118.81734426, -33.05800930, 94.01690687 };
 
 	@SuppressWarnings("unused")
-	private final static int NormalizeToPawnValue = 217;
+	private final static int NormalizeToPawnValue = 236;
 
 	private final static int PAWN_VALUE = 1;
 	private final static int KNIGHT_VALUE = 3;
