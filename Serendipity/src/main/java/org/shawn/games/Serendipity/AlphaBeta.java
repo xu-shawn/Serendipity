@@ -103,6 +103,8 @@ public class AlphaBeta
 				: NNUE.evaluate(network, accumulators.getBlackAccumulator(), accumulators.getWhiteAccumulator(),
 						NNUE.chooseOutputBucket(board)));
 
+		v = (v << 4) >> 4 + (board.getIncrementalHashKey() & 0b1);
+
 		return v;
 	}
 
