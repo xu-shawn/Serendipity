@@ -710,6 +710,8 @@ public class AlphaBeta
 		{
 			UCI.reportBestMove(lastCompletePV[0]);
 		}
+
+		tt.printDebugInfo();
 	}
 
 	public Move nextMove(Board board, Limits limits)

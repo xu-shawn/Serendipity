@@ -20,7 +20,7 @@ public class TranspositionTable
 		// staticEval: 16 bits
 		// Square: 6 bits
 		// Signature: 64 bits
-		
+
 		// Total: 32 Bytes (Padding and Class Header)
 
 		private long signature;
@@ -105,13 +105,13 @@ public class TranspositionTable
 	private int size;
 	private int mask;
 	private Entry[] entries;
-	
+
 	private static final int ENTRY_SIZE = 32;
 
 	public TranspositionTable(int size)
 	{
 		size *= 1048576 / ENTRY_SIZE;
-		
+
 		this.size = Integer.highestOneBit(size);
 		this.mask = this.size - 1;
 		this.entries = new Entry[this.size];
@@ -138,7 +138,7 @@ public class TranspositionTable
 	{
 		Arrays.fill(entries, null);
 	}
-	
+
 	public void resize(int size)
 	{
 		size *= 1048576 / ENTRY_SIZE;
@@ -146,38 +146,62 @@ public class TranspositionTable
 		this.mask = this.size - 1;
 		this.entries = new Entry[this.size];
 	}
-	
+
 	public int hashfull()
 	{
 		int hashfull = 0;
-		
-		for (int i = 0;i < 1000; i ++)
+
+		for (int i = 0; i < 1000; i++)
 		{
 			if (this.entries[i] != null)
 			{
-				hashfull ++;
+				hashfull++;
 			}
 		}
-		
+
 		return hashfull;
 	}
-	
+
 	public int hashfull_accurate()
 	{
 		int hashfull = 0;
 		int minimum_hash = 1048576 / ENTRY_SIZE;
-		
+
 		for (int i = 0; i < minimum_hash; i++)
 		{
 			if (this.entries[i] != null)
 			{
-				hashfull ++;
+				hashfull++;
 			}
 		}
-		
+
 		return hashfull * 1000 / minimum_hash;
 	}
-	
+
+	public void printDebugInfo()
+	{
+		int[] count = new int[] { 0, 0, 0 };
+		int[] total = new int[] { 0, 0, 0 };
+
+		for (Entry entry : this.entries)
+		{
+			if (entry == null)
+			{
+				continue;
+			}
+
+			int n = entry.getType().ordinal();
+
+			count[n]++;
+			total[n] += entry.getEvaluation();
+		}
+
+		System.out.printf("%d Entries\n", count[0] + count[1] + count[2]);
+		System.out.printf("EXACT     : %d hits, %d average\n", count[0], total[0] / count[0]);
+		System.out.printf("LOWERBOUND: %d hits, %d average\n", count[1], total[1] / count[1]);
+		System.out.printf("UPPERBOUND: %d hits, %d average\n", count[2], total[2] / count[2]);
+	}
+
 	public int getSize()
 	{
 		return this.size * ENTRY_SIZE / 1048576;
