@@ -28,7 +28,7 @@ public class MoveSort
 	}
 
 	public static int moveValue(Move move, Move ttMove, Move killer, Move counterMove, History history,
-			History captureHistory, Board board)
+			History captureHistory, History[] continuationHistories, Board board)
 	{
 		if (move.equals(ttMove))
 		{
@@ -62,17 +62,23 @@ public class MoveSort
 			return 700000000;
 		}
 
-		return history.get(board, move);
+		int moveValue = history.get(board, move);
+
+		if (continuationHistories[0] != null)
+			moveValue += continuationHistories[0].get(board, move);
+
+		return moveValue;
 	}
 
-	public static void sortMoves(List<Move> moves, Move ttMove, Move killer, Move counterMove, History history, History captureHistory,
-			Board board)
+	public static void sortMoves(List<Move> moves, Move ttMove, Move killer, Move counterMove, History history,
+			History captureHistory, History[] continuationHistories, Board board)
 	{
 
 		for (int i = 0; i < moves.size(); i++)
 		{
 			Move move = moves.get(i);
-			int value = moveValue(move, ttMove, killer, counterMove, history, captureHistory, board);
+			int value = moveValue(move, ttMove, killer, counterMove, history, captureHistory, continuationHistories,
+					board);
 			moves.set(i, new ScoredMove(move, value));
 		}
 

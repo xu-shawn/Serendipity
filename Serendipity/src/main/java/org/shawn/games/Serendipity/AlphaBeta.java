@@ -31,6 +31,7 @@ public class AlphaBeta
 	private Move[][] counterMoves;
 	private History history;
 	private History captureHistory;
+	private ContinuationHistories continuationHistories;
 	private int nmpMinPly;
 
 	private int rootDepth;
@@ -52,6 +53,7 @@ public class AlphaBeta
 		this.counterMoves = new Move[13][65];
 		this.history = new FromToHistory();
 		this.captureHistory = new CaptureHistory();
+		this.continuationHistories = new ContinuationHistories();
 		this.rootDepth = 0;
 		this.ss = new SearchStack(MAX_PLY);
 		this.tt = tt;
@@ -111,7 +113,27 @@ public class AlphaBeta
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
-		MoveSort.sortMoves(moves, ttMove, null, null, history, captureHistory, board);
+
+		History[] currentContinuationHistories = new History[] { ss.get(-1).continuationHistory };
+
+		MoveSort.sortMoves(moves, ttMove, null, null, history, captureHistory, currentContinuationHistories, board);
+	}
+
+	private void updateContinuationHistories(int ply, int depth, Board board, Move move, List<Move> quietsSearched)
+	{
+		History conthist = ss.get(ply - 1).continuationHistory;
+		
+		if (conthist == null)
+		{
+			return;
+		}
+
+		conthist.register(board, move, stat_bonus(depth));
+
+		for (Move quietMove : quietsSearched)
+		{
+			conthist.register(board, quietMove, stat_malus(depth));
+		}
 	}
 
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
@@ -381,6 +403,7 @@ public class AlphaBeta
 
 			board.doNullMove();
 			sse.move = Constants.emptyMove;
+			sse.continuationHistory = continuationHistories.get(board, sse.move);
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1);
 			board.undoMove();
 
@@ -437,7 +460,10 @@ public class AlphaBeta
 		if (lastMove != null)
 			counterMove = counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo().ordinal()];
 
-		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory, board);
+		History[] currentContinuationHistories = new History[] { ss.get(-1).continuationHistory };
+
+		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory,
+				currentContinuationHistories, board);
 
 		List<Move> quietsSearched = new ArrayList<>();
 		List<Move> capturesSearched = new ArrayList<>();
@@ -531,6 +557,7 @@ public class AlphaBeta
 			accumulators.updateAccumulators(board, move, false);
 			board.doMove(move);
 			sse.move = move;
+			sse.continuationHistory = continuationHistories.get(board, sse.move);
 
 			int thisMoveEval = MIN_EVAL;
 
@@ -596,6 +623,8 @@ public class AlphaBeta
 							counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo()
 									.ordinal()] = move;
 						}
+
+						updateContinuationHistories(ply, depth, board, move, quietsSearched);
 					}
 					else
 					{
@@ -749,6 +778,7 @@ public class AlphaBeta
 		this.counterMoves = new Move[13][65];
 		this.history = new FromToHistory();
 		this.captureHistory = new CaptureHistory();
+		this.continuationHistories = new ContinuationHistories();
 		this.rootDepth = 0;
 		this.selDepth = 0;
 
