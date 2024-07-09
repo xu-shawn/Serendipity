@@ -116,17 +116,18 @@ public class AlphaBeta
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory };
 
+		if (ss.get(ply - 1).continuationHistory == null)
+		{
+			System.out.println(board);
+			System.out.println(ss.get(ply - 1).move);
+		}
+
 		MoveSort.sortMoves(moves, ttMove, null, null, history, captureHistory, currentContinuationHistories, board);
 	}
 
 	private void updateContinuationHistories(int ply, int depth, Board board, Move move, List<Move> quietsSearched)
 	{
 		History conthist = ss.get(ply - 1).continuationHistory;
-
-		if (conthist == null)
-		{
-			return;
-		}
 
 		conthist.register(board, move, stat_bonus(depth));
 
@@ -141,6 +142,8 @@ public class AlphaBeta
 		this.nodesCount++;
 
 		this.selDepth = Math.max(this.selDepth, ply);
+
+		var sse = ss.get(ply);
 
 		int bestScore;
 
@@ -232,6 +235,8 @@ public class AlphaBeta
 
 			accumulators.updateAccumulators(board, move, false);
 			board.doMove(move);
+			sse.move = move;
+			sse.continuationHistory = continuationHistories.get(board, sse.move);
 
 			int score = -quiesce(board, -beta, -alpha, ply + 1);
 
@@ -455,6 +460,7 @@ public class AlphaBeta
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 		Move lastMove = ss.get(ply - 1).move;
+
 		Move counterMove = null;
 
 		if (lastMove != null)

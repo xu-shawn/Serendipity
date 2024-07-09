@@ -26,6 +26,11 @@ public class SearchStack
 		{
 			stack[i] = new SearchState();
 		}
+
+		for (int i = 0; i < 5; i++)
+		{
+			stack[i].continuationHistory = new PieceToHistory();
+		}
 	}
 
 	public SearchState get(int index)

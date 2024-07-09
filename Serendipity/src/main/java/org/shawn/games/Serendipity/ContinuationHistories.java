@@ -12,6 +12,14 @@ public class ContinuationHistories
 	public ContinuationHistories()
 	{
 		continuationHistories = new PieceToHistory[Piece.values().length][Square.values().length];
+
+		for (int i = 0; i < Piece.values().length; i++)
+		{
+			for (int j = 0; j < Square.values().length; j++)
+			{
+				continuationHistories[i][j] = new PieceToHistory();
+			}
+		}
 	}
 
 	public History get(Piece piece, Square to)

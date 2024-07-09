@@ -64,8 +64,7 @@ public class MoveSort
 
 		int moveValue = history.get(board, move);
 
-		if (continuationHistories[0] != null)
-			moveValue += continuationHistories[0].get(board, move);
+		moveValue += continuationHistories[0].get(board, move);
 
 		return moveValue;
 	}
