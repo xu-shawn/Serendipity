@@ -13,20 +13,26 @@ public class SearchStack
 		public Move killer;
 		public Move move;
 		public Move excludedMove;
+		public History continuationHistory;
 	}
-	
+
 	private SearchState[] stack;
-	
+
 	public SearchStack(int n)
 	{
 		stack = new SearchState[n + 5];
-		
-		for (int i = 0; i < stack.length;i ++)
+
+		for (int i = 0; i < stack.length; i++)
 		{
 			stack[i] = new SearchState();
 		}
+
+		for (int i = 0; i < 5; i++)
+		{
+			stack[i].continuationHistory = new PieceToHistory();
+		}
 	}
-	
+
 	public SearchState get(int index)
 	{
 		return stack[index + 5];
