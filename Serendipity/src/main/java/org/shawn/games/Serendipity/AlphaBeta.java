@@ -124,16 +124,18 @@ public class AlphaBeta
 	private void updateContinuationHistories(int ply, int depth, Board board, Move move, List<Move> quietsSearched)
 	{
 		History conthist;
+		int bonus = stat_bonus(depth);
+		int malus = stat_malus(depth);
 
 		for (int i : new int[] { 1, 2, 4, 6 })
 		{
 			conthist = ss.get(ply - i).continuationHistory;
 
-			conthist.register(board, move, stat_bonus(depth));
+			conthist.register(board, move, (i == 6) ? bonus / 2 : bonus);
 
 			for (Move quietMove : quietsSearched)
 			{
-				conthist.register(board, quietMove, stat_malus(depth));
+				conthist.register(board, quietMove, (i == 6) ? malus / 2 : malus);
 			}
 		}
 	}
