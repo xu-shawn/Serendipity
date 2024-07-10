@@ -125,7 +125,7 @@ public class AlphaBeta
 	{
 		History conthist;
 
-		for (int i : new int[] { 1, 2, 4 })
+		for (int i : new int[] { 1, 2, 4, 6 })
 		{
 			conthist = ss.get(ply - i).continuationHistory;
 
