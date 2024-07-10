@@ -115,7 +115,7 @@ public class AlphaBeta
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
-				ss.get(ply - 2).continuationHistory };
+				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory };
 
 		MoveSort.sortMoves(moves, ttMove, null, null, history, captureHistory, currentContinuationHistories, board);
 	}
@@ -124,7 +124,7 @@ public class AlphaBeta
 	{
 		History conthist;
 
-		for (int i : new int[] { 1, 2 })
+		for (int i : new int[] { 1, 2, 4 })
 		{
 			conthist = ss.get(ply - i).continuationHistory;
 
@@ -467,7 +467,7 @@ public class AlphaBeta
 			counterMove = counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo().ordinal()];
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
-				ss.get(ply - 2).continuationHistory };
+				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory };
 
 		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory,
 				currentContinuationHistories, board);
