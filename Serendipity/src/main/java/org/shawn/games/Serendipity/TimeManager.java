@@ -22,7 +22,7 @@ public class TimeManager
 		this.timeLeft = timeLeft - Math.min(moveOverHead, timeLeft) / 2;
 		this.increment = increment;
 
-		if (movesToGo != 0)
+		if (movesToGo != 0 && movesToGo != -1)
 		{
 			this.movesToGo = movesToGo;
 
