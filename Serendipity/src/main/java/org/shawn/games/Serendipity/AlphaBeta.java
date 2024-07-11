@@ -116,7 +116,7 @@ public class AlphaBeta
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
-				ss.get(ply - 6).continuationHistory };
+				ss.get(ply - 6).continuationHistory, null, ss.get(ply - 8).continuationHistory };
 
 		MoveSort.sortMoves(moves, ttMove, null, null, history, captureHistory, currentContinuationHistories, board);
 	}
@@ -127,7 +127,7 @@ public class AlphaBeta
 		int bonus = stat_bonus(depth);
 		int malus = stat_malus(depth);
 
-		for (int i : new int[] { 1, 2, 4, 6 })
+		for (int i : new int[] { 1, 2, 4, 6, 8 })
 		{
 			conthist = ss.get(ply - i).continuationHistory;
 
@@ -135,7 +135,7 @@ public class AlphaBeta
 
 			for (Move quietMove : quietsSearched)
 			{
-				conthist.register(board, quietMove, (i == 6) ? malus / 2 : malus);
+				conthist.register(board, quietMove, (i == 6 || i == 8) ? malus / 2 : malus);
 			}
 		}
 	}
@@ -471,7 +471,7 @@ public class AlphaBeta
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
-				ss.get(ply - 6).continuationHistory };
+				ss.get(ply - 6).continuationHistory, null, ss.get(ply - 8).continuationHistory };
 
 		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory,
 				currentContinuationHistories, board);

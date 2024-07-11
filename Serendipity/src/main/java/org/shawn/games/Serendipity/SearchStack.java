@@ -20,14 +20,14 @@ public class SearchStack
 
 	public SearchStack(int n)
 	{
-		stack = new SearchState[n + 6];
+		stack = new SearchState[n + 8];
 
 		for (int i = 0; i < stack.length; i++)
 		{
 			stack[i] = new SearchState();
 		}
 
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 8; i++)
 		{
 			stack[i].continuationHistory = new PieceToHistory();
 		}
@@ -35,6 +35,6 @@ public class SearchStack
 
 	public SearchState get(int index)
 	{
-		return stack[index + 6];
+		return stack[index + 8];
 	}
 }
