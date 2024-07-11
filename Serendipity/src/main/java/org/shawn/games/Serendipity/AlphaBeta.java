@@ -135,12 +135,6 @@ public class AlphaBeta
 				malus /= 2;
 			}
 
-			if (i == 8)
-			{
-				bonus /= 4;
-				malus /= 4;
-			}
-
 			conthist = ss.get(ply - i).continuationHistory;
 
 			conthist.register(board, move, bonus);
