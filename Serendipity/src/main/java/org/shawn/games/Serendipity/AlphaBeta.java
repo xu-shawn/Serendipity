@@ -526,7 +526,7 @@ public class AlphaBeta
 
 			int extension = 0;
 
-			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth >= 4
+			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth >= 3
 					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
 					&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)
 							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.LOWERBOUND))
