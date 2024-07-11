@@ -129,13 +129,25 @@ public class AlphaBeta
 
 		for (int i : new int[] { 1, 2, 4, 6, 8 })
 		{
+			if (i == 6)
+			{
+				bonus /= 2;
+				malus /= 2;
+			}
+
+			if (i == 8)
+			{
+				bonus /= 4;
+				malus /= 4;
+			}
+
 			conthist = ss.get(ply - i).continuationHistory;
 
-			conthist.register(board, move, (i == 6) ? bonus / 2 : bonus);
+			conthist.register(board, move, bonus);
 
 			for (Move quietMove : quietsSearched)
 			{
-				conthist.register(board, quietMove, (i == 6 || i == 8) ? malus / 2 : malus);
+				conthist.register(board, quietMove, malus);
 			}
 		}
 	}
