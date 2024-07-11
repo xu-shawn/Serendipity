@@ -17,7 +17,9 @@ public class AlphaBeta
 
 	public static final int MAX_PLY = 256;
 
-	public static final int[][] reduction = new int[256][256];
+	public static final int[][] reduction = new int[MAX_PLY][MAX_PLY];
+	public static final int[] stat_bonus = new int[MAX_PLY];
+	public static final int[] stat_malus = new int[MAX_PLY];
 
 	private TranspositionTable tt;
 
@@ -67,6 +69,16 @@ public class AlphaBeta
 				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
 			}
 		}
+
+		for (int i = 0; i < stat_bonus.length; i++)
+		{
+			stat_bonus[i] = i * 300 - 300;
+		}
+
+		for (int i = 0; i < stat_malus.length; i++)
+		{
+			stat_malus[i] = i * -300 + 300;
+		}
 	}
 
 	private void updatePV(Move move, int ply)
@@ -78,16 +90,6 @@ public class AlphaBeta
 	private void clearPV()
 	{
 		this.pv = new Move[MAX_PLY][MAX_PLY];
-	}
-
-	private static int stat_bonus(int depth)
-	{
-		return depth * 300 - 300;
-	}
-
-	private static int stat_malus(int depth)
-	{
-		return -stat_bonus(depth);
 	}
 
 	public static boolean isQuiet(Move move, Board board)
@@ -124,8 +126,8 @@ public class AlphaBeta
 	private void updateContinuationHistories(int ply, int depth, Board board, Move move, List<Move> quietsSearched)
 	{
 		History conthist;
-		int bonus = stat_bonus(depth);
-		int malus = stat_malus(depth);
+		int bonus = stat_bonus[depth];
+		int malus = stat_malus[depth];
 
 		for (int i : new int[] { 1, 2, 4, 6 })
 		{
@@ -622,11 +624,11 @@ public class AlphaBeta
 					{
 						sse.killer = move;
 
-						history.register(board, move, stat_bonus(depth));
+						history.register(board, move, stat_bonus[depth]);
 
 						for (Move quietMove : quietsSearched)
 						{
-							history.register(board, quietMove, stat_malus(depth));
+							history.register(board, quietMove, stat_malus[depth]);
 						}
 
 						if (lastMove != null)
@@ -639,11 +641,11 @@ public class AlphaBeta
 					}
 					else
 					{
-						captureHistory.register(board, move, stat_bonus(depth));
+						captureHistory.register(board, move, stat_bonus[depth]);
 
 						for (Move capture : capturesSearched)
 						{
-							captureHistory.register(board, capture, stat_malus(depth));
+							captureHistory.register(board, capture, stat_malus[depth]);
 						}
 					}
 
