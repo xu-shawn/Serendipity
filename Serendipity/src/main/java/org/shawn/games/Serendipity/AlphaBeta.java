@@ -105,7 +105,7 @@ public class AlphaBeta
 				: NNUE.evaluate(network, accumulators.getBlackAccumulator(), accumulators.getWhiteAccumulator(),
 						NNUE.chooseOutputBucket(board)));
 
-		v = v * (200 - board.getHalfMoveCounter()) / 200;
+		v = v * (400 - board.getHalfMoveCounter()) / 400;
 
 		return v;
 	}
