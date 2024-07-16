@@ -549,6 +549,11 @@ public class AlphaBeta
 					{
 						extension = 2;
 					}
+
+					else if (depth >= 8 && currentMoveEntry.getDepth() > depth - 1 && singularValue < singularBeta - 10)
+					{
+						extension = 2;
+					}
 				}
 
 				else if (singularValue > beta)
