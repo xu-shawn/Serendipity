@@ -748,7 +748,7 @@ public class AlphaBeta
 
 		if (!suppressOutput)
 		{
-			UCI.reportBestMove(lastCompletePV[0]);
+			UCI.reportBestMove(pv[0][0]);
 		}
 	}
 
