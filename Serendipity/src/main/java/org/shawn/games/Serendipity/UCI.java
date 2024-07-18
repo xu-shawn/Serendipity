@@ -294,6 +294,7 @@ public class UCI
 						if (fullCommand[i].equals("nodes"))
 						{
 							limits.setNodes(Integer.parseInt(fullCommand[i + 1]));
+							limits.setTime(157680000000L);
 							break;
 						}
 
