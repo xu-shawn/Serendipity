@@ -20,7 +20,7 @@ public class TranspositionTable
 		// staticEval: 16 bits
 		// Square: 6 bits
 		// Signature: 64 bits
-		
+
 		// Total: 32 Bytes (Padding and Class Header)
 
 		private long signature;
@@ -95,9 +95,6 @@ public class TranspositionTable
 
 		public Move getMove()
 		{
-			// System.out.print(this.originalMove + " " + this.originalMove != null ? 0 :
-			// this.originalMove.getTo().ordinal() + " ");
-			// System.out.println(Integer.toBinaryString(this.move));
 			return move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
 		}
 	}
@@ -105,13 +102,13 @@ public class TranspositionTable
 	private int size;
 	private int mask;
 	private Entry[] entries;
-	
+
 	private static final int ENTRY_SIZE = 32;
 
 	public TranspositionTable(int size)
 	{
 		size *= 1048576 / ENTRY_SIZE;
-		
+
 		this.size = Integer.highestOneBit(size);
 		this.mask = this.size - 1;
 		this.entries = new Entry[this.size];
@@ -138,7 +135,7 @@ public class TranspositionTable
 	{
 		Arrays.fill(entries, null);
 	}
-	
+
 	public void resize(int size)
 	{
 		size *= 1048576 / ENTRY_SIZE;
@@ -146,38 +143,38 @@ public class TranspositionTable
 		this.mask = this.size - 1;
 		this.entries = new Entry[this.size];
 	}
-	
+
 	public int hashfull()
 	{
 		int hashfull = 0;
-		
-		for (int i = 0;i < 1000; i ++)
+
+		for (int i = 0; i < 1000; i++)
 		{
 			if (this.entries[i] != null)
 			{
-				hashfull ++;
+				hashfull++;
 			}
 		}
-		
+
 		return hashfull;
 	}
-	
+
 	public int hashfull_accurate()
 	{
 		int hashfull = 0;
 		int minimum_hash = 1048576 / ENTRY_SIZE;
-		
+
 		for (int i = 0; i < minimum_hash; i++)
 		{
 			if (this.entries[i] != null)
 			{
-				hashfull ++;
+				hashfull++;
 			}
 		}
-		
+
 		return hashfull * 1000 / minimum_hash;
 	}
-	
+
 	public int getSize()
 	{
 		return this.size * ENTRY_SIZE / 1048576;

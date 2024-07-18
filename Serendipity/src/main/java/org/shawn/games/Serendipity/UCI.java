@@ -112,7 +112,8 @@ public class UCI
 		myOption.set(value);
 	}
 
-	public static void report(int depth, int selDepth, int nodes, int hashfull, int score, long ms, Board board, Move[] pv)
+	public static void report(int depth, int selDepth, int nodes, int hashfull, int score, long ms, Board board,
+			Move[] pv)
 	{
 		String pvString = String.join(" ",
 				Arrays.stream(pv).takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList()));
@@ -122,8 +123,10 @@ public class UCI
 			int cp = WDLModel.normalizeEval(score, board);
 			int[] wdl = WDLModel.calculateWDL(score, board);
 
-			System.out.printf("info depth %d seldepth %d nodes %d nps %d hashfull %d score cp %d wdl %d %d %d time %d pv %s\n",
-					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), hashfull, cp, wdl[0], wdl[1], wdl[2], ms, pvString);
+			System.out.printf(
+					"info depth %d seldepth %d nodes %d nps %d hashfull %d score cp %d wdl %d %d %d time %d pv %s\n",
+					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), hashfull, cp, wdl[0], wdl[1], wdl[2], ms,
+					pvString);
 		}
 
 		else
@@ -141,9 +144,10 @@ public class UCI
 				wdl = new int[] { 1000, 0, 0 };
 			}
 
-			System.out.printf("info depth %d seldepth %d nodes %d nps %d hashfull %d score mate %d wdl %d %d %d time %d pv %s\n",
-					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), hashfull, mateValue, wdl[0], wdl[1], wdl[2], ms,
-					pvString);
+			System.out.printf(
+					"info depth %d seldepth %d nodes %d nps %d hashfull %d score mate %d wdl %d %d %d time %d pv %s\n",
+					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), hashfull, mateValue, wdl[0], wdl[1],
+					wdl[2], ms, pvString);
 		}
 	}
 

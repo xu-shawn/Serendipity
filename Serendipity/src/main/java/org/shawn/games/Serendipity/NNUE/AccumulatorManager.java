@@ -129,8 +129,8 @@ public class AccumulatorManager
 	private void efficientlyUpdate(Board board, Move move, Side side, boolean undo)
 	{
 		NNUE.NNUEAccumulator accumulator = Side.WHITE.equals(side) ? whiteAccumulator : blackAccumulator;
-		
-    if (undo)
+
+		if (undo)
 		{
 			if (board.getContext().isKingSideCastle(move)
 					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_SIDE)
