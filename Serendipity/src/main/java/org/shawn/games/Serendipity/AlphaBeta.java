@@ -45,6 +45,8 @@ public class AlphaBeta
 	private Board internalBoard;
 	private Limits limits;
 
+	private Move bestMove;
+
 	public AlphaBeta(TranspositionTable tt, NNUE network)
 	{
 		this.nodesCount = 0;
@@ -613,6 +615,9 @@ public class AlphaBeta
 			{
 				alpha = thisMoveEval;
 
+				if (ply == 0)
+					this.bestMove = move;
+
 				if (alpha >= beta)
 				{
 					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
@@ -702,6 +707,7 @@ public class AlphaBeta
 			{
 				rootDepth = i;
 				selDepth = 0;
+				this.bestMove = null;
 
 				if (i > 3)
 				{
@@ -748,7 +754,7 @@ public class AlphaBeta
 
 		if (!suppressOutput)
 		{
-			UCI.reportBestMove(lastCompletePV[0]);
+			UCI.reportBestMove(this.bestMove == null ? lastCompletePV[0] : this.bestMove);
 		}
 	}
 
