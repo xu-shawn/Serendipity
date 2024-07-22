@@ -540,7 +540,7 @@ public class AlphaBeta
 				int moveCountBackup = sse.moveCount;
 
 				sse.excludedMove = move;
-				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, !cutNode);
+				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, cutNode);
 				sse.excludedMove = null;
 				sse.moveCount = moveCountBackup;
 
