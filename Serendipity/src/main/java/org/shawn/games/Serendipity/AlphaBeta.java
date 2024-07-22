@@ -265,7 +265,8 @@ public class AlphaBeta
 		return bestScore;
 	}
 
-	private int mainSearch(Board board, int depth, int alpha, int beta, int ply) throws TimeOutException
+	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean cutNode)
+			throws TimeOutException
 	{
 		this.nodesCount++;
 		this.pv[ply][0] = null;
@@ -414,7 +415,7 @@ public class AlphaBeta
 			board.doNullMove();
 			sse.move = Constants.emptyMove;
 			sse.continuationHistory = continuationHistories.get(board, sse.move);
-			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1);
+			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, !cutNode);
 			board.undoMove();
 
 			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
@@ -426,7 +427,7 @@ public class AlphaBeta
 
 				this.nmpMinPly = ply + 3 * (depth - r) / 4;
 
-				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply);
+				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply, false);
 
 				this.nmpMinPly = 0;
 
@@ -539,7 +540,7 @@ public class AlphaBeta
 				int moveCountBackup = sse.moveCount;
 
 				sse.excludedMove = move;
-				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply);
+				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, !cutNode);
 				sse.excludedMove = null;
 				sse.moveCount = moveCountBackup;
 
@@ -578,25 +579,26 @@ public class AlphaBeta
 			{
 				r += isPV ? 0 : 1;
 				r -= givesCheck ? 1 : 0;
+				r += cutNode ? 2 : 0;
 //
 //				r = Math.max(0, Math.min(depth - 1, r));
 
-				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1);
+				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1, true);
 
 				if (thisMoveEval > alpha)
 				{
-					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1);
+					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, !cutNode);
 				}
 			}
 
 			else if (!isPV || sse.moveCount > 1)
 			{
-				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1);
+				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, !cutNode);
 			}
 
 			if (isPV && (sse.moveCount == 1 || thisMoveEval > alpha))
 			{
-				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1);
+				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, false);
 			}
 
 			board.undoMove();
@@ -718,7 +720,7 @@ public class AlphaBeta
 
 				while (true)
 				{
-					int newScore = mainSearch(this.internalBoard, i, alpha, beta, 0);
+					int newScore = mainSearch(this.internalBoard, i, alpha, beta, 0, false);
 
 					if (newScore > alpha && newScore < beta)
 					{
