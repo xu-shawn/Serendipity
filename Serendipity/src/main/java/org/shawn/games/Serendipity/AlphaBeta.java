@@ -482,7 +482,7 @@ public class AlphaBeta
 		List<Move> quietsSearched = new ArrayList<>();
 		List<Move> capturesSearched = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
+		if ((isPV || cutNode) && ttMove == null && rootDepth > 1 && depth > 5)
 		{
 			depth -= 2;
 		}
