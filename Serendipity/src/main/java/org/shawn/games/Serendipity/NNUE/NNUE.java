@@ -33,7 +33,7 @@ public class NNUE
 	private static final int QB = 64;
 
 	private final short[][] L1Weights;
-	private final short[] L1Biases;
+	final short[] L1Biases;
 	private final short[][] L2Weights;
 	private final short outputBiases[];
 	
