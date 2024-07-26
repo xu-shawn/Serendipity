@@ -561,7 +561,7 @@ public class AlphaBeta
 
 				else if (cutNode)
 				{
-					extension = -2;
+					extension = -1;
 				}
 
 			}
