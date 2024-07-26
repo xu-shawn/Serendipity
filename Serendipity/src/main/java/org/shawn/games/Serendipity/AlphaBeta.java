@@ -559,6 +559,11 @@ public class AlphaBeta
 					return singularValue;
 				}
 
+				else if (cutNode)
+				{
+					extension = -2;
+				}
+
 			}
 
 			else if (givesCheck)
