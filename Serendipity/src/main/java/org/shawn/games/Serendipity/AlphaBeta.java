@@ -558,6 +558,11 @@ public class AlphaBeta
 				{
 					return singularValue;
 				}
+				
+				else if (currentMoveEntry.getEvaluation() > beta)
+				{
+					extension = -2;
+				}
 
 			}
 
