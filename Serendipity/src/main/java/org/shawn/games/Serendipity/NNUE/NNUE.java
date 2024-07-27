@@ -9,8 +9,8 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-	private static final int HIDDEN_SIZE = 1024;
-	private static final int FEATURE_SIZE = 768;
+    static final int HIDDEN_SIZE = 1024;
+	static final int FEATURE_SIZE = 768;
 	private static final int OUTPUT_BUCKETS = 8;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
 	private static final int INPUT_BUCKET_SIZE = 7;
@@ -32,7 +32,7 @@ public class NNUE
 	private static final int QA = 255;
 	private static final int QB = 64;
 
-	private final short[][] L1Weights;
+    final short[][] L1Weights;
 	final short[] L1Biases;
 	private final short[][] L2Weights;
 	private final short outputBiases[];
