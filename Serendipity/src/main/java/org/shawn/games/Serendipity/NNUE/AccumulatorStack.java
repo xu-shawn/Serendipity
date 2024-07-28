@@ -21,7 +21,6 @@ public class AccumulatorStack
 	{
 		short[] values;
 		Side color;
-		@SuppressWarnings("unused")
 		boolean needsRefresh;
 		int kingBucket;
 
@@ -154,49 +153,51 @@ public class AccumulatorStack
 				return;
 			}
 
-			if (move.getPromotion().equals(Piece.NONE))
+			Square from = move.getFrom();
+			Square to = move.getTo();
+
+			Piece promoted = move.getPromotion();
+			Piece moved = board.getPiece(from);
+			Piece captured = board.getPiece(to);
+
+			if (promoted.equals(Piece.NONE))
 			{
-				if (!board.getPiece(move.getTo()).equals(Piece.NONE))
+				if (!captured.equals(Piece.NONE))
 				{
-					this.addsubsub(prev, NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), this.color),
-							NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color),
-							NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), this.color));
+					this.addsubsub(prev, NNUE.getIndex(to, moved, this.color), NNUE.getIndex(from, moved, this.color),
+							NNUE.getIndex(to, captured, this.color));
 					return;
 				}
 
-				if (move.getTo().equals(board.getEnPassant())
-						&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
+				if (move.getTo().equals(board.getEnPassant()) && moved.getPieceType().equals(PieceType.PAWN))
 				{
+					// @formatter:off
 					this.addsubsub(prev,
-
-							NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), this.color),
-							NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color),
-
+							NNUE.getIndex(to, moved, this.color),
+							NNUE.getIndex(from, moved, this.color),
 							NNUE.getIndex(board.getEnPassantTarget(), board.getPiece(board.getEnPassantTarget()),
 									this.color));
+					// @formatter:on
 
 					return;
 				}
 
-				this.addsub(prev, NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), this.color),
-						NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color));
+				this.addsub(prev, NNUE.getIndex(to, moved, this.color), NNUE.getIndex(from, moved, this.color));
 
 				return;
 			}
 
 			else
 			{
-				if (!board.getPiece(move.getTo()).equals(Piece.NONE))
+				if (!captured.equals(Piece.NONE))
 				{
-					this.addsubsub(prev, NNUE.getIndex(move.getTo(), move.getPromotion(), this.color),
-							NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color),
-							NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), this.color));
+					this.addsubsub(prev, NNUE.getIndex(to, promoted, this.color),
+							NNUE.getIndex(from, moved, this.color), NNUE.getIndex(to, captured, this.color));
 
 					return;
 				}
 
-				this.addsub(prev, NNUE.getIndex(move.getTo(), move.getPromotion(), this.color),
-						NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color));
+				this.addsub(prev, NNUE.getIndex(to, promoted, this.color), NNUE.getIndex(from, moved, this.color));
 
 				return;
 			}
