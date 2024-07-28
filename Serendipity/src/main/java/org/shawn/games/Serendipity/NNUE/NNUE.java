@@ -132,11 +132,6 @@ public class NNUE
 				: INPUT_BUCKETS[board.getKingSquare(side).ordinal() ^ 0b111000];
 	}
 
-	public static int chooseInputBucket(int squareIndex)
-	{
-		return INPUT_BUCKETS[squareIndex];
-	}
-
 	public static int getIndex(Square square, Piece piece, Side perspective)
 	{
 		return Side.WHITE.equals(perspective)

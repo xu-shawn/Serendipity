@@ -192,8 +192,6 @@ public class AccumulatorStack
 
 		private void fullAccumulatorUpdate(Board board)
 		{
-			this.changeKingBucket((NNUE.chooseInputBucket(board.getKingSquare(this.color).ordinal())));
-
 			for (Square sq : Square.values())
 			{
 				if (!board.getPiece(sq).equals(Piece.NONE))
@@ -207,17 +205,19 @@ public class AccumulatorStack
 		{
 			if (board.getSideToMove().equals(this.color)
 					&& board.getPiece(move.getFrom()).equals(Piece.make(color, PieceType.KING))
-					&& NNUE.chooseInputBucket(move.getFrom().ordinal()) != NNUE
-							.chooseInputBucket(move.getTo().ordinal()))
+					&& this.kingBucket != NNUE.chooseInputBucket(board, color))
 			{
-				board.doMove(move);
+				this.changeKingBucket(NNUE.chooseInputBucket(board, color));
 				fullAccumulatorUpdate(board);
-				board.undoMove();
 			}
-			else
-			{
-				efficientlyUpdate(board, move);
-			}
+
+			efficientlyUpdate(board, move);
+		}
+
+		private void loadFromBoard(Board board)
+		{
+			this.changeKingBucket(NNUE.chooseInputBucket(board, color));
+			fullAccumulatorUpdate(board);
 		}
 	}
 
@@ -238,8 +238,8 @@ public class AccumulatorStack
 
 		public void loadFromBoard(Board board)
 		{
-			this.accumulators[0].fullAccumulatorUpdate(board);
-			this.accumulators[1].fullAccumulatorUpdate(board);
+			this.accumulators[0].loadFromBoard(board);
+			this.accumulators[1].loadFromBoard(board);
 		}
 
 		public void loadFrom(AccumulatorPair prev)
