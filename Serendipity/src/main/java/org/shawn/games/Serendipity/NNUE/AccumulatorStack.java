@@ -192,6 +192,7 @@ public class AccumulatorStack
 
 		private void fullAccumulatorUpdate(Board board)
 		{
+			this.values = network.L1Biases.clone();
 			for (Square sq : Square.values())
 			{
 				if (!board.getPiece(sq).equals(Piece.NONE))
@@ -283,6 +284,14 @@ public class AccumulatorStack
 		this.top = 0;
 		this.stack[0].init();
 		this.stack[0].loadFromBoard(board);
+	}
+	
+	public void printAccumulator(Side side)
+	{
+		for (int i = 0; i < NNUE.HIDDEN_SIZE; i ++)
+		{
+			System.out.print(this.stack[top].accumulators[side.ordinal()].values[i] + ", ");
+		}
 	}
 
 	public AccumulatorStack.Accumulator getAccumulator(Side side)
