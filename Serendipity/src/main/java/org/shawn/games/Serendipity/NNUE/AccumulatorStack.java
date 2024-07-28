@@ -204,10 +204,10 @@ public class AccumulatorStack
 		private void makeMove(Board board, Move move)
 		{
 			if (board.getSideToMove().equals(this.color)
-					&& board.getPiece(move.getFrom()).equals(Piece.make(color, PieceType.KING))
-					&& this.kingBucket != NNUE.chooseInputBucket(board, color))
+					&& board.getPiece(move.getFrom()).equals(Piece.make(this.color, PieceType.KING))
+					&& this.kingBucket != NNUE.chooseInputBucket(move.getTo(), this.color))
 			{
-				this.changeKingBucket(NNUE.chooseInputBucket(board, color));
+				this.changeKingBucket(NNUE.chooseInputBucket(move.getTo(), this.color));
 				fullAccumulatorUpdate(board);
 			}
 
@@ -216,7 +216,7 @@ public class AccumulatorStack
 
 		private void loadFromBoard(Board board)
 		{
-			this.changeKingBucket(NNUE.chooseInputBucket(board, color));
+			this.changeKingBucket(NNUE.chooseInputBucket(board, this.color));
 			fullAccumulatorUpdate(board);
 		}
 	}

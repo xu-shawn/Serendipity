@@ -9,7 +9,7 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-    static final int HIDDEN_SIZE = 1024;
+	static final int HIDDEN_SIZE = 1024;
 	static final int FEATURE_SIZE = 768;
 	private static final int OUTPUT_BUCKETS = 8;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
@@ -32,18 +32,18 @@ public class NNUE
 	private static final int QA = 255;
 	private static final int QB = 64;
 
-    final short[][] L1Weights;
+	final short[][] L1Weights;
 	final short[] L1Biases;
 	private final short[][] L2Weights;
 	private final short outputBiases[];
-	
+
 	private final static int screlu[] = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
-	
+
 	static
 	{
-		for(int i = Short.MIN_VALUE; i <= Short.MAX_VALUE;i ++)
+		for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++)
 		{
-			screlu[i - (int) Short.MIN_VALUE] = screlu((short)(i));
+			screlu[i - (int) Short.MIN_VALUE] = screlu((short) (i));
 		}
 	}
 
@@ -109,7 +109,8 @@ public class NNUE
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
 			eval += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i]
-					+ screlu[them.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
+					+ screlu[them.values[i] - (int) Short.MIN_VALUE]
+							* (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
 		}
 
 		eval /= QA;
@@ -130,6 +131,11 @@ public class NNUE
 	{
 		return side.equals(Side.WHITE) ? INPUT_BUCKETS[board.getKingSquare(side).ordinal()]
 				: INPUT_BUCKETS[board.getKingSquare(side).ordinal() ^ 0b111000];
+	}
+
+	public static int chooseInputBucket(Square square, Side side)
+	{
+		return side.equals(Side.WHITE) ? INPUT_BUCKETS[square.ordinal()] : INPUT_BUCKETS[square.ordinal() ^ 0b111000];
 	}
 
 	public static int getIndex(Square square, Piece piece, Side perspective)
