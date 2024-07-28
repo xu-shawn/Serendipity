@@ -483,9 +483,9 @@ public class AlphaBeta
 			depth -= 2;
 		}
 
-		final int probcutBeta = beta + 300;
+		final int probcutBeta = beta + 200;
 
-		if (!isPV && !inCheck && depth > 3 && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
+		if (!isPV && !inCheck && depth > 4 && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
 				&& currentMoveEntry.getDepth() >= depth - 3 && currentMoveEntry.getEvaluation() < probcutBeta))
 		{
 			final List<Move> moves = MoveSort.sortProbcutCaptures(board.pseudoLegalCaptures(), ttMove, board,
@@ -498,7 +498,7 @@ public class AlphaBeta
 					continue;
 				}
 
-				if (!SEE.staticExchangeEvaluation(board, move, -20))
+				if (!SEE.staticExchangeEvaluation(board, move, -108))
 				{
 					continue;
 				}
