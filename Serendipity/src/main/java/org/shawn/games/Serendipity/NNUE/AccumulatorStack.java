@@ -27,7 +27,7 @@ public class AccumulatorStack
 
 		public Accumulator()
 		{
-
+			this.values = new short[NNUE.HIDDEN_SIZE];
 		}
 
 		public Accumulator(NNUE network, Side color)
@@ -45,7 +45,7 @@ public class AccumulatorStack
 
 		public void loadFrom(Accumulator prev)
 		{
-			this.values = prev.values.clone();
+			System.arraycopy(prev.values, 0, this.values, 0, NNUE.HIDDEN_SIZE);
 			this.color = prev.color;
 			this.needsRefresh = true;
 			this.kingBucket = prev.kingBucket;
@@ -192,7 +192,7 @@ public class AccumulatorStack
 
 		private void fullAccumulatorUpdate(Board board)
 		{
-			this.values = network.L1Biases.clone();
+			System.arraycopy(network.L1Biases, 0, this.values, 0, NNUE.HIDDEN_SIZE);
 			for (Square sq : Square.values())
 			{
 				if (!board.getPiece(sq).equals(Piece.NONE))
@@ -285,10 +285,10 @@ public class AccumulatorStack
 		this.stack[0].init();
 		this.stack[0].loadFromBoard(board);
 	}
-	
+
 	public void printAccumulator(Side side)
 	{
-		for (int i = 0; i < NNUE.HIDDEN_SIZE; i ++)
+		for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
 		{
 			System.out.print(this.stack[top].accumulators[side.ordinal()].values[i] + ", ");
 		}
