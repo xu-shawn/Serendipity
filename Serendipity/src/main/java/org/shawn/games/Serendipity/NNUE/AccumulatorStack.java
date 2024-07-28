@@ -162,15 +162,13 @@ public class AccumulatorStack
 
 			if (promoted.equals(Piece.NONE))
 			{
-				// Capture piece is not Piece.NONE
-				if (captured.ordinal() != 12)
+				if (!captured.equals(Piece.NONE))
 				{
 					this.addsubsub(prev, NNUE.getIndex(to, moved, this.color), NNUE.getIndex(from, moved, this.color),
 							NNUE.getIndex(to, captured, this.color));
 					return;
 				}
 
-				// En-passant
 				if (move.getTo().equals(board.getEnPassant()) && moved.getPieceType().equals(PieceType.PAWN))
 				{
 					// @formatter:off
