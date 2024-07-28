@@ -21,7 +21,6 @@ public class AccumulatorStack
 	{
 		short[] values;
 		Side color;
-		@SuppressWarnings("unused")
 		boolean needsRefresh;
 		int kingBucket;
 
@@ -161,7 +160,7 @@ public class AccumulatorStack
 			Piece moved = board.getPiece(from);
 			Piece captured = board.getPiece(to);
 
-			if (promoted.ordinal() == 12)
+			if (promoted.equals(Piece.NONE))
 			{
 				// Capture piece is not Piece.NONE
 				if (captured.ordinal() != 12)
@@ -172,7 +171,7 @@ public class AccumulatorStack
 				}
 
 				// En-passant
-				if (move.getTo().equals(board.getEnPassant()) && moved.getPieceType().ordinal() == 0)
+				if (move.getTo().equals(board.getEnPassant()) && moved.getPieceType().equals(PieceType.PAWN))
 				{
 					// @formatter:off
 					this.addsubsub(prev,
@@ -192,7 +191,7 @@ public class AccumulatorStack
 
 			else
 			{
-				if (captured.ordinal() != 12)
+				if (!captured.equals(Piece.NONE))
 				{
 					this.addsubsub(prev, NNUE.getIndex(to, promoted, this.color),
 							NNUE.getIndex(from, moved, this.color), NNUE.getIndex(to, captured, this.color));
