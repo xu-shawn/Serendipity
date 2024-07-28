@@ -43,9 +43,8 @@ public class AccumulatorStack
 			needsRefresh = true;
 		}
 
-		public void loadFrom(Accumulator prev)
+		public void loadAttributesFrom(Accumulator prev)
 		{
-			System.arraycopy(prev.values, 0, this.values, 0, NNUE.HIDDEN_SIZE);
 			this.color = prev.color;
 			this.needsRefresh = true;
 			this.kingBucket = prev.kingBucket;
@@ -60,30 +59,42 @@ public class AccumulatorStack
 			}
 		}
 
-		public void addsub(int featureIndexToAdd, int featureIndexToSubtract)
+		public void add(Accumulator prev, int featureIndex)
+		{
+			featureIndex = featureIndex + kingBucket * NNUE.FEATURE_SIZE;
+			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+			{
+				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndex][i]);
+			}
+		}
+
+		public void addsub(Accumulator prev, int featureIndexToAdd, int featureIndexToSubtract)
 		{
 			featureIndexToAdd = featureIndexToAdd + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract = featureIndexToSubtract + kingBucket * NNUE.FEATURE_SIZE;
 			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
 			{
-				values[i] += network.L1Weights[featureIndexToAdd][i] - network.L1Weights[featureIndexToSubtract][i];
+				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndexToAdd][i]
+						- network.L1Weights[featureIndexToSubtract][i]);
 			}
 		}
 
-		public void addsubsub(int featureIndexToAdd, int featureIndexToSubtract1, int featureIndexToSubtract2)
+		public void addsubsub(Accumulator prev, int featureIndexToAdd, int featureIndexToSubtract1,
+				int featureIndexToSubtract2)
 		{
 			featureIndexToAdd = featureIndexToAdd + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract1 = featureIndexToSubtract1 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract2 = featureIndexToSubtract2 + kingBucket * NNUE.FEATURE_SIZE;
 			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
 			{
-				values[i] += network.L1Weights[featureIndexToAdd][i] - network.L1Weights[featureIndexToSubtract1][i]
-						- network.L1Weights[featureIndexToSubtract2][i];
+				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndexToAdd][i]
+						- network.L1Weights[featureIndexToSubtract1][i]
+						- network.L1Weights[featureIndexToSubtract2][i]);
 			}
 		}
 
-		public void addaddsubsub(int featureIndexToAdd1, int featureIndexToAdd2, int featureIndexToSubtract1,
-				int featureIndexToSubtract2)
+		public void addaddsubsub(Accumulator prev, int featureIndexToAdd1, int featureIndexToAdd2,
+				int featureIndexToSubtract1, int featureIndexToSubtract2)
 		{
 			featureIndexToAdd1 = featureIndexToAdd1 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToAdd2 = featureIndexToAdd2 + kingBucket * NNUE.FEATURE_SIZE;
@@ -91,18 +102,19 @@ public class AccumulatorStack
 			featureIndexToSubtract2 = featureIndexToSubtract2 + kingBucket * NNUE.FEATURE_SIZE;
 			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
 			{
-				values[i] += network.L1Weights[featureIndexToAdd1][i] + network.L1Weights[featureIndexToAdd2][i]
-						- network.L1Weights[featureIndexToSubtract1][i] - network.L1Weights[featureIndexToSubtract2][i];
+				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndexToAdd1][i]
+						+ network.L1Weights[featureIndexToAdd2][i] - network.L1Weights[featureIndexToSubtract1][i]
+						- network.L1Weights[featureIndexToSubtract2][i]);
 			}
 		}
 
-		private void efficientlyUpdate(Board board, Move move)
+		private void efficientlyUpdate(Accumulator prev, Board board, Move move)
 		{
 			if (board.getContext().isKingSideCastle(move)
 					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_SIDE)
 							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
 			{
-				this.addaddsubsub(
+				this.addaddsubsub(prev,
 						NNUE.getIndex(board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE)
 								.getTo(), Piece.make(board.getSideToMove(), PieceType.ROOK), this.color),
 
@@ -122,7 +134,7 @@ public class AccumulatorStack
 					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.QUEEN_SIDE)
 							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
 			{
-				this.addaddsubsub(
+				this.addaddsubsub(prev,
 						NNUE.getIndex(board.getContext()
 								.getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
 								Piece.make(board.getSideToMove(), PieceType.ROOK), this.color),
@@ -146,7 +158,7 @@ public class AccumulatorStack
 			{
 				if (!board.getPiece(move.getTo()).equals(Piece.NONE))
 				{
-					this.addsubsub(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), this.color),
+					this.addsubsub(prev, NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), this.color),
 							NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color),
 							NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), this.color));
 					return;
@@ -155,7 +167,7 @@ public class AccumulatorStack
 				if (move.getTo().equals(board.getEnPassant())
 						&& board.getPiece(move.getFrom()).getPieceType().equals(PieceType.PAWN))
 				{
-					this.addsubsub(
+					this.addsubsub(prev,
 
 							NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), this.color),
 							NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color),
@@ -166,7 +178,7 @@ public class AccumulatorStack
 					return;
 				}
 
-				this.addsub(NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), this.color),
+				this.addsub(prev, NNUE.getIndex(move.getTo(), board.getPiece(move.getFrom()), this.color),
 						NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color));
 
 				return;
@@ -176,14 +188,14 @@ public class AccumulatorStack
 			{
 				if (!board.getPiece(move.getTo()).equals(Piece.NONE))
 				{
-					this.addsubsub(NNUE.getIndex(move.getTo(), move.getPromotion(), this.color),
+					this.addsubsub(prev, NNUE.getIndex(move.getTo(), move.getPromotion(), this.color),
 							NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color),
 							NNUE.getIndex(move.getTo(), board.getPiece(move.getTo()), this.color));
 
 					return;
 				}
 
-				this.addsub(NNUE.getIndex(move.getTo(), move.getPromotion(), this.color),
+				this.addsub(prev, NNUE.getIndex(move.getTo(), move.getPromotion(), this.color),
 						NNUE.getIndex(move.getFrom(), board.getPiece(move.getFrom()), this.color));
 
 				return;
@@ -202,7 +214,7 @@ public class AccumulatorStack
 			}
 		}
 
-		private void makeMove(Board board, Move move)
+		private void makeMove(Accumulator prev, Board board, Move move)
 		{
 			if (board.getSideToMove().equals(this.color)
 					&& board.getPiece(move.getFrom()).equals(Piece.make(this.color, PieceType.KING))
@@ -210,9 +222,13 @@ public class AccumulatorStack
 			{
 				this.changeKingBucket(NNUE.chooseInputBucket(move.getTo(), this.color));
 				fullAccumulatorUpdate(board);
+				efficientlyUpdate(this, board, move);
 			}
 
-			efficientlyUpdate(board, move);
+			else
+			{
+				efficientlyUpdate(prev, board, move);
+			}
 		}
 
 		private void loadFromBoard(Board board)
@@ -245,14 +261,14 @@ public class AccumulatorStack
 
 		public void loadFrom(AccumulatorPair prev)
 		{
-			this.accumulators[0].loadFrom(prev.accumulators[0]);
-			this.accumulators[1].loadFrom(prev.accumulators[1]);
+			this.accumulators[0].loadAttributesFrom(prev.accumulators[0]);
+			this.accumulators[1].loadAttributesFrom(prev.accumulators[1]);
 		}
 
-		public void makeMove(Board board, Move move)
+		public void makeMove(AccumulatorPair prev, Board board, Move move)
 		{
-			this.accumulators[0].makeMove(board, move);
-			this.accumulators[1].makeMove(board, move);
+			this.accumulators[0].makeMove(prev.accumulators[0], board, move);
+			this.accumulators[1].makeMove(prev.accumulators[1], board, move);
 		}
 	}
 
@@ -276,7 +292,7 @@ public class AccumulatorStack
 	{
 		top++;
 		this.stack[top].loadFrom(this.stack[top - 1]);
-		this.stack[top].makeMove(board, move);
+		this.stack[top].makeMove(this.stack[top - 1], board, move);
 	}
 
 	public void init(Board board)
