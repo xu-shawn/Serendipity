@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class AccumulatorTest
 {
-	AccumulatorManager accumulators;
+	AccumulatorStack accumulators;
 	NNUE network;
 	Board board;
 
@@ -21,25 +21,20 @@ public class AccumulatorTest
 	{
 		network = new NNUE("/simple.nnue");
 		board = new Board();
-		accumulators = new AccumulatorManager(network, board);
+		accumulators = new AccumulatorStack(network);
+		accumulators.init(board);
 	}
 
-	private int evaluate(Board board)
+	public int evaluate(Board board)
 	{
-		int v = (Side.WHITE.equals(board.getSideToMove())
-				? NNUE.evaluate(network, accumulators.getWhiteAccumulator(), accumulators.getBlackAccumulator(),
-						NNUE.chooseOutputBucket(board))
-				: NNUE.evaluate(network, accumulators.getBlackAccumulator(), accumulators.getWhiteAccumulator(),
-						NNUE.chooseOutputBucket(board)))
-				* 24;
+		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(), NNUE.chooseOutputBucket(board));
+
 		return v;
 	}
 
 	@Test
 	public void testAccumulators()
 	{
-		int eval1 = evaluate(board);
-
 		// 1. e4 d5 2. e5 f5 3. exf6 e5 4. fxg7 Bxg7 5. Ne2 Ne7 6. d3 O-O 7. Be3 c6 8.
 		// Qd2 Nd7 9. Nbc3 e4 10. O-O-O Kh8 11. g3 Re8 12. Bg2 Rg8 13. Qe1 Re8 14. Qg1
 		Move[] testGame = { new Move("e2e4", Side.WHITE), new Move("d7d5", Side.BLACK), new Move("e4e5", Side.WHITE),
@@ -54,25 +49,16 @@ public class AccumulatorTest
 
 		for (Move move : testGame)
 		{
-			accumulators.updateAccumulators(board, move, false);
+			accumulators.push(board, move);
 			board.doMove(move);
 		}
 
-		int eval2 = evaluate(board);
-		
-		accumulators = new AccumulatorManager(network, board);
+		int incrementallyUpdatedEvaluation = evaluate(board);
 
-		int eval3 = evaluate(board);
+		accumulators.init(board);
 
-		for (int i = testGame.length - 1; i >= 0; i--)
-		{
-			board.undoMove();
-			accumulators.updateAccumulators(board, testGame[i], true);
-		}
+		int fullUpdatedEvaluation = evaluate(board);
 
-		int eval4 = evaluate(board);
-
-		assertEquals(eval1, eval4);
-		assertEquals(eval2, eval3);
+		assertEquals(incrementallyUpdatedEvaluation, fullUpdatedEvaluation);
 	}
 }

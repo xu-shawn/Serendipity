@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.shawn.games.Serendipity.NNUE.AccumulatorStack;
 import org.shawn.games.Serendipity.NNUE.NNUE;
-import org.shawn.games.Serendipity.NNUE.NNUE.NNUEAccumulator;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
@@ -239,27 +239,12 @@ public class UCI
 							"Nodes per second:\t" + totalNodes * 1000 / Math.max((timeEnd - timeBegin) / 1000000, 1));
 					break;
 				case "eval":
-					NNUEAccumulator whiteAccumulator = new NNUEAccumulator(network,
-							NNUE.chooseInputBucket(internalBoard, Side.WHITE));
-					NNUEAccumulator blackAccumulator = new NNUEAccumulator(network,
-							NNUE.chooseInputBucket(internalBoard, Side.BLACK));
-
-					// Initialize Accumulators
-					for (Square sq : Square.values())
-					{
-						if (!internalBoard.getPiece(sq).equals(Piece.NONE))
-						{
-							whiteAccumulator.add(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.WHITE));
-							blackAccumulator.add(NNUE.getIndex(sq, internalBoard.getPiece(sq), Side.BLACK));
-						}
-					}
+					AccumulatorStack acc = new AccumulatorStack(network);
+					acc.init(internalBoard);
 
 					System.out.println(internalBoard);
-					System.out.println(Side.WHITE.equals(internalBoard.getSideToMove())
-							? NNUE.evaluate(network, whiteAccumulator, blackAccumulator,
-									NNUE.chooseOutputBucket(internalBoard))
-							: NNUE.evaluate(network, blackAccumulator, whiteAccumulator,
-									NNUE.chooseOutputBucket(internalBoard)));
+					System.out.println(NNUE.evaluate(network, acc, internalBoard.getSideToMove(),
+							NNUE.chooseOutputBucket(internalBoard)));
 					break;
 				case "go":
 					Limits limits = new Limits();

@@ -9,8 +9,8 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-	private static final int HIDDEN_SIZE = 1024;
-	private static final int FEATURE_SIZE = 768;
+	static final int HIDDEN_SIZE = 1024;
+	static final int FEATURE_SIZE = 768;
 	private static final int OUTPUT_BUCKETS = 8;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
 	private static final int INPUT_BUCKET_SIZE = 7;
@@ -32,99 +32,18 @@ public class NNUE
 	private static final int QA = 255;
 	private static final int QB = 64;
 
-	private final short[][] L1Weights;
-	private final short[] L1Biases;
+	final short[][] L1Weights;
+	final short[] L1Biases;
 	private final short[][] L2Weights;
 	private final short outputBiases[];
-	
+
 	private final static int screlu[] = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
-	
+
 	static
 	{
-		for(int i = Short.MIN_VALUE; i <= Short.MAX_VALUE;i ++)
+		for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++)
 		{
-			screlu[i - (int) Short.MIN_VALUE] = screlu((short)(i));
-		}
-	}
-
-	public static class NNUEAccumulator
-	{
-		private short[] values;
-		private int bucketIndex;
-		NNUE network;
-
-		public NNUEAccumulator(NNUE network, int bucketIndex)
-		{
-			this.network = network;
-			this.bucketIndex = bucketIndex;
-			values = network.L1Biases.clone();
-		}
-
-		public void reset()
-		{
-			values = network.L1Biases.clone();
-		}
-
-		public void setBucketIndex(int bucketIndex)
-		{
-			this.bucketIndex = bucketIndex;
-		}
-
-		public void add(int featureIndex)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void sub(int featureIndex)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] -= network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void addsub(int featureIndexToAdd, int featureIndexToSubtract)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void addaddsub(int featureIndexToAdd1, int featureIndexToAdd2, int featureIndexToSubtract)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
-						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void addsubsub(int featureIndexToAdd, int featureIndexToSubtract1, int featureIndexToSubtract2)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void addaddsubsub(int featureIndexToAdd1, int featureIndexToAdd2, int featureIndexToSubtract1,
-				int featureIndexToSubtract2)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
-						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
-			}
+			screlu[i - (int) Short.MIN_VALUE] = screlu((short) (i));
 		}
 	}
 
@@ -180,14 +99,18 @@ public class NNUE
 		return v * v;
 	}
 
-	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
+	public static int evaluate(NNUE network, AccumulatorStack accumulators, Side side, int chosenBucket)
 	{
 		int eval = 0;
+
+		AccumulatorStack.Accumulator us = accumulators.getAccumulator(side);
+		AccumulatorStack.Accumulator them = accumulators.getAccumulator(side.flip());
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
 			eval += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i]
-					+ screlu[them.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
+					+ screlu[them.values[i] - (int) Short.MIN_VALUE]
+							* (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
 		}
 
 		eval /= QA;
@@ -210,9 +133,9 @@ public class NNUE
 				: INPUT_BUCKETS[board.getKingSquare(side).ordinal() ^ 0b111000];
 	}
 
-	public static int chooseInputBucket(int squareIndex)
+	public static int chooseInputBucket(Square square, Side side)
 	{
-		return INPUT_BUCKETS[squareIndex];
+		return side.equals(Side.WHITE) ? INPUT_BUCKETS[square.ordinal()] : INPUT_BUCKETS[square.ordinal() ^ 0b111000];
 	}
 
 	public static int getIndex(Square square, Piece piece, Side perspective)
