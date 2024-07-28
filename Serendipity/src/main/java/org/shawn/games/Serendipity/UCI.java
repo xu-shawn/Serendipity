@@ -70,7 +70,7 @@ public class UCI
 	{
 		transpositionTable = new TranspositionTable(32);
 		options = new HashMap<>();
-		networkName = new NNUEOption("simple.nnue", "nnuefile");
+		networkName = new NNUEOption("embedded.nnue", "nnuefile");
 		threads = new IntegerOption(1, 1, 1, "Threads");
 		hash = new HashOption(32, 8, 4096, transpositionTable, "Hash");
 

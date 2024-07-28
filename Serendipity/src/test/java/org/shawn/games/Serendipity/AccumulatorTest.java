@@ -19,7 +19,7 @@ public class AccumulatorTest
 
 	public AccumulatorTest() throws IOException
 	{
-		network = new NNUE("/simple.nnue");
+		network = new NNUE("/embedded.nnue");
 		board = new Board();
 		accumulators = new AccumulatorStack(network);
 		accumulators.init(board);
