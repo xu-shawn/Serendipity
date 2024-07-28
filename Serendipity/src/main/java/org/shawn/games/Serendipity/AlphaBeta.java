@@ -485,7 +485,7 @@ public class AlphaBeta
 
 		final int probcutBeta = beta + 200;
 
-		if (!isPV && !inCheck && depth > 4 && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
+		if (!isPV && !inCheck && depth > 7 && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
 				&& currentMoveEntry.getDepth() >= depth - 3 && currentMoveEntry.getEvaluation() < probcutBeta))
 		{
 			final List<Move> moves = MoveSort.sortProbcutCaptures(board.pseudoLegalCaptures(), ttMove, board,
