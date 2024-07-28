@@ -38,7 +38,7 @@ public class AlphaBeta
 	private int selDepth;
 
 	private NNUE network;
-	private AccumulatorManager accumulators;
+	private AccumulatorStack accumulators;
 
 	private SearchStack ss;
 
@@ -235,7 +235,7 @@ public class AlphaBeta
 				continue;
 			}
 
-			accumulators.updateAccumulators(board, move, false);
+			accumulators.push(board, move);
 			board.doMove(move);
 			sse.move = move;
 			sse.continuationHistory = continuationHistories.get(board, sse.move);
@@ -243,7 +243,7 @@ public class AlphaBeta
 			int score = -quiesce(board, -beta, -alpha, ply + 1);
 
 			board.undoMove();
-			accumulators.updateAccumulators(board, move, true);
+			accumulators.pop();
 
 			bestScore = Math.max(bestScore, score);
 			alpha = Math.max(alpha, bestScore);
@@ -565,7 +565,7 @@ public class AlphaBeta
 
 			newdepth += extension;
 
-			accumulators.updateAccumulators(board, move, false);
+			accumulators.push(board, move);
 			board.doMove(move);
 			sse.move = move;
 			sse.continuationHistory = continuationHistories.get(board, sse.move);
@@ -599,7 +599,7 @@ public class AlphaBeta
 			}
 
 			board.undoMove();
-			accumulators.updateAccumulators(board, move, true);
+			accumulators.pop();
 
 			if (thisMoveEval > bestValue)
 			{
@@ -769,7 +769,8 @@ public class AlphaBeta
 		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
 				board.getMoveCounter());
 		this.ss = new SearchStack(MAX_PLY);
-		this.accumulators = new AccumulatorManager(network, board);
+		this.accumulators = new AccumulatorStack(network);
+		this.accumulators.init(board);
 		this.nmpMinPly = 0;
 
 		this.internalBoard = board.clone();

@@ -43,11 +43,12 @@ public class AccumulatorStack
 			needsRefresh = true;
 		}
 
-		public void loadFrom(Accumulator pred)
+		public void loadFrom(Accumulator prev)
 		{
-			this.values = pred.values.clone();
-			this.color = pred.color;
+			this.values = prev.values.clone();
+			this.color = prev.color;
 			this.needsRefresh = true;
+			this.kingBucket = prev.kingBucket;
 		}
 
 		public void add(int featureIndex)
@@ -226,9 +227,7 @@ public class AccumulatorStack
 
 		public AccumulatorPair()
 		{
-			accumulators = new Accumulator[2];
-			accumulators[0] = new Accumulator();
-			accumulators[1] = new Accumulator();
+			accumulators = new Accumulator[] { new Accumulator(), new Accumulator() };
 		}
 
 		public void init()
