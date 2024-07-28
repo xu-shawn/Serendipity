@@ -47,87 +47,6 @@ public class NNUE
 		}
 	}
 
-	public static class NNUEAccumulator
-	{
-		private short[] values;
-		private int bucketIndex;
-		NNUE network;
-
-		public NNUEAccumulator(NNUE network, int bucketIndex)
-		{
-			this.network = network;
-			this.bucketIndex = bucketIndex;
-			values = network.L1Biases.clone();
-		}
-
-		public void reset()
-		{
-			values = network.L1Biases.clone();
-		}
-
-		public void setBucketIndex(int bucketIndex)
-		{
-			this.bucketIndex = bucketIndex;
-		}
-
-		public void add(int featureIndex)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void sub(int featureIndex)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] -= network.L1Weights[featureIndex + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void addsub(int featureIndexToAdd, int featureIndexToSubtract)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void addaddsub(int featureIndexToAdd1, int featureIndexToAdd2, int featureIndexToSubtract)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
-						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void addsubsub(int featureIndexToAdd, int featureIndexToSubtract1, int featureIndexToSubtract2)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndexToAdd + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-
-		public void addaddsubsub(int featureIndexToAdd1, int featureIndexToAdd2, int featureIndexToSubtract1,
-				int featureIndexToSubtract2)
-		{
-			for (int i = 0; i < HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndexToAdd1 + bucketIndex * FEATURE_SIZE][i]
-						+ network.L1Weights[featureIndexToAdd2 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract1 + bucketIndex * FEATURE_SIZE][i]
-						- network.L1Weights[featureIndexToSubtract2 + bucketIndex * FEATURE_SIZE][i];
-			}
-		}
-	}
-
 	private short toLittleEndian(short input)
 	{
 		return (short) (((input & 0xFF) << 8) | ((input & 0xFF00) >> 8));
@@ -180,9 +99,12 @@ public class NNUE
 		return v * v;
 	}
 
-	public static int evaluate(NNUE network, NNUEAccumulator us, NNUEAccumulator them, int chosenBucket)
+	public static int evaluate(NNUE network, AccumulatorStack accumulators, Side side, int chosenBucket)
 	{
 		int eval = 0;
+
+		AccumulatorStack.Accumulator us = accumulators.getAccumulator(side);
+		AccumulatorStack.Accumulator them = accumulators.getAccumulator(side.flip());
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{

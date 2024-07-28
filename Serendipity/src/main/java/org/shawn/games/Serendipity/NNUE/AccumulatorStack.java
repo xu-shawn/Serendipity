@@ -17,7 +17,7 @@ public class AccumulatorStack
 	private AccumulatorPair[] stack;
 	private short top;
 
-	private class Accumulator
+	public class Accumulator
 	{
 		short[] values;
 		Side color;
@@ -226,14 +226,21 @@ public class AccumulatorStack
 
 		public AccumulatorPair()
 		{
+			accumulators = new Accumulator[2];
 			accumulators[0] = new Accumulator();
 			accumulators[1] = new Accumulator();
 		}
 
-		public void loadFromNet()
+		public void init()
 		{
 			this.accumulators = new Accumulator[] { new Accumulator(network, Side.WHITE),
 					new Accumulator(network, Side.BLACK) };
+		}
+
+		public void loadFromBoard(Board board)
+		{
+			this.accumulators[0].fullAccumulatorUpdate(board);
+			this.accumulators[1].fullAccumulatorUpdate(board);
 		}
 
 		public void loadFrom(AccumulatorPair prev)
@@ -241,7 +248,7 @@ public class AccumulatorStack
 			this.accumulators[0].loadFrom(prev.accumulators[0]);
 			this.accumulators[1].loadFrom(prev.accumulators[1]);
 		}
-		
+
 		public void makeMove(Board board, Move move)
 		{
 			this.accumulators[0].makeMove(board, move);
@@ -249,17 +256,15 @@ public class AccumulatorStack
 		}
 	}
 
-	private AccumulatorStack(Board board)
+	public AccumulatorStack(NNUE network)
 	{
+		this.network = network;
 		this.stack = new AccumulatorPair[AlphaBeta.MAX_PLY + 1];
-		this.top = 0;
 
 		for (int i = 0; i < this.stack.length; i++)
 		{
 			this.stack[i] = new AccumulatorPair();
 		}
-		
-		this.stack[0].loadFromNet();
 	}
 
 	public void pop()
@@ -269,8 +274,20 @@ public class AccumulatorStack
 
 	public void push(Board board, Move move)
 	{
-		top ++;
+		top++;
 		this.stack[top].loadFrom(this.stack[top - 1]);
 		this.stack[top].makeMove(board, move);
+	}
+
+	public void init(Board board)
+	{
+		this.top = 0;
+		this.stack[0].init();
+		this.stack[0].loadFromBoard(board);
+	}
+
+	public AccumulatorStack.Accumulator getAccumulator(Side side)
+	{
+		return this.stack[top].accumulators[side.ordinal()];
 	}
 }
