@@ -122,4 +122,32 @@ public class MoveSort
 
 		return moves;
 	}
+
+	public static List<Move> sortProbcutCaptures(List<Move> moves, Board board, History captureHistory)
+	{
+		List<Move> selectedMoves = new ArrayList<Move>(moves.size());
+
+		for (int i = 0; i < moves.size(); i++)
+		{
+			Move move = moves.get(i);
+
+			if (!SEE.staticExchangeEvaluation(board, move, -108))
+			{
+				continue;
+			}
+
+			int value = qSearchValue(move, board, captureHistory);
+			selectedMoves.add(new ScoredMove(move, value));
+		}
+
+		selectedMoves.sort(new Comparator<Move>() {
+			@Override
+			public int compare(Move m1, Move m2)
+			{
+				return ((ScoredMove) m2).getScore() - ((ScoredMove) m1).getScore();
+			}
+		});
+
+		return selectedMoves;
+	}
 }

@@ -101,8 +101,7 @@ public class AlphaBeta
 
 	public int evaluate(Board board)
 	{
-		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(),
-						NNUE.chooseOutputBucket(board));
+		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(), NNUE.chooseOutputBucket(board));
 
 		return v;
 	}
@@ -482,6 +481,51 @@ public class AlphaBeta
 		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
 		{
 			depth -= 2;
+		}
+
+		final int probcutBeta = beta + 350;
+
+		if (!isPV && !inCheck && depth > 3 && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
+				&& currentMoveEntry.getDepth() >= depth - 3 && currentMoveEntry.getEvaluation() < probcutBeta))
+		{
+			final List<Move> moves = MoveSort.sortProbcutCaptures(board.pseudoLegalCaptures(), board, captureHistory);
+
+			for (Move move : moves)
+			{
+				if (!board.isMoveLegal(move, false))
+				{
+					continue;
+				}
+
+				if (!SEE.staticExchangeEvaluation(board, move, -20))
+				{
+					continue;
+				}
+
+				accumulators.push(board, move);
+				board.doMove(move);
+
+				sse.move = move;
+				sse.continuationHistory = continuationHistories.get(board, sse.move);
+
+				int score = -quiesce(board, -probcutBeta, -probcutBeta + 1, ply + 1);
+
+				if (score >= probcutBeta)
+				{
+					score = -mainSearch(board, depth - 4, -probcutBeta, -probcutBeta + 1, ply + 1, !cutNode);
+				}
+
+				board.undoMove();
+				accumulators.pop();
+
+				if (score >= probcutBeta)
+				{
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth - 3, score,
+							move, sse.staticEval);
+
+					return score;
+				}
+			}
 		}
 
 		for (Move move : legalMoves)
