@@ -513,7 +513,7 @@ public class AlphaBeta
 
 				if (score >= probcutBeta)
 				{
-					score = -mainSearch(board, depth - 4, -probcutBeta, -probcutBeta + 1, ply + 1, !cutNode);
+					score = -mainSearch(board, depth - 3, -probcutBeta, -probcutBeta + 1, ply + 1, !cutNode);
 				}
 
 				board.undoMove();
@@ -521,7 +521,7 @@ public class AlphaBeta
 
 				if (score >= probcutBeta)
 				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth - 3, score,
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth - 2, score,
 							move, sse.staticEval);
 
 					return score;
