@@ -483,7 +483,7 @@ public class AlphaBeta
 			depth -= 2;
 		}
 
-		final int probcutBeta = beta + 350;
+		final int probcutBeta = beta + 300;
 
 		if (!isPV && !inCheck && depth > 8 && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
 				&& currentMoveEntry.getDepth() >= depth - 3 && currentMoveEntry.getEvaluation() < probcutBeta))
