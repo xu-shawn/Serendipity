@@ -485,7 +485,7 @@ public class AlphaBeta
 
 		final int probcutBeta = beta + 300;
 
-		if (!isPV && !inCheck && depth > 8 && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
+		if (!isPV && !inCheck && depth > 5 && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
 				&& currentMoveEntry.getDepth() >= depth - 3 && currentMoveEntry.getEvaluation() < probcutBeta))
 		{
 			final List<Move> moves = MoveSort.sortProbcutCaptures(board.pseudoLegalCaptures(), ttMove, board,
@@ -498,7 +498,7 @@ public class AlphaBeta
 					continue;
 				}
 
-				if (!SEE.staticExchangeEvaluation(board, move, -50))
+				if (!SEE.staticExchangeEvaluation(board, move, probcutBeta - sse.staticEval))
 				{
 					continue;
 				}
@@ -513,7 +513,7 @@ public class AlphaBeta
 
 				if (score >= probcutBeta)
 				{
-					score = -mainSearch(board, depth - 3, -probcutBeta, -probcutBeta + 1, ply + 1, !cutNode);
+					score = -mainSearch(board, depth - 4, -probcutBeta, -probcutBeta + 1, ply + 1, !cutNode);
 				}
 
 				board.undoMove();
@@ -521,7 +521,7 @@ public class AlphaBeta
 
 				if (score >= probcutBeta)
 				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth - 2, score,
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth - 3, score,
 							move, sse.staticEval);
 
 					return score;
