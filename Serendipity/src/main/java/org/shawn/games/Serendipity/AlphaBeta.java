@@ -47,6 +47,9 @@ public class AlphaBeta
 
 	private Move bestMove;
 
+	private Tunable probcutBetaMargin = new Tunable(350, 70, 700, 100, 0.002, "probcutBetaMargin");
+	private Tunable probcutMinDepth = new Tunable(8, 1, 15, 0.2, 0.006, "probcutMinDepth");
+
 	public AlphaBeta(TranspositionTable tt, NNUE network)
 	{
 		this.nodesCount = 0;
@@ -483,9 +486,9 @@ public class AlphaBeta
 			depth -= 2;
 		}
 
-		final int probcutBeta = beta + 300;
+		final int probcutBeta = beta + probcutBetaMargin.get();
 
-		if (!isPV && !inCheck && depth > 8 && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
+		if (!isPV && !inCheck && depth > probcutMinDepth.get() && beta < MATE_EVAL - 1024 && !(currentMoveEntry != null
 				&& currentMoveEntry.getDepth() >= depth - 3 && currentMoveEntry.getEvaluation() < probcutBeta))
 		{
 			final List<Move> moves = MoveSort.sortProbcutCaptures(board.pseudoLegalCaptures(), ttMove, board,
@@ -513,7 +516,7 @@ public class AlphaBeta
 
 				if (score >= probcutBeta)
 				{
-					score = -mainSearch(board, depth - 3, -probcutBeta, -probcutBeta + 1, ply + 1, !cutNode);
+					score = -mainSearch(board, depth - 4, -probcutBeta, -probcutBeta + 1, ply + 1, !cutNode);
 				}
 
 				board.undoMove();
@@ -521,7 +524,7 @@ public class AlphaBeta
 
 				if (score >= probcutBeta)
 				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth - 2, score,
+					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth - 3, score,
 							move, sse.staticEval);
 
 					return score;
