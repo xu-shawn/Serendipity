@@ -330,7 +330,7 @@ public class AlphaBeta
 					}
 					break;
 				case LOWERBOUND:
-					if (eval > beta)
+					if (eval >= beta)
 					{
 						return eval;
 					}
