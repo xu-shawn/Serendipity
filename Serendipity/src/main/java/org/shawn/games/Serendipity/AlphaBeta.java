@@ -101,8 +101,7 @@ public class AlphaBeta
 
 	public int evaluate(Board board)
 	{
-		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(),
-						NNUE.chooseOutputBucket(board));
+		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(), NNUE.chooseOutputBucket(board));
 
 		return v;
 	}
@@ -551,11 +550,15 @@ public class AlphaBeta
 					}
 				}
 
-				else if (singularValue > beta)
+				else if (singularValue >= beta)
 				{
 					return singularValue;
 				}
 
+				else if (currentMoveEntry.getEvaluation() >= beta)
+				{
+					extension = -1;
+				}
 			}
 
 			else if (givesCheck)
