@@ -66,7 +66,7 @@ public class AlphaBeta
 		{
 			for (int j = 0; j < reduction[0].length; j++)
 			{
-				reduction[i][j] = (int) (0.60 + Math.log(i) * Math.log(j) / 2.17);
+				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
 			}
 		}
 	}
@@ -574,7 +574,7 @@ public class AlphaBeta
 
 			if (sse.moveCount > 2 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
-				r += isPV ? 0 : 1;
+				r -= isPV ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
 				r += cutNode ? 1 : 0;
 
