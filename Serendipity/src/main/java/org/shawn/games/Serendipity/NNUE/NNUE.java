@@ -11,20 +11,20 @@ public class NNUE
 
 	static final int HIDDEN_SIZE = 1024;
 	static final int FEATURE_SIZE = 768;
-	private static final int OUTPUT_BUCKETS = 8;
+	private static final int OUTPUT_BUCKETS = 1;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
 	private static final int INPUT_BUCKET_SIZE = 7;
 	// @formatter:off
 	private static final int[] INPUT_BUCKETS = new int[]
 	{
-			0, 0, 1, 1, 2, 2, 3, 3,
-			4, 4, 4, 4, 5, 5, 5, 5,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
 	};
 	// @formatter:on
 
@@ -73,9 +73,9 @@ public class NNUE
 			L1Biases[i] = toLittleEndian(networkData.readShort());
 		}
 
-		L2Weights = new short[OUTPUT_BUCKETS][HIDDEN_SIZE * 2];
+		L2Weights = new short[OUTPUT_BUCKETS][HIDDEN_SIZE];
 
-		for (int i = 0; i < HIDDEN_SIZE * 2; i++)
+		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
 			for (int j = 0; j < OUTPUT_BUCKETS; j++)
 			{
@@ -103,14 +103,11 @@ public class NNUE
 	{
 		int eval = 0;
 
-		AccumulatorStack.Accumulator us = accumulators.getAccumulator(side);
-		AccumulatorStack.Accumulator them = accumulators.getAccumulator(side.flip());
+		AccumulatorStack.Accumulator us = accumulators.getAccumulator(Side.WHITE);
 
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
-			eval += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i]
-					+ screlu[them.values[i] - (int) Short.MIN_VALUE]
-							* (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
+			eval += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i];
 		}
 
 		eval /= QA;

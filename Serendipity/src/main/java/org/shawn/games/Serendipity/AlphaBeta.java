@@ -103,6 +103,9 @@ public class AlphaBeta
 	{
 		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(), NNUE.chooseOutputBucket(board));
 
+		if (board.getSideToMove().equals(Side.BLACK))
+			v = -v;
+
 		return v;
 	}
 

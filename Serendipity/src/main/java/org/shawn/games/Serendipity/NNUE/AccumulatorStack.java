@@ -250,26 +250,22 @@ public class AccumulatorStack
 
 		public void init()
 		{
-			this.accumulators = new Accumulator[] { new Accumulator(network, Side.WHITE),
-					new Accumulator(network, Side.BLACK) };
+			this.accumulators = new Accumulator[] { new Accumulator(network, Side.WHITE) };
 		}
 
 		public void loadFromBoard(Board board)
 		{
 			this.accumulators[0].loadFromBoard(board);
-			this.accumulators[1].loadFromBoard(board);
 		}
 
 		public void loadFrom(AccumulatorPair prev)
 		{
 			this.accumulators[0].loadAttributesFrom(prev.accumulators[0]);
-			this.accumulators[1].loadAttributesFrom(prev.accumulators[1]);
 		}
 
 		public void makeMove(AccumulatorPair prev, Board board, Move move)
 		{
 			this.accumulators[0].makeMove(prev.accumulators[0], board, move);
-			this.accumulators[1].makeMove(prev.accumulators[1], board, move);
 		}
 	}
 
