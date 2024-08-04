@@ -101,8 +101,7 @@ public class AlphaBeta
 
 	public int evaluate(Board board)
 	{
-		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(),
-						NNUE.chooseOutputBucket(board));
+		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(), NNUE.chooseOutputBucket(board));
 
 		return v;
 	}
@@ -668,21 +667,24 @@ public class AlphaBeta
 
 		if (sse.moveCount == 0)
 		{
-			return -MATE_EVAL + ply;
+			return inSingularSearch ? alpha : -MATE_EVAL + ply;
 		}
 
-		if (alpha == oldAlpha)
+		if (!inSingularSearch)
 		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue, ttMove,
-					sse.staticEval);
-		}
+			if (alpha == oldAlpha)
+			{
+				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue,
+						ttMove, sse.staticEval);
+			}
 
-		else if (alpha > oldAlpha)
-		{
-			tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, bestValue, bestMove,
-					sse.staticEval);
+			else if (alpha > oldAlpha)
+			{
+				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, bestValue, bestMove,
+						sse.staticEval);
+			}
 		}
-
+		
 		return bestValue;
 	}
 
