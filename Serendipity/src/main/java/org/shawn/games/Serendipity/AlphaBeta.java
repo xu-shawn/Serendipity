@@ -574,13 +574,14 @@ public class AlphaBeta
 
 			if (sse.moveCount > 2 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
-				r += isPV ? 0 : 1;
+				r -= isPV ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
 				r += cutNode ? 1 : 0;
-//
-//				r = Math.max(0, Math.min(depth - 1, r));
 
-				thisMoveEval = -mainSearch(board, depth - r, -(alpha + 1), -alpha, ply + 1, true);
+				int d = newdepth - r;
+				d = Math.min(newdepth, newdepth - r);
+
+				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
 
 				if (thisMoveEval > alpha)
 				{
