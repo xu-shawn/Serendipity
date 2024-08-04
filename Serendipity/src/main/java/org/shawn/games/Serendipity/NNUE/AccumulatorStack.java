@@ -245,7 +245,7 @@ public class AccumulatorStack
 
 		public AccumulatorPair()
 		{
-			accumulators = new Accumulator[] { new Accumulator(), new Accumulator() };
+			accumulators = new Accumulator[] { new Accumulator() };
 		}
 
 		public void init()
