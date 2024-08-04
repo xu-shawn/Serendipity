@@ -550,9 +550,14 @@ public class AlphaBeta
 					}
 				}
 
-				else if (singularValue > beta)
+				else if (singularValue >= beta)
 				{
 					return singularValue;
+				}
+
+				else if (currentMoveEntry.getEvaluation() >= beta)
+				{
+					extension = -1;
 				}
 
 			}
@@ -684,7 +689,7 @@ public class AlphaBeta
 						sse.staticEval);
 			}
 		}
-		
+
 		return bestValue;
 	}
 
