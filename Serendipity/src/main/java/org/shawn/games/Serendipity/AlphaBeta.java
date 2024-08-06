@@ -475,8 +475,8 @@ public class AlphaBeta
 		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory,
 				currentContinuationHistories, board);
 
-		List<Move> quietsSearched = new ArrayList<>();
-		List<Move> capturesSearched = new ArrayList<>();
+		List<Move> quietsSearched = new ArrayList<>(32);
+		List<Move> capturesSearched = new ArrayList<>(32);
 
 		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
 		{
@@ -674,7 +674,7 @@ public class AlphaBeta
 				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
 						bestMove, sse.staticEval);
 			}
-			
+
 			else if (alpha == oldAlpha)
 			{
 				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue,
