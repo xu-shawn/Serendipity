@@ -516,8 +516,8 @@ public class AlphaBeta
 					continue;
 				}
 
-				if (depth < 9
-						&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
+				if (depth < 9 && !SEE.staticExchangeEvaluation(board, move,
+						isQuiet ? -65 * lmrDepth : -38 * lmrDepth * lmrDepth))
 				{
 					continue;
 				}
@@ -674,7 +674,7 @@ public class AlphaBeta
 				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
 						bestMove, sse.staticEval);
 			}
-			
+
 			else if (alpha == oldAlpha)
 			{
 				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue,
