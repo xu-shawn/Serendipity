@@ -171,7 +171,7 @@ public class AlphaBeta
 					}
 					break;
 				case LOWERBOUND:
-					if (eval > beta)
+					if (eval >= beta)
 					{
 						return eval;
 					}
@@ -395,7 +395,7 @@ public class AlphaBeta
 			}
 		}
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval > beta && eval - depth * 70 > beta)
+		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval >= beta && eval - depth * 70 >= beta)
 		{
 			return beta > -MATE_EVAL + 1024 ? beta + (eval - beta) / 3 : eval;
 		}
@@ -427,7 +427,7 @@ public class AlphaBeta
 
 				this.nmpMinPly = 0;
 
-				if (v > beta)
+				if (v >= beta)
 				{
 					return nullEval;
 				}
@@ -550,7 +550,7 @@ public class AlphaBeta
 					}
 				}
 
-				else if (singularValue > beta)
+				else if (singularValue >= beta)
 				{
 					return singularValue;
 				}
@@ -619,9 +619,6 @@ public class AlphaBeta
 
 				if (alpha >= beta)
 				{
-					tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
-							bestMove, sse.staticEval);
-
 					if (isQuiet)
 					{
 						sse.killer = move;
@@ -651,7 +648,7 @@ public class AlphaBeta
 						}
 					}
 
-					return bestValue;
+					break;
 				}
 			}
 
@@ -672,7 +669,13 @@ public class AlphaBeta
 
 		if (!inSingularSearch)
 		{
-			if (alpha == oldAlpha)
+			if (alpha >= beta)
+			{
+				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
+						bestMove, sse.staticEval);
+			}
+			
+			else if (alpha == oldAlpha)
 			{
 				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue,
 						ttMove, sse.staticEval);
@@ -684,7 +687,7 @@ public class AlphaBeta
 						sse.staticEval);
 			}
 		}
-		
+
 		return bestValue;
 	}
 
