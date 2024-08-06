@@ -28,7 +28,6 @@ public class AlphaBeta
 
 	private Move[][] pv;
 	private Move[] lastCompletePV;
-	private Move[][] counterMoves;
 	private History history;
 	private History captureHistory;
 	private ContinuationHistories continuationHistories;
@@ -52,7 +51,6 @@ public class AlphaBeta
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
-		this.counterMoves = new Move[13][65];
 		this.history = new FromToHistory();
 		this.captureHistory = new CaptureHistory();
 		this.continuationHistories = new ContinuationHistories();
@@ -116,7 +114,7 @@ public class AlphaBeta
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
 				ss.get(ply - 6).continuationHistory };
 
-		MoveSort.sortMoves(moves, ttMove, null, null, history, captureHistory, currentContinuationHistories, board);
+		MoveSort.sortMoves(moves, ttMove, null, history, captureHistory, currentContinuationHistories, board);
 	}
 
 	private void updateContinuationHistories(int ply, int depth, Board board, Move move, List<Move> quietsSearched)
@@ -461,19 +459,13 @@ public class AlphaBeta
 		int oldAlpha = alpha;
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
-		Move lastMove = ss.get(ply - 1).move;
-
-		Move counterMove = null;
-
-		if (lastMove != null)
-			counterMove = counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo().ordinal()];
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
 				ss.get(ply - 6).continuationHistory };
 
-		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, counterMove, history, captureHistory,
-				currentContinuationHistories, board);
+		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, history, captureHistory, currentContinuationHistories,
+				board);
 
 		List<Move> quietsSearched = new ArrayList<>();
 		List<Move> capturesSearched = new ArrayList<>();
@@ -630,12 +622,6 @@ public class AlphaBeta
 							history.register(board, quietMove, stat_malus(depth));
 						}
 
-						if (lastMove != null)
-						{
-							counterMoves[board.getPiece(lastMove.getFrom()).ordinal()][lastMove.getTo()
-									.ordinal()] = move;
-						}
-
 						updateContinuationHistories(ply, depth, board, move, quietsSearched);
 					}
 					else
@@ -674,7 +660,7 @@ public class AlphaBeta
 				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
 						bestMove, sse.staticEval);
 			}
-			
+
 			else if (alpha == oldAlpha)
 			{
 				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue,
@@ -698,7 +684,6 @@ public class AlphaBeta
 		int delta;
 
 		currentScore = MIN_EVAL;
-		counterMoves = new Move[13][65];
 		lastCompletePV = null;
 		alpha = MIN_EVAL;
 		beta = MAX_EVAL;
@@ -798,7 +783,6 @@ public class AlphaBeta
 		this.nodesLimit = -1;
 		this.pv = new Move[MAX_PLY][MAX_PLY];
 		this.ss = new SearchStack(MAX_PLY);
-		this.counterMoves = new Move[13][65];
 		this.history = new FromToHistory();
 		this.captureHistory = new CaptureHistory();
 		this.continuationHistories = new ContinuationHistories();
