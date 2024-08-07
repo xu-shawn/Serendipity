@@ -308,6 +308,11 @@ public class AlphaBeta
 			return quiesce(board, alpha, beta, ply);
 		}
 
+		if (depth >= MAX_PLY)
+		{
+			depth = MAX_PLY - 1;
+		}
+
 		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
 
 		sse.ttHit = currentMoveEntry != null;
