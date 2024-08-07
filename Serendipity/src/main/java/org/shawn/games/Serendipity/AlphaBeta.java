@@ -124,7 +124,7 @@ public class AlphaBeta
 
 		ss.get(ply - 1).continuationHistory.register(board, move, bonus);
 		ss.get(ply - 2).continuationHistory.register(board, move, bonus);
-		ss.get(ply - 2).continuationHistory.register(board, move, bonus / 8);
+		ss.get(ply - 3).continuationHistory.register(board, move, bonus / 8);
 		ss.get(ply - 4).continuationHistory.register(board, move, bonus);
 		ss.get(ply - 6).continuationHistory.register(board, move, bonus / 2);
 
