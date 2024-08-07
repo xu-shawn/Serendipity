@@ -12,6 +12,9 @@ public class TranspositionTable
 		EXACT, LOWERBOUND, UPPERBOUND
 	}
 
+	private static NodeType[] byteToNodeType = new NodeType[] { NodeType.EXACT, NodeType.LOWERBOUND,
+			NodeType.UPPERBOUND };
+
 	public class Entry
 	{
 		// depth: (0-255) 8 bits
@@ -40,12 +43,7 @@ public class TranspositionTable
 
 		private byte typeToByte(NodeType type)
 		{
-			return switch (type)
-			{
-				case EXACT -> 0;
-				case LOWERBOUND -> 1;
-				case UPPERBOUND -> 2;
-			};
+			return (byte) type.ordinal();
 		}
 
 		public void write(long signature, NodeType type, short depth, int evaluation, Move move, int staticEval)
@@ -69,13 +67,7 @@ public class TranspositionTable
 
 		public NodeType getType()
 		{
-			return switch (this.depthAndType & 0b11)
-			{
-				case 0 -> NodeType.EXACT;
-				case 1 -> NodeType.LOWERBOUND;
-				case 2 -> NodeType.UPPERBOUND;
-				default -> throw new IllegalArgumentException("Unexpected value: " + (this.depthAndType & 0b11));
-			};
+			return byteToNodeType[this.depthAndType & 0b11];
 		}
 
 		public short getDepth()

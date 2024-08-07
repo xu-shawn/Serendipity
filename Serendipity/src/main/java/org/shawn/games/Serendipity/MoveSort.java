@@ -7,6 +7,8 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class MoveSort
 {
+	private static int[] promoValue = { -2000000001, 2000000000, -2000000001, -2000000001, 2000000001 };
+
 	private static int pieceValue(Piece p)
 	{
 		if (p.getPieceType() == null)
@@ -37,12 +39,7 @@ public class MoveSort
 
 		if (!move.getPromotion().equals(Piece.NONE))
 		{
-			return switch (move.getPromotion().getPieceType())
-			{
-				case QUEEN -> 2000000001;
-				case KNIGHT -> 2000000000;
-				default -> -2000000001;
-			};
+			return promoValue[move.getPromotion().getPieceType().ordinal()];
 		}
 
 		if (!AlphaBeta.isQuiet(move, board))
