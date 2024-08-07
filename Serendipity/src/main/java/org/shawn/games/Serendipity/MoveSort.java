@@ -61,6 +61,7 @@ public class MoveSort
 
 		moveValue += continuationHistories[0].get(board, move);
 		moveValue += continuationHistories[1].get(board, move);
+		moveValue += continuationHistories[2].get(board, move) / 8;
 		moveValue += continuationHistories[3].get(board, move);
 		moveValue += continuationHistories[5].get(board, move) / 2;
 

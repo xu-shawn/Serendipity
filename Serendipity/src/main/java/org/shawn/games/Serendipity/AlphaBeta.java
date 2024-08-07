@@ -111,28 +111,30 @@ public class AlphaBeta
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
-				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
-				ss.get(ply - 6).continuationHistory };
+				ss.get(ply - 2).continuationHistory, ss.get(ply - 3).continuationHistory,
+				ss.get(ply - 4).continuationHistory, null, ss.get(ply - 6).continuationHistory };
 
 		MoveSort.sortMoves(moves, ttMove, null, history, captureHistory, currentContinuationHistories, board);
 	}
 
 	private void updateContinuationHistories(int ply, int depth, Board board, Move move, List<Move> quietsSearched)
 	{
-		History conthist;
 		int bonus = stat_bonus(depth);
 		int malus = stat_malus(depth);
 
-		for (int i : new int[] { 1, 2, 4, 6 })
+		ss.get(ply - 1).continuationHistory.register(board, move, bonus);
+		ss.get(ply - 2).continuationHistory.register(board, move, bonus);
+		ss.get(ply - 2).continuationHistory.register(board, move, bonus / 8);
+		ss.get(ply - 4).continuationHistory.register(board, move, bonus);
+		ss.get(ply - 6).continuationHistory.register(board, move, bonus / 2);
+
+		for (Move quietMove : quietsSearched)
 		{
-			conthist = ss.get(ply - i).continuationHistory;
-
-			conthist.register(board, move, (i == 6) ? bonus / 2 : bonus);
-
-			for (Move quietMove : quietsSearched)
-			{
-				conthist.register(board, quietMove, (i == 6) ? malus / 2 : malus);
-			}
+			ss.get(ply - 1).continuationHistory.register(board, quietMove, malus);
+			ss.get(ply - 2).continuationHistory.register(board, quietMove, malus);
+			ss.get(ply - 3).continuationHistory.register(board, quietMove, malus / 8);
+			ss.get(ply - 4).continuationHistory.register(board, quietMove, malus);
+			ss.get(ply - 6).continuationHistory.register(board, quietMove, malus / 2);
 		}
 	}
 
@@ -461,8 +463,8 @@ public class AlphaBeta
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
-				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
-				ss.get(ply - 6).continuationHistory };
+				ss.get(ply - 2).continuationHistory, ss.get(ply - 3).continuationHistory,
+				ss.get(ply - 4).continuationHistory, null, ss.get(ply - 6).continuationHistory };
 
 		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, history, captureHistory, currentContinuationHistories,
 				board);
