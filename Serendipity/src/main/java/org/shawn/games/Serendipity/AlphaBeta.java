@@ -687,7 +687,7 @@ public class AlphaBeta
 		lastCompletePV = null;
 		alpha = MIN_EVAL;
 		beta = MAX_EVAL;
-		delta = 25;
+		delta = 20;
 		clearPV();
 
 		try
@@ -701,7 +701,7 @@ public class AlphaBeta
 
 				if (i > 3)
 				{
-					delta = 25;
+					delta = 20;
 					alpha = currentScore - delta;
 					beta = currentScore + delta;
 				}
@@ -733,7 +733,7 @@ public class AlphaBeta
 						beta = Math.min(beta + delta, MAX_EVAL);
 					}
 
-					delta += delta * 3;
+					delta += delta / 3;
 				}
 			}
 		}
