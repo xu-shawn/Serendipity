@@ -6,7 +6,7 @@ public class Limits
 	private long increment;
 	private int movesToGo;
 
-	private int nodes;
+	private long nodes;
 	private int depth;
 
 	public Limits()
@@ -14,7 +14,7 @@ public class Limits
 		this(100, 0, 0, -1, 256);
 	}
 
-	public Limits(long time, long increment, int movesToGo, int nodes, int depth)
+	public Limits(long time, long increment, int movesToGo, long nodes, int depth)
 	{
 		this.time = time;
 		this.increment = increment;
@@ -53,12 +53,12 @@ public class Limits
 		this.movesToGo = movesToGo;
 	}
 
-	public int getNodes()
+	public long getNodes()
 	{
 		return nodes;
 	}
 
-	public void setNodes(int nodes)
+	public void setNodes(long nodes)
 	{
 		this.nodes = nodes;
 	}

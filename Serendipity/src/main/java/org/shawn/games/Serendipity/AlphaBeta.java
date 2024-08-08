@@ -23,8 +23,8 @@ public class AlphaBeta
 
 	private TimeManager timeManager;
 
-	private int nodesCount;
-	private int nodesLimit;
+	private long nodesCount;
+	private long nodesLimit;
 
 	private Move[][] pv;
 	private Move[] lastCompletePV;
@@ -777,7 +777,7 @@ public class AlphaBeta
 		return lastCompletePV[0];
 	}
 
-	public int getNodesCount()
+	public long getNodesCount()
 	{
 		return this.nodesCount;
 	}

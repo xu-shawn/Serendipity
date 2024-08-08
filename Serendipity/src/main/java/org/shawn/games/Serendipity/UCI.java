@@ -112,7 +112,7 @@ public class UCI
 		myOption.set(value);
 	}
 
-	public static void report(int depth, int selDepth, int nodes, int hashfull, int score, long ms, Board board,
+	public static void report(int depth, int selDepth, long nodes, int hashfull, int score, long ms, Board board,
 			Move[] pv)
 	{
 		String pvString = String.join(" ",
@@ -278,7 +278,7 @@ public class UCI
 
 						if (fullCommand[i].equals("nodes"))
 						{
-							limits.setNodes(Integer.parseInt(fullCommand[i + 1]));
+							limits.setNodes(Long.parseLong(fullCommand[i + 1]));
 							limits.setTime(157680000000L);
 							break;
 						}
