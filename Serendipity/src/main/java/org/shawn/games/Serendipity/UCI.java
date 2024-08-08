@@ -115,8 +115,17 @@ public class UCI
 	public static void report(int depth, int selDepth, long nodes, int hashfull, int score, long ms, Board board,
 			Move[] pv)
 	{
-		String pvString = String.join(" ",
-				Arrays.stream(pv).takeWhile(x -> x != null).map(Object::toString).collect(Collectors.toList()));
+		StringBuffer pvString = new StringBuffer();
+		
+		for (Move move : pv)
+		{
+			if (move == null)
+			{
+				break;
+			}
+			
+			pvString.append(" " + move.toString());
+		}
 
 		if (Math.abs(score) < AlphaBeta.MATE_EVAL - AlphaBeta.MAX_PLY)
 		{
@@ -124,9 +133,9 @@ public class UCI
 			int[] wdl = WDLModel.calculateWDL(score, board);
 
 			System.out.printf(
-					"info depth %d seldepth %d nodes %d nps %d hashfull %d score cp %d wdl %d %d %d time %d pv %s\n",
+					"info depth %d seldepth %d nodes %d nps %d hashfull %d score cp %d wdl %d %d %d time %d pv%s\n",
 					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), hashfull, cp, wdl[0], wdl[1], wdl[2], ms,
-					pvString);
+					pvString.toString());
 		}
 
 		else
@@ -206,7 +215,7 @@ public class UCI
 				case "uci":
 					System.out.println("id name Serendipity");
 					System.out.println("id author Shawn Xu");
-					for (var option : options.values())
+					for (UCIOption option : options.values())
 					{
 						System.out.println(option);
 					}
@@ -323,7 +332,7 @@ public class UCI
 					}
 					break;
 				case "option":
-					for (var option : options.values())
+					for (UCIOption option : options.values())
 					{
 						System.out.println(option);
 					}
@@ -343,7 +352,7 @@ public class UCI
 					}
 					break;
 				case "showvalues":
-					for (var option : options.values())
+					for (UCIOption option : options.values())
 					{
 						System.out.println(option + " value " + option.getString());
 					}

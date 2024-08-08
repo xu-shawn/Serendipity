@@ -142,7 +142,7 @@ public class AlphaBeta
 
 		this.selDepth = Math.max(this.selDepth, ply);
 
-		var sse = ss.get(ply);
+		SearchStack.SearchState sse = ss.get(ply);
 
 		int bestScore;
 
@@ -272,7 +272,7 @@ public class AlphaBeta
 		int bestValue;
 		int eval;
 
-		var sse = ss.get(ply);
+		SearchStack.SearchState sse = ss.get(ply);
 
 		bestValue = MIN_EVAL;
 		bestMove = null;
@@ -307,7 +307,7 @@ public class AlphaBeta
 			this.nodesCount--;
 			return quiesce(board, alpha, beta, ply);
 		}
-		
+
 		if (depth >= MAX_PLY)
 		{
 			depth = MAX_PLY - 1;

@@ -5,52 +5,24 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class SEE
 {
-	private static int SEEPieceValues(PieceType piece)
-	{
-		return switch (piece)
-		{
-			case PAWN -> 103;
-			case KNIGHT -> 422;
-			case BISHOP -> 437;
-			case ROOK -> 694;
-			case QUEEN -> 1313;
-			default -> 0;
-		};
-	}
-	
-	public static void printBitboard(long bb)
-	{
-		String binary = "0".repeat(Long.numberOfLeadingZeros(bb)) + Long.toBinaryString(bb);
-		for(int i = 0; i< 8; i++)
-		{
-			for(int j = 0; j < 8; j++)
-			{
-				System.out.print(binary.charAt(i * 8 + 7 - j));
-			}
-			System.out.println();
-		}
-	}
-
-	private static int SEEPieceValues(Piece piece)
-	{
-		return SEEPieceValues(piece.getPieceType());
-	}
+	private static int[] SEEPieceValues = new int[] { 103, 422, 437, 694, 1313, 0 };
 
 	public static int moveEstimatedValue(Board board, Move move)
 	{
 		// Start with the value of the piece on the target square
 		int value = !board.getPiece(move.getTo()).equals(Piece.NONE)
-				? SEEPieceValues(board.getPiece(move.getTo()).getPieceType())
+				? SEEPieceValues[board.getPiece(move.getTo()).getPieceType().ordinal()]
 				: 0;
 
 		// Factor in the new piece's value and remove our promoted pawn
 		if (!Piece.NONE.equals(move.getPromotion()))
-			value += SEEPieceValues(move.getPromotion()) - SEEPieceValues(PieceType.PAWN);
+			value += SEEPieceValues[move.getPromotion().getPieceType().ordinal()]
+					- SEEPieceValues[PieceType.PAWN.ordinal()];
 
 		// Target square is encoded as empty for enpass moves
 		else if (PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 				&& board.getEnPassant().equals(move.getTo()))
-			value = SEEPieceValues(PieceType.PAWN);
+			value = SEEPieceValues[PieceType.PAWN.ordinal()];
 
 		return value;
 	}
@@ -69,8 +41,7 @@ public class SEE
 		to = move.getTo();
 
 		isPromotion = !Piece.NONE.equals(move.getPromotion());
-		isEnPassant = PieceType.PAWN.equals(board.getPiece(from).getPieceType())
-				&& board.getEnPassant().equals(to);
+		isEnPassant = PieceType.PAWN.equals(board.getPiece(from).getPieceType()) && board.getEnPassant().equals(to);
 
 		// Next victim is moved piece or promotion type
 		nextVictim = !isPromotion ? board.getPiece(from).getPieceType() : move.getPromotion().getPieceType();
@@ -84,7 +55,7 @@ public class SEE
 			return false;
 
 		// Worst case is losing the moved piece
-		balance -= SEEPieceValues(nextVictim);
+		balance -= SEEPieceValues[nextVictim.ordinal()];
 
 		// If the balance is positive even if losing the moved piece,
 		// the exchange is guaranteed to beat the threshold.
@@ -174,7 +145,7 @@ public class SEE
 			colour = colour.flip();
 
 			// Negamax the balance and add the value of the next victim
-			balance = -balance - 1 - SEEPieceValues(nextVictim);
+			balance = -balance - 1 - SEEPieceValues[nextVictim.ordinal()];
 
 			// If the balance is non-negative after giving away our piece then we win
 			if (balance >= 0)

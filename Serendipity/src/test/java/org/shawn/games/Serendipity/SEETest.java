@@ -89,44 +89,29 @@ public class SEETest
 
 	private class SEE
 	{
-		private static int SEEPieceValues(PieceType piece)
-		{
-			return switch (piece)
-			{
-				case PAWN -> 100;
-				case KNIGHT -> 300;
-				case BISHOP -> 300;
-				case ROOK -> 500;
-				case QUEEN -> 900;
-				default -> 0;
-			};
-		}
+		private int[] SEEPieceValues = new int[] { 100, 300, 300, 500, 900, 0 };
 
-		private static int SEEPieceValues(Piece piece)
-		{
-			return SEEPieceValues(piece.getPieceType());
-		}
-
-		public static int moveEstimatedValue(Board board, Move move)
+		public int moveEstimatedValue(Board board, Move move)
 		{
 			// Start with the value of the piece on the target square
 			int value = !board.getPiece(move.getTo()).equals(Piece.NONE)
-					? SEEPieceValues(board.getPiece(move.getTo()).getPieceType())
+					? SEEPieceValues[board.getPiece(move.getTo()).getPieceType().ordinal()]
 					: 0;
 
 			// Factor in the new piece's value and remove our promoted pawn
 			if (!Piece.NONE.equals(move.getPromotion()))
-				value += SEEPieceValues(move.getPromotion()) - SEEPieceValues(PieceType.PAWN);
+				value += SEEPieceValues[move.getPromotion().getPieceType().ordinal()]
+						- SEEPieceValues[PieceType.PAWN.ordinal()];
 
 			// Target square is encoded as empty for enpass moves
 			else if (PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
 					&& board.getEnPassant().equals(move.getTo()))
-				value = SEEPieceValues(PieceType.PAWN);
+				value = SEEPieceValues[PieceType.PAWN.ordinal()];
 
 			return value;
 		}
 
-		public static boolean staticExchangeEvaluation(Board board, Move move, int threshold)
+		public boolean staticExchangeEvaluation(Board board, Move move, int threshold)
 		{
 			Square from, to;
 			PieceType nextVictim;
@@ -140,8 +125,7 @@ public class SEETest
 			to = move.getTo();
 
 			isPromotion = !Piece.NONE.equals(move.getPromotion());
-			isEnPassant = PieceType.PAWN.equals(board.getPiece(from).getPieceType())
-					&& board.getEnPassant().equals(to);
+			isEnPassant = PieceType.PAWN.equals(board.getPiece(from).getPieceType()) && board.getEnPassant().equals(to);
 
 			// Next victim is moved piece or promotion type
 			nextVictim = !isPromotion ? board.getPiece(from).getPieceType() : move.getPromotion().getPieceType();
@@ -155,7 +139,7 @@ public class SEETest
 				return false;
 
 			// Worst case is losing the moved piece
-			balance -= SEEPieceValues(nextVictim);
+			balance -= SEEPieceValues[nextVictim.ordinal()];
 
 			// If the balance is positive even if losing the moved piece,
 			// the exchange is guaranteed to beat the threshold.
@@ -245,7 +229,7 @@ public class SEETest
 				colour = colour.flip();
 
 				// Negamax the balance and add the value of the next victim
-				balance = -balance - 1 - SEEPieceValues(nextVictim);
+				balance = -balance - 1 - SEEPieceValues[nextVictim.ordinal()];
 
 				// If the balance is non-negative after giving away our piece then we win
 				if (balance >= 0)
@@ -263,30 +247,29 @@ public class SEETest
 			// Side to move after the loop loses
 			return !board.getSideToMove().equals(colour);
 		}
-	}
 
-	@Test
-	public void testSEE()
-	{
-		Board board = new Board();
-		
-		for (String s : rawTestString.split("\n"))
+		@Test
+		public void testSEE()
 		{
-			String[] data = s.split("\\s\\|\\s");
-			
-			board.loadFromFen(data[0]);
-			Move move = new Move(data[1], board.getSideToMove());
+			Board board = new Board();
 
-			int expectedValue = Integer.parseInt(data[2]);
-			
-			if(!SEE.staticExchangeEvaluation(board, move, expectedValue))
+			for (String s : rawTestString.split("\n"))
 			{
-				System.out.println(s);
-			}
+				String[] data = s.split("\\s\\|\\s");
 
-			assertFalse(SEE.staticExchangeEvaluation(board, move, expectedValue + 1));
+				board.loadFromFen(data[0]);
+				Move move = new Move(data[1], board.getSideToMove());
+
+				int expectedValue = Integer.parseInt(data[2]);
+
+				if (!this.staticExchangeEvaluation(board, move, expectedValue))
+				{
+					System.out.println(s);
+				}
+
+				assertFalse(this.staticExchangeEvaluation(board, move, expectedValue + 1));
 //			assertTrue(SEE.staticExchangeEvaluation(board, move, expectedValue));
+			}
 		}
 	}
-
 }
