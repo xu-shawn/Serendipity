@@ -570,7 +570,7 @@ public class AlphaBeta
 
 			if (sse.moveCount > 2 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
-				r -= isPV ? 1 : 0;
+				r -= isPV ? 2 : 0;
 				r -= givesCheck ? 1 : 0;
 				r += cutNode ? 1 : 0;
 
@@ -579,7 +579,7 @@ public class AlphaBeta
 
 				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
 
-				if (thisMoveEval > alpha)
+				if (thisMoveEval > alpha && d < newdepth)
 				{
 					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, !cutNode);
 				}
