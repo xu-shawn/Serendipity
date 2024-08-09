@@ -573,6 +573,7 @@ public class AlphaBeta
 				r -= isPV ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
 				r += cutNode ? 1 : 0;
+				r += improving ? 0 : 1;
 
 				int d = newdepth - r;
 				d = Math.min(newdepth, newdepth - r);
