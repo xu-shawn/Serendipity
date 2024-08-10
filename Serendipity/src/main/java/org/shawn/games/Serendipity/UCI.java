@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.shawn.games.Serendipity.Listeners.UCIListener;
 import org.shawn.games.Serendipity.NNUE.AccumulatorStack;
 import org.shawn.games.Serendipity.NNUE.NNUE;
 
@@ -86,6 +87,7 @@ public class UCI
 
 		internalBoard = new Board();
 		engine = new AlphaBeta(transpositionTable, network);
+		engine.addListener(new UCIListener());
 
 		if (args.length == 1 && args[0].equals("bench"))
 		{
@@ -110,59 +112,6 @@ public class UCI
 	{
 		UCIOption myOption = options.get(name);
 		myOption.set(value);
-	}
-
-	public static void report(int depth, int selDepth, long nodes, int hashfull, int score, long ms, Board board,
-			Move[] pv)
-	{
-		StringBuffer pvString = new StringBuffer();
-		
-		for (Move move : pv)
-		{
-			if (move == null)
-			{
-				break;
-			}
-			
-			pvString.append(" " + move.toString());
-		}
-
-		if (Math.abs(score) < AlphaBeta.MATE_EVAL - AlphaBeta.MAX_PLY)
-		{
-			int cp = WDLModel.normalizeEval(score, board);
-			int[] wdl = WDLModel.calculateWDL(score, board);
-
-			System.out.printf(
-					"info depth %d seldepth %d nodes %d nps %d hashfull %d score cp %d wdl %d %d %d time %d pv%s\n",
-					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), hashfull, cp, wdl[0], wdl[1], wdl[2], ms,
-					pvString.toString());
-		}
-
-		else
-		{
-			int mateInPly = AlphaBeta.MATE_EVAL - Math.abs(score);
-			int mateValue = mateInPly % 2 != 0 ? (mateInPly + 1) / 2 : -mateInPly / 2;
-			int[] wdl;
-
-			if (mateValue < 0)
-			{
-				wdl = new int[] { 0, 0, 1000 };
-			}
-			else
-			{
-				wdl = new int[] { 1000, 0, 0 };
-			}
-
-			System.out.printf(
-					"info depth %d seldepth %d nodes %d nps %d hashfull %d score mate %d wdl %d %d %d time %d pv %s\n",
-					depth, selDepth, nodes, nodes * 1000L / Math.max(1, ms), hashfull, mateValue, wdl[0], wdl[1],
-					wdl[2], ms, pvString);
-		}
-	}
-
-	public static void reportBestMove(Move bestMove)
-	{
-		System.out.println("bestmove " + (bestMove == null ? "(none)" : bestMove));
 	}
 
 	private static long perft(Board board, int depth, int ply, boolean root)
