@@ -1,4 +1,4 @@
-package org.shawn.games.Serendipity;
+package org.shawn.games.Serendipity.Search;
 
 public class TimeOutException extends Exception
 {

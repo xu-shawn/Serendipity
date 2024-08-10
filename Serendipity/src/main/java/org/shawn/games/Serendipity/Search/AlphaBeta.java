@@ -1,7 +1,11 @@
-package org.shawn.games.Serendipity;
+package org.shawn.games.Serendipity.Search;
 
 import java.util.*;
 
+import org.shawn.games.Serendipity.History.CaptureHistory;
+import org.shawn.games.Serendipity.History.ContinuationHistories;
+import org.shawn.games.Serendipity.History.FromToHistory;
+import org.shawn.games.Serendipity.History.History;
 import org.shawn.games.Serendipity.Listeners.*;
 import org.shawn.games.Serendipity.NNUE.*;
 
@@ -285,7 +289,7 @@ public class AlphaBeta
 		inCheck = sse.inCheck = board.isKingAttacked();
 		inSingularSearch = sse.excludedMove != null;
 
-		if ((nodesCount & 1023) == 0 && (timeManager.stop() || (nodesLimit > 0 && nodesCount > nodesLimit)))
+		if ((nodesCount & 1023) == 0 && (timeManager.shouldStop() || (nodesLimit > 0 && nodesCount > nodesLimit)))
 		{
 			throw new TimeOutException();
 		}
@@ -701,7 +705,7 @@ public class AlphaBeta
 
 		try
 		{
-			for (int i = 1; i <= limits.getDepth() && (i < 4 || !timeManager.stopIterativeDeepening())
+			for (int i = 1; i <= limits.getDepth() && (i < 4 || !timeManager.shouldStopIterativeDeepening())
 					&& i < MAX_PLY; i++)
 			{
 				rootDepth = i;

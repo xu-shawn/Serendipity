@@ -1,4 +1,4 @@
-package org.shawn.games.Serendipity;
+package org.shawn.games.Serendipity.UCI;
 
 public class StringOption implements UCIOption
 {

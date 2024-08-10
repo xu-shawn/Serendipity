@@ -1,6 +1,6 @@
 package org.shawn.games.Serendipity.NNUE;
 
-import org.shawn.games.Serendipity.AlphaBeta;
+import org.shawn.games.Serendipity.Search.AlphaBeta;
 
 import com.github.bhlangonijr.chesslib.Board;
 import com.github.bhlangonijr.chesslib.CastleRight;

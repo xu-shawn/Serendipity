@@ -1,4 +1,4 @@
-package org.shawn.games.Serendipity;
+package org.shawn.games.Serendipity.UCI;
 
 import java.io.IOException;
 import java.util.*;
@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 import org.shawn.games.Serendipity.Listeners.UCIListener;
 import org.shawn.games.Serendipity.NNUE.AccumulatorStack;
 import org.shawn.games.Serendipity.NNUE.NNUE;
+import org.shawn.games.Serendipity.Search.AlphaBeta;
+import org.shawn.games.Serendipity.Search.Limits;
+import org.shawn.games.Serendipity.Search.TranspositionTable;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;

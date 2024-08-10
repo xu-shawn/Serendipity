@@ -3,7 +3,8 @@ package org.shawn.games.Serendipity;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.shawn.games.Serendipity.TranspositionTable.NodeType;
+import org.shawn.games.Serendipity.Search.TranspositionTable;
+import org.shawn.games.Serendipity.Search.TranspositionTable.NodeType;
 
 import com.github.bhlangonijr.chesslib.*;
 
