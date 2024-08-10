@@ -2,6 +2,7 @@ package org.shawn.games.Serendipity;
 
 import java.util.*;
 
+import org.shawn.games.Serendipity.Listeners.*;
 import org.shawn.games.Serendipity.NNUE.*;
 
 import com.github.bhlangonijr.chesslib.*;
@@ -46,6 +47,8 @@ public class AlphaBeta
 
 	private Move bestMove;
 
+	private List<ISearchListener> listeners;
+
 	public AlphaBeta(TranspositionTable tt, NNUE network)
 	{
 		this.nodesCount = 0;
@@ -57,6 +60,7 @@ public class AlphaBeta
 		this.rootDepth = 0;
 		this.ss = new SearchStack(MAX_PLY);
 		this.tt = tt;
+		this.listeners = new ArrayList<>();
 
 		this.network = network;
 
@@ -721,8 +725,13 @@ public class AlphaBeta
 						this.lastCompletePV = pv[0].clone();
 						if (!suppressOutput)
 						{
-							UCI.report(i, selDepth, nodesCount, tt.hashfull(), currentScore, timeManager.timePassed(),
-									this.internalBoard, this.lastCompletePV);
+							SearchReport report = new SearchReport(i, selDepth, nodesCount, tt.hashfull(), currentScore,
+									timeManager.timePassed(), this.internalBoard, this.lastCompletePV);
+
+							for (ISearchListener listener : listeners)
+							{
+								listener.notify(report);
+							}
 						}
 						break;
 					}
@@ -749,7 +758,12 @@ public class AlphaBeta
 
 		if (!suppressOutput)
 		{
-			UCI.reportBestMove(this.bestMove == null ? lastCompletePV[0] : this.bestMove);
+			FinalReport report = new FinalReport(this.bestMove == null ? lastCompletePV[0] : this.bestMove);
+
+			for (ISearchListener listener : listeners)
+			{
+				listener.notify(report);
+			}
 		}
 	}
 
@@ -801,5 +815,20 @@ public class AlphaBeta
 				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
 			}
 		}
+	}
+
+	public List<ISearchListener> getListeners()
+	{
+		return listeners;
+	}
+
+	public void setListeners(List<ISearchListener> listeners)
+	{
+		this.listeners = listeners;
+	}
+
+	public void addListener(ISearchListener listener)
+	{
+		this.listeners.add(listener);
 	}
 }
