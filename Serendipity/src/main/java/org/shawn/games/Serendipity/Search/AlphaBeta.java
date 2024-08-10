@@ -2,14 +2,14 @@ package org.shawn.games.Serendipity.Search;
 
 import java.util.*;
 
-import org.shawn.games.Serendipity.History.CaptureHistory;
-import org.shawn.games.Serendipity.History.ContinuationHistories;
-import org.shawn.games.Serendipity.History.FromToHistory;
-import org.shawn.games.Serendipity.History.History;
 import org.shawn.games.Serendipity.NNUE.*;
-import org.shawn.games.Serendipity.Search.Listeners.FinalReport;
-import org.shawn.games.Serendipity.Search.Listeners.ISearchListener;
-import org.shawn.games.Serendipity.Search.Listeners.SearchReport;
+import org.shawn.games.Serendipity.Search.History.CaptureHistory;
+import org.shawn.games.Serendipity.Search.History.ContinuationHistories;
+import org.shawn.games.Serendipity.Search.History.FromToHistory;
+import org.shawn.games.Serendipity.Search.History.History;
+import org.shawn.games.Serendipity.Search.Listener.FinalReport;
+import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
+import org.shawn.games.Serendipity.Search.Listener.SearchReport;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;

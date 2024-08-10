@@ -2,7 +2,7 @@ package org.shawn.games.Serendipity.Search;
 
 import java.util.*;
 
-import org.shawn.games.Serendipity.History.History;
+import org.shawn.games.Serendipity.Search.History.History;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;

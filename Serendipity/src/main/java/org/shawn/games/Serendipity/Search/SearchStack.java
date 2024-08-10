@@ -1,7 +1,7 @@
 package org.shawn.games.Serendipity.Search;
 
-import org.shawn.games.Serendipity.History.History;
-import org.shawn.games.Serendipity.History.PieceToHistory;
+import org.shawn.games.Serendipity.Search.History.History;
+import org.shawn.games.Serendipity.Search.History.PieceToHistory;
 
 import com.github.bhlangonijr.chesslib.move.Move;
 
