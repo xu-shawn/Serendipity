@@ -1,5 +1,7 @@
 package org.shawn.games.Serendipity.Search.History;
 
+import java.util.Arrays;
+
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.Move;
 
@@ -49,5 +51,11 @@ public class FromToHistory implements History
 	public void register(Board board, Move move, int value)
 	{
 		register(move.getFrom(), move.getTo(), value);
+	}
+
+	@Override
+	public void fill(int x)
+	{
+		Arrays.fill(history, x);
 	}
 }

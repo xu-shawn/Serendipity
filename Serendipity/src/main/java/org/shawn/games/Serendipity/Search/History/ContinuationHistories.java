@@ -1,5 +1,7 @@
 package org.shawn.games.Serendipity.Search.History;
 
+import java.util.Arrays;
+
 import com.github.bhlangonijr.chesslib.Board;
 import com.github.bhlangonijr.chesslib.Piece;
 import com.github.bhlangonijr.chesslib.Square;
@@ -30,5 +32,13 @@ public class ContinuationHistories
 	public History get(Board board, Move move)
 	{
 		return get(board.getPiece(move.getFrom()), move.getTo());
+	}
+
+	public void fill(int x)
+	{
+		for (PieceToHistory[] row : continuationHistories)
+		{
+			Arrays.stream(row).forEach(history -> history.fill(x));
+		}
 	}
 }

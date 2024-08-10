@@ -1,5 +1,7 @@
 package org.shawn.games.Serendipity.Search.History;
 
+import java.util.Arrays;
+
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.Move;
 
@@ -27,7 +29,7 @@ public class CaptureHistory implements History
 	public void register(Piece piece, Square to, PieceType captured, int value)
 	{
 		int clampedValue = clamp(value, MAX_BONUS, -MAX_BONUS);
-		
+
 		if (captured == null)
 		{
 			captured = PieceType.NONE;
@@ -62,5 +64,17 @@ public class CaptureHistory implements History
 		}
 
 		register(movedPiece, move.getTo(), board.getPiece(move.getTo()).getPieceType(), value);
+	}
+
+	@Override
+	public void fill(int x)
+	{
+		for (int[][] x1 : history)
+		{
+			for (int[] x2 : x1)
+			{
+				Arrays.fill(x2, x);
+			}
+		}
 	}
 }

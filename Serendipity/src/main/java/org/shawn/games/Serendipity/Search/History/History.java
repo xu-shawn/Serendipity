@@ -7,4 +7,5 @@ public interface History
 {
 	public int get(Board board, Move move);
 	public void register(Board board, Move move, int value);
+	public void fill(int x);
 }
