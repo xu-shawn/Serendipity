@@ -9,7 +9,6 @@ import org.shawn.games.Serendipity.NNUE.NNUE;
 import org.shawn.games.Serendipity.Search.AlphaBeta;
 import org.shawn.games.Serendipity.Search.Limits;
 import org.shawn.games.Serendipity.Search.TranspositionTable;
-import org.shawn.games.Serendipity.Search.Listeners.UCIListener;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
