@@ -1,4 +1,4 @@
-package org.shawn.games.Serendipity.Listeners;
+package org.shawn.games.Serendipity.Search.Listeners;
 
 import org.shawn.games.Serendipity.Search.AlphaBeta;
 import org.shawn.games.Serendipity.UCI.WDLModel;

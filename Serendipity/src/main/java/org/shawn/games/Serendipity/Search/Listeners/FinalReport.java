@@ -1,4 +1,4 @@
-package org.shawn.games.Serendipity.Listeners;
+package org.shawn.games.Serendipity.Search.Listeners;
 
 import com.github.bhlangonijr.chesslib.move.Move;
 

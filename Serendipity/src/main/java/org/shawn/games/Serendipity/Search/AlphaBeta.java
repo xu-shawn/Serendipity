@@ -6,8 +6,10 @@ import org.shawn.games.Serendipity.History.CaptureHistory;
 import org.shawn.games.Serendipity.History.ContinuationHistories;
 import org.shawn.games.Serendipity.History.FromToHistory;
 import org.shawn.games.Serendipity.History.History;
-import org.shawn.games.Serendipity.Listeners.*;
 import org.shawn.games.Serendipity.NNUE.*;
+import org.shawn.games.Serendipity.Search.Listeners.FinalReport;
+import org.shawn.games.Serendipity.Search.Listeners.ISearchListener;
+import org.shawn.games.Serendipity.Search.Listeners.SearchReport;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
