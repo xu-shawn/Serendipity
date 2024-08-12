@@ -510,7 +510,7 @@ public class AlphaBeta
 							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 									.getBitboard(board.getSideToMove()))
 			{
-				if (!inCheck && isQuiet && lmrDepth <= 8 && sse.staticEval + lmrDepth * 150 + 150 <= alpha)
+				if (!givesCheck && isQuiet && lmrDepth <= 8 && sse.staticEval + lmrDepth * 150 + 150 <= alpha)
 				{
 					continue;
 				}
