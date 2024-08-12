@@ -1,10 +1,10 @@
-package org.shawn.games.Serendipity.Listeners;
+package org.shawn.games.Serendipity.Search.Listener;
 
 import com.github.bhlangonijr.chesslib.move.Move;
 
 public class FinalReport
 {
-	final Move bestMove;
+	public final Move bestMove;
 
 	public FinalReport(Move bestMove)
 	{

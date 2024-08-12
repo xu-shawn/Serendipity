@@ -1,9 +1,15 @@
-package org.shawn.games.Serendipity;
+package org.shawn.games.Serendipity.Search;
 
 import java.util.*;
 
-import org.shawn.games.Serendipity.Listeners.*;
 import org.shawn.games.Serendipity.NNUE.*;
+import org.shawn.games.Serendipity.Search.History.CaptureHistory;
+import org.shawn.games.Serendipity.Search.History.ContinuationHistories;
+import org.shawn.games.Serendipity.Search.History.FromToHistory;
+import org.shawn.games.Serendipity.Search.History.History;
+import org.shawn.games.Serendipity.Search.Listener.FinalReport;
+import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
+import org.shawn.games.Serendipity.Search.Listener.SearchReport;
 
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
@@ -27,19 +33,13 @@ public class AlphaBeta
 	private long nodesCount;
 	private long nodesLimit;
 
-	private Move[][] pv;
 	private Move[] lastCompletePV;
-	private History history;
-	private History captureHistory;
-	private ContinuationHistories continuationHistories;
 	private int nmpMinPly;
-
-	private int rootDepth;
-	private int selDepth;
 
 	private NNUE network;
 	private AccumulatorStack accumulators;
 
+	private ThreadData threadData;
 	private SearchStack ss;
 
 	private Board internalBoard;
@@ -53,15 +53,12 @@ public class AlphaBeta
 	{
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
-		this.pv = new Move[MAX_PLY][MAX_PLY];
-		this.history = new FromToHistory();
-		this.captureHistory = new CaptureHistory();
-		this.continuationHistories = new ContinuationHistories();
-		this.rootDepth = 0;
+
+		this.threadData = new ThreadData();
 		this.ss = new SearchStack(MAX_PLY);
-		this.tt = tt;
 		this.listeners = new ArrayList<>();
 
+		this.tt = tt;
 		this.network = network;
 
 		for (int i = 0; i < reduction.length; i++)
@@ -75,13 +72,13 @@ public class AlphaBeta
 
 	private void updatePV(Move move, int ply)
 	{
-		pv[ply][0] = move;
-		System.arraycopy(pv[ply + 1], 0, pv[ply], 1, MAX_PLY - 1);
+		threadData.pv[ply][0] = move;
+		System.arraycopy(threadData.pv[ply + 1], 0, threadData.pv[ply], 1, MAX_PLY - 1);
 	}
 
 	private void clearPV()
 	{
-		this.pv = new Move[MAX_PLY][MAX_PLY];
+		this.threadData.pv = new Move[MAX_PLY][MAX_PLY];
 	}
 
 	private static int stat_bonus(int depth)
@@ -118,7 +115,8 @@ public class AlphaBeta
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
 				ss.get(ply - 6).continuationHistory };
 
-		MoveSort.sortMoves(moves, ttMove, null, history, captureHistory, currentContinuationHistories, board);
+		MoveSort.sortMoves(moves, ttMove, null, threadData.history, threadData.captureHistory,
+				currentContinuationHistories, board);
 	}
 
 	private void updateContinuationHistories(int ply, int depth, Board board, Move move, List<Move> quietsSearched)
@@ -144,7 +142,7 @@ public class AlphaBeta
 	{
 		this.nodesCount++;
 
-		this.selDepth = Math.max(this.selDepth, ply);
+		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
 		SearchStack.SearchState sse = ss.get(ply);
 
@@ -212,7 +210,7 @@ public class AlphaBeta
 
 			futilityBase = standPat + 205;
 			moves = board.pseudoLegalCaptures();
-			MoveSort.sortCaptures(moves, board, captureHistory);
+			MoveSort.sortCaptures(moves, board, threadData.captureHistory);
 		}
 
 		for (Move move : moves)
@@ -239,7 +237,7 @@ public class AlphaBeta
 			accumulators.push(board, move);
 			board.doMove(move);
 			sse.move = move;
-			sse.continuationHistory = continuationHistories.get(board, sse.move);
+			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
 
 			int score = -quiesce(board, -beta, -alpha, ply + 1);
 
@@ -267,9 +265,9 @@ public class AlphaBeta
 			throws TimeOutException
 	{
 		this.nodesCount++;
-		this.pv[ply][0] = null;
+		this.threadData.pv[ply][0] = null;
 		this.ss.get(ply + 2).killer = null;
-		this.selDepth = Math.max(this.selDepth, ply);
+		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
 		boolean improving, isPV, inCheck, givesCheck, inSingularSearch;
 		Move bestMove;
@@ -285,7 +283,7 @@ public class AlphaBeta
 		inCheck = sse.inCheck = board.isKingAttacked();
 		inSingularSearch = sse.excludedMove != null;
 
-		if ((nodesCount & 1023) == 0 && (timeManager.stop() || (nodesLimit > 0 && nodesCount > nodesLimit)))
+		if ((nodesCount & 1023) == 0 && (timeManager.shouldStop() || (nodesLimit > 0 && nodesCount > nodesLimit)))
 		{
 			throw new TimeOutException();
 		}
@@ -417,7 +415,7 @@ public class AlphaBeta
 
 			board.doNullMove();
 			sse.move = Constants.emptyMove;
-			sse.continuationHistory = continuationHistories.get(board, sse.move);
+			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, !cutNode);
 			board.undoMove();
 
@@ -473,13 +471,13 @@ public class AlphaBeta
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
 				ss.get(ply - 6).continuationHistory };
 
-		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, history, captureHistory, currentContinuationHistories,
-				board);
+		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, threadData.history, threadData.captureHistory,
+				currentContinuationHistories, board);
 
 		List<Move> quietsSearched = new ArrayList<>();
 		List<Move> capturesSearched = new ArrayList<>();
 
-		if (isPV && ttMove == null && rootDepth > 1 && depth > 5)
+		if (isPV && ttMove == null && threadData.rootDepth > 1 && depth > 5)
 		{
 			depth -= 2;
 		}
@@ -568,7 +566,7 @@ public class AlphaBeta
 			accumulators.push(board, move);
 			board.doMove(move);
 			sse.move = move;
-			sse.continuationHistory = continuationHistories.get(board, sse.move);
+			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
 
 			int thisMoveEval = MIN_EVAL;
 
@@ -624,22 +622,22 @@ public class AlphaBeta
 					{
 						sse.killer = move;
 
-						history.register(board, move, stat_bonus(depth));
+						threadData.history.register(board, move, stat_bonus(depth));
 
 						for (Move quietMove : quietsSearched)
 						{
-							history.register(board, quietMove, stat_malus(depth));
+							threadData.history.register(board, quietMove, stat_malus(depth));
 						}
 
 						updateContinuationHistories(ply, depth, board, move, quietsSearched);
 					}
 					else
 					{
-						captureHistory.register(board, move, stat_bonus(depth));
+						threadData.captureHistory.register(board, move, stat_bonus(depth));
 
 						for (Move capture : capturesSearched)
 						{
-							captureHistory.register(board, capture, stat_malus(depth));
+							threadData.captureHistory.register(board, capture, stat_malus(depth));
 						}
 					}
 
@@ -701,11 +699,11 @@ public class AlphaBeta
 
 		try
 		{
-			for (int i = 1; i <= limits.getDepth() && (i < 4 || !timeManager.stopIterativeDeepening())
+			for (int i = 1; i <= limits.getDepth() && (i < 4 || !timeManager.shouldStopIterativeDeepening())
 					&& i < MAX_PLY; i++)
 			{
-				rootDepth = i;
-				selDepth = 0;
+				threadData.rootDepth = i;
+				threadData.selDepth = 0;
 				this.bestMove = null;
 
 				if (i > 3)
@@ -722,10 +720,10 @@ public class AlphaBeta
 					if (newScore > alpha && newScore < beta)
 					{
 						currentScore = newScore;
-						this.lastCompletePV = pv[0].clone();
+						this.lastCompletePV = threadData.pv[0].clone();
 						if (!suppressOutput)
 						{
-							SearchReport report = new SearchReport(i, selDepth, nodesCount, tt.hashfull(), currentScore,
+							SearchReport report = new SearchReport(i, threadData.selDepth, nodesCount, tt.hashfull(), currentScore,
 									timeManager.timePassed(), this.internalBoard, this.lastCompletePV);
 
 							for (ISearchListener listener : listeners)
@@ -800,13 +798,14 @@ public class AlphaBeta
 	{
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
-		this.pv = new Move[MAX_PLY][MAX_PLY];
+		this.threadData.pv = new Move[MAX_PLY][MAX_PLY];
 		this.ss = new SearchStack(MAX_PLY);
-		this.history = new FromToHistory();
-		this.captureHistory = new CaptureHistory();
-		this.continuationHistories = new ContinuationHistories();
-		this.rootDepth = 0;
-		this.selDepth = 0;
+		this.threadData.rootDepth = 0;
+		this.threadData.selDepth = 0;
+
+		this.threadData.history.fill(0);
+		this.threadData.captureHistory.fill(0);
+		this.threadData.continuationHistories.fill(0);
 
 		for (int i = 0; i < reduction.length; i++)
 		{

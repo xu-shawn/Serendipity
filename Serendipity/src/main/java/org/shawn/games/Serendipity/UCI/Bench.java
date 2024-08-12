@@ -1,4 +1,7 @@
-package org.shawn.games.Serendipity;
+package org.shawn.games.Serendipity.UCI;
+
+import org.shawn.games.Serendipity.Search.AlphaBeta;
+import org.shawn.games.Serendipity.Search.Limits;
 
 import com.github.bhlangonijr.chesslib.*;
 

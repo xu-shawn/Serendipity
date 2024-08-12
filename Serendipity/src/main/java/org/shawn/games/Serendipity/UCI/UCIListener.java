@@ -1,7 +1,9 @@
-package org.shawn.games.Serendipity.Listeners;
+package org.shawn.games.Serendipity.UCI;
 
-import org.shawn.games.Serendipity.AlphaBeta;
-import org.shawn.games.Serendipity.WDLModel;
+import org.shawn.games.Serendipity.Search.AlphaBeta;
+import org.shawn.games.Serendipity.Search.Listener.FinalReport;
+import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
+import org.shawn.games.Serendipity.Search.Listener.SearchReport;
 
 import com.github.bhlangonijr.chesslib.move.Move;
 

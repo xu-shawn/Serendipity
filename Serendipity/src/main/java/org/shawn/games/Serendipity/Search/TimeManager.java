@@ -1,4 +1,4 @@
-package org.shawn.games.Serendipity;
+package org.shawn.games.Serendipity.Search;
 
 public class TimeManager
 {
@@ -57,12 +57,12 @@ public class TimeManager
 		this.softLimitTimeStamp = startTime + 1000000L * this.softLimit;
 	}
 
-	public boolean stop()
+	public boolean shouldStop()
 	{
 		return System.nanoTime() > this.hardLimitTimeStamp;
 	}
 
-	public boolean stopIterativeDeepening()
+	public boolean shouldStopIterativeDeepening()
 	{
 		return System.nanoTime() > this.softLimitTimeStamp;
 	}
