@@ -12,6 +12,6 @@ if test -n "$JAVA_HOME"; then
     java="$JAVA_HOME/bin/java"
 fi
 
-exec "$java" -Xmx48m $java_args -jar $MYSELF "$@"
+exec "$java" -Xms48m -Xmx48m -Xgc:genpar $java_args -jar $MYSELF "$@"
 
 exit 1
