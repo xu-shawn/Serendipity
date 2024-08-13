@@ -3,6 +3,7 @@ package org.shawn.games.Serendipity.Search;
 import java.util.*;
 
 import org.shawn.games.Serendipity.NNUE.*;
+import org.shawn.games.Serendipity.Search.Debug.Debugger;
 import org.shawn.games.Serendipity.Search.History.CaptureHistory;
 import org.shawn.games.Serendipity.Search.History.ContinuationHistories;
 import org.shawn.games.Serendipity.Search.History.FromToHistory;

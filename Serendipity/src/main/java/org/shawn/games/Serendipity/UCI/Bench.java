@@ -2,6 +2,7 @@ package org.shawn.games.Serendipity.UCI;
 
 import org.shawn.games.Serendipity.Search.AlphaBeta;
 import org.shawn.games.Serendipity.Search.Limits;
+import org.shawn.games.Serendipity.Search.Debug.Debugger;
 
 import com.github.bhlangonijr.chesslib.*;
 
@@ -90,6 +91,8 @@ public class Bench
 				System.out.printf("%d nodes %d nps", totalNodes, totalNodes * 1000000000L / (endTime - startTime));
 			}
 		}
+		
+		Debugger.print();
 		
 		ai.reset();
 
