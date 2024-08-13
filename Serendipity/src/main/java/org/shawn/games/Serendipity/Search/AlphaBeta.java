@@ -510,7 +510,8 @@ public class AlphaBeta
 							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 									.getBitboard(board.getSideToMove()))
 			{
-				if (!givesCheck && isQuiet && lmrDepth <= 8 && sse.staticEval + lmrDepth * 150 + 150 <= alpha)
+				if (!inCheck && !givesCheck && isQuiet && lmrDepth <= 8
+						&& sse.staticEval + lmrDepth * 150 + 150 <= alpha)
 				{
 					continue;
 				}
@@ -723,8 +724,8 @@ public class AlphaBeta
 						this.lastCompletePV = threadData.pv[0].clone();
 						if (!suppressOutput)
 						{
-							SearchReport report = new SearchReport(i, threadData.selDepth, nodesCount, tt.hashfull(), currentScore,
-									timeManager.timePassed(), this.internalBoard, this.lastCompletePV);
+							SearchReport report = new SearchReport(i, threadData.selDepth, nodesCount, tt.hashfull(),
+									currentScore, timeManager.timePassed(), this.internalBoard, this.lastCompletePV);
 
 							for (ISearchListener listener : listeners)
 							{
