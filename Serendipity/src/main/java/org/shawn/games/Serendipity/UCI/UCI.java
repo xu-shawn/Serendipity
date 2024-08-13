@@ -71,7 +71,7 @@ public class UCI
 
 	public static void main(String args[])
 	{
-		transpositionTable = new TranspositionTable(32);
+		transpositionTable = new TranspositionTable(4);
 		options = new HashMap<>();
 		networkName = new NNUEOption("embedded.nnue", "nnuefile");
 		threads = new IntegerOption(1, 1, 1, "Threads");
