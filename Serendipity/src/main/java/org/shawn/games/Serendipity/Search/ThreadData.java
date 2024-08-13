@@ -24,6 +24,6 @@ public class ThreadData
 		this.continuationHistories = new ContinuationHistories();
 
 		this.rootDepth = 0;
-		this.pv = new Move[AlphaBeta.MAX_PLY][AlphaBeta.MAX_PLY];
+		this.pv = new Move[AlphaBeta.MAX_PLY + 1][AlphaBeta.MAX_PLY + 1];
 	}
 }

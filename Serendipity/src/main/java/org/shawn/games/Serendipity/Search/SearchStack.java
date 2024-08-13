@@ -23,7 +23,7 @@ public class SearchStack
 
 	public SearchStack(int n)
 	{
-		stack = new SearchState[n + 6];
+		stack = new SearchState[n + 9];
 
 		for (int i = 0; i < stack.length; i++)
 		{

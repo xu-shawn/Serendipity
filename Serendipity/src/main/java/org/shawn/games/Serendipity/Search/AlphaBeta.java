@@ -24,7 +24,7 @@ public class AlphaBeta
 
 	public static final int MAX_PLY = 256;
 
-	public static final int[][] reduction = new int[256][256];
+	public static final int[][] reduction = new int[MAX_PLY + 1][MAX_PLY + 1];
 
 	private TranspositionTable tt;
 
@@ -74,11 +74,12 @@ public class AlphaBeta
 	{
 		threadData.pv[ply][0] = move;
 		System.arraycopy(threadData.pv[ply + 1], 0, threadData.pv[ply], 1, MAX_PLY - 1);
+		threadData.pv[ply + 1][0] = null;
 	}
 
 	private void clearPV()
 	{
-		this.threadData.pv = new Move[MAX_PLY][MAX_PLY];
+		this.threadData.pv = new Move[MAX_PLY + 1][MAX_PLY + 1];
 	}
 
 	private static int stat_bonus(int depth)
@@ -265,7 +266,6 @@ public class AlphaBeta
 			throws TimeOutException
 	{
 		this.nodesCount++;
-		this.threadData.pv[ply][0] = null;
 		this.ss.get(ply + 2).killer = null;
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
@@ -798,7 +798,7 @@ public class AlphaBeta
 	{
 		this.nodesCount = 0;
 		this.nodesLimit = -1;
-		this.threadData.pv = new Move[MAX_PLY][MAX_PLY];
+		this.threadData.pv = new Move[MAX_PLY + 1][MAX_PLY + 1];
 		this.ss = new SearchStack(MAX_PLY);
 		this.threadData.rootDepth = 0;
 		this.threadData.selDepth = 0;
