@@ -582,10 +582,17 @@ public class AlphaBeta
 				r -= givesCheck ? 1 : 0;
 				r += cutNode ? 1 : 0;
 
-				final int history = threadData.history.get(board, move) + 4500;
-
-				r -= history / 5000;
-
+				if (isQuiet)
+				{
+					final int history = threadData.history.get(board, move) + 4500;
+					r -= history / 5000;
+				}
+				else
+				{
+					final int history = threadData.history.get(board, move);
+					r -= history / 5000;
+				}
+				
 				int d = newdepth - r;
 				d = Math.min(newdepth, newdepth - r);
 
