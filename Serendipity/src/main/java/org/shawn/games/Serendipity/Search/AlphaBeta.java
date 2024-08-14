@@ -74,8 +74,7 @@ public class AlphaBeta
 	private void updatePV(Move move, int ply)
 	{
 		threadData.pv[ply][0] = move;
-		System.arraycopy(threadData.pv[ply + 1], 0, threadData.pv[ply], 1, MAX_PLY - 1);
-		threadData.pv[ply + 1][0] = null;
+		System.arraycopy(threadData.pv[ply + 1], 0, threadData.pv[ply], 1, MAX_PLY);
 	}
 
 	private void clearPV()
@@ -283,6 +282,11 @@ public class AlphaBeta
 		isPV = beta - alpha > 1;
 		inCheck = sse.inCheck = board.isKingAttacked();
 		inSingularSearch = sse.excludedMove != null;
+
+		if (isPV)
+		{
+			threadData.pv[ply][0] = null;
+		}
 
 		if ((nodesCount & 1023) == 0 && (timeManager.shouldStop() || (nodesLimit > 0 && nodesCount > nodesLimit)))
 		{
@@ -577,9 +581,9 @@ public class AlphaBeta
 				r -= isPV ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
 				r += cutNode ? 1 : 0;
-				
+
 				final int history = threadData.history.get(board, move) + 4500;
-				
+
 				r -= history / 5000;
 
 				int d = newdepth - r;
