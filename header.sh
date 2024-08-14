@@ -12,6 +12,6 @@ if test -n "$JAVA_HOME"; then
     java="$JAVA_HOME/bin/java"
 fi
 
-exec "$java" -Xms48m -Xmx48m -XX:+UseParallelGC $java_args -jar $MYSELF "$@"
+exec "$java" -Xms96m -Xmx96m -XX:+UseParallelGC $java_args -jar $MYSELF "$@"
 
 exit 1
