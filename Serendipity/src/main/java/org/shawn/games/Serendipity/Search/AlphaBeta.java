@@ -584,7 +584,7 @@ public class AlphaBeta
 
 				final int history = threadData.history.get(board, move) + 4500;
 
-				r -= history / 5000;
+				r -= history / 4000;
 
 				int d = newdepth - r;
 				d = Math.min(newdepth, newdepth - r);
