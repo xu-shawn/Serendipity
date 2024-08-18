@@ -75,7 +75,7 @@ public class UCI
 		options = new HashMap<>();
 		networkName = new NNUEOption("embedded.nnue", "nnuefile");
 		threads = new IntegerOption(1, 1, 1, "Threads");
-		hash = new HashOption(32, 8, 4096, transpositionTable, "Hash");
+		hash = new HashOption(4, 1, 4096, transpositionTable, "Hash");
 
 		try
 		{
