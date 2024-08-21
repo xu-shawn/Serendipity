@@ -39,6 +39,7 @@ public class UCI
 			{
 				network = new NNUE("/" + value);
 				engine = new AlphaBeta(transpositionTable, network);
+				engine.addListener(new UCIListener());
 			}
 
 			catch (IOException e)
