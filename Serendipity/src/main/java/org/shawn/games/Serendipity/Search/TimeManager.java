@@ -4,7 +4,6 @@ public class TimeManager
 {
 	private long timeLeft;
 	private long increment;
-	private int movesToGo;
 	private long hardLimit;
 	private long softLimit;
 
@@ -12,21 +11,26 @@ public class TimeManager
 	private long hardLimitTimeStamp;
 	private long softLimitTimeStamp;
 
-	public TimeManager(long timeLeft, long increment, int movesToGo, long moveOverHead, int moves)
+	public void set(Limits limits, long moveOverHead)
+	{
+		set(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), moveOverHead);
+	}
+
+	public void set(long timeLeft, long increment, int movesToGo, long moveOverHead)
 	{
 		if (timeLeft < 0)
 		{
 			timeLeft = 1000;
 		}
+		
+		System.out.println(timeLeft);
 
 		this.timeLeft = timeLeft - Math.min(moveOverHead, timeLeft) / 2;
 		this.increment = increment;
 
 		if (movesToGo != 0 && movesToGo != -1)
 		{
-			this.movesToGo = movesToGo;
-
-			this.hardLimit = this.timeLeft / this.movesToGo + this.increment * 3 / 4;
+			this.hardLimit = this.timeLeft / movesToGo + this.increment * 3 / 4;
 			this.softLimit = this.hardLimit / 2;
 
 			this.startTime = System.nanoTime();

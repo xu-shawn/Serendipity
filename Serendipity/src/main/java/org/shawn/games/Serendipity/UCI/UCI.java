@@ -8,6 +8,7 @@ import org.shawn.games.Serendipity.NNUE.AccumulatorStack;
 import org.shawn.games.Serendipity.NNUE.NNUE;
 import org.shawn.games.Serendipity.Search.AlphaBeta;
 import org.shawn.games.Serendipity.Search.Limits;
+import org.shawn.games.Serendipity.Search.ThreadManager;
 import org.shawn.games.Serendipity.Search.TranspositionTable;
 
 import com.github.bhlangonijr.chesslib.*;
@@ -17,12 +18,12 @@ public class UCI
 {
 	private static Board internalBoard;
 	private static Map<String, UCIOption> options;
-	private static AlphaBeta engine;
+	private static ThreadManager engine;
 	private static TranspositionTable transpositionTable;
 	private static NNUE network;
 
 	private static StringOption networkName;
-	private static IntegerOption threads;
+	private static ThreadsOption threads;
 	private static HashOption hash;
 
 	public static class NNUEOption extends StringOption
@@ -38,8 +39,6 @@ public class UCI
 			try
 			{
 				network = new NNUE("/" + value);
-				engine = new AlphaBeta(transpositionTable, network);
-				engine.addListener(new UCIListener());
 			}
 
 			catch (IOException e)
@@ -48,7 +47,8 @@ public class UCI
 				return;
 			}
 
-			this.value = value;
+			engine.reinit(network);
+			super.set(value);
 		}
 	}
 
@@ -70,12 +70,27 @@ public class UCI
 		}
 	}
 
+	public static class ThreadsOption extends IntegerOption
+	{
+		public ThreadsOption(int value, int lowerBound, int upperBound, String name)
+		{
+			super(value, lowerBound, upperBound, name);
+		}
+
+		@Override
+		public void set(String value)
+		{
+			super.set(value);
+			engine.reinit(super.value);
+		}
+	}
+
 	public static void main(String args[])
 	{
 		transpositionTable = new TranspositionTable(4);
 		options = new HashMap<>();
 		networkName = new NNUEOption("embedded.nnue", "nnuefile");
-		threads = new IntegerOption(1, 1, 1, "Threads");
+		threads = new ThreadsOption(1, 1, 64, "Threads");
 		hash = new HashOption(4, 1, 4096, transpositionTable, "Hash");
 
 		try
@@ -89,12 +104,13 @@ public class UCI
 		}
 
 		internalBoard = new Board();
-		engine = new AlphaBeta(transpositionTable, network);
-		engine.addListener(new UCIListener());
+
+		engine = new ThreadManager();
+		engine.init(threads.get(), transpositionTable, network);
 
 		if (args.length == 1 && args[0].equals("bench"))
 		{
-			Bench.bench(engine, 10, false, true);
+			Bench.bench(engine, 10, true);
 			return;
 		}
 
@@ -177,7 +193,7 @@ public class UCI
 					System.gc();
 					internalBoard = new Board();
 					transpositionTable.clear();
-					engine.reset();
+					engine.init(threads.get(), transpositionTable, network);
 					break;
 				case "quit":
 					input.close();
@@ -315,17 +331,8 @@ public class UCI
 					{
 						depth = Integer.parseInt(fullCommand[1]);
 					}
-					Bench.bench(engine, depth);
+					Bench.bench(engine, depth, false);
 					transpositionTable.clear();
-					break;
-				case "benches":
-					int iterations = Integer.parseInt(fullCommand[1]);
-					depth = 10;
-					if (fullCommand.length > 2)
-					{
-						depth = Integer.parseInt(fullCommand[2]);
-					}
-					Bench.benchMultiple(engine, depth, iterations);
 					break;
 			}
 		}
