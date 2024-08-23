@@ -111,6 +111,7 @@ public class UCI
 		if (args.length == 1 && args[0].equals("bench"))
 		{
 			Bench.bench(engine, 10, true);
+			engine.shutdownAll();
 			return;
 		}
 
@@ -197,6 +198,7 @@ public class UCI
 					break;
 				case "quit":
 					input.close();
+					engine.shutdownAll();
 					return;
 				case "perft":
 					if (fullCommand.length >= 2)

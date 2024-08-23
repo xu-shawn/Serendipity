@@ -137,4 +137,9 @@ public class ThreadManager
 	{
 		return threads.get(0);
 	}
+	
+	public void shutdownAll()
+	{
+		pool.shutdownNow();
+	}
 }

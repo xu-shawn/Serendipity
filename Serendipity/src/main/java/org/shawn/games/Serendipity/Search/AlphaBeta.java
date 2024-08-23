@@ -849,7 +849,6 @@ public class AlphaBeta implements Runnable
 
 			catch (InterruptedException | BrokenBarrierException e)
 			{
-				e.printStackTrace();
 				break;
 			}
 
