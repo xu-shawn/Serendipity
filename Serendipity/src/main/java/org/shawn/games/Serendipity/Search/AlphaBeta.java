@@ -853,13 +853,19 @@ public class AlphaBeta implements Runnable
 				break;
 			}
 
-			this.nmpMinPly = 0;
-			this.threadData.nodes.set(0);
-			this.ss = new SearchStack(MAX_PLY);
-			this.accumulators = new AccumulatorStack(sharedThreadData.network);
-			this.accumulators.init(this.internalBoard);
-
-			iterativeDeepening(false);
+			prepareThreadAndDoIterativeDeepening();
 		}
+	}
+	
+	public void prepareThreadAndDoIterativeDeepening()
+	{
+		this.nmpMinPly = 0;
+		this.threadData.nodes.set(0);
+		this.ss = new SearchStack(MAX_PLY);
+		this.sharedThreadData.stopped.set(false);
+		this.accumulators = new AccumulatorStack(sharedThreadData.network);
+		this.accumulators.init(this.internalBoard);
+
+		iterativeDeepening(false);
 	}
 }

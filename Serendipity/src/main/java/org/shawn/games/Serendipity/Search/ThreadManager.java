@@ -77,6 +77,16 @@ public class ThreadManager
 			pool.execute(threads.get(i));
 		}
 	}
+	
+	public void initThreads(Board board, Limits limits)
+	{
+		for (AlphaBeta thread : threads)
+		{
+			thread.setBoard(board);
+		}
+
+		threads.get(0).updateTM(limits);
+	}
 
 	public void nextMove(Board board, Limits limits)
 	{
@@ -89,13 +99,8 @@ public class ThreadManager
 			e.printStackTrace();
 			return;
 		}
-
-		for (AlphaBeta thread : threads)
-		{
-			thread.setBoard(board);
-		}
-
-		threads.get(0).updateTM(limits);
+		
+		initThreads(board, limits);
 
 		try
 		{
@@ -127,19 +132,9 @@ public class ThreadManager
 
 		return nodes;
 	}
-
-	public static void main(String[] args) throws IOException, InterruptedException
+	
+	public AlphaBeta getMainThread()
 	{
-		Limits depthLimit = new Limits();
-		depthLimit.setDepth(20);
-		depthLimit.setTime(10000000);
-
-		NNUE network;
-		network = new NNUE("/embedded.nnue");
-
-		ThreadManager engine = new ThreadManager();
-		engine.init(4, new TranspositionTable(64), network);
-
-		engine.nextMove(new Board(), depthLimit);
+		return threads.get(0);
 	}
 }

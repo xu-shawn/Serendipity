@@ -23,8 +23,6 @@ public class TimeManager
 			timeLeft = 1000;
 		}
 		
-		System.out.println(timeLeft);
-
 		this.timeLeft = timeLeft - Math.min(moveOverHead, timeLeft) / 2;
 		this.increment = increment;
 
@@ -73,6 +71,6 @@ public class TimeManager
 
 	public long timePassed()
 	{
-		return (System.nanoTime() - startTime) / 1000000;
+		return (System.nanoTime() - this.startTime) / 1000000;
 	}
 }

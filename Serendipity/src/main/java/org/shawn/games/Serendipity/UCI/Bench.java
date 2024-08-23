@@ -62,12 +62,15 @@ public class Bench
 		long totalNodes = 0;
 		long startTime = System.nanoTime();
 		Board board = new Board();
+		AlphaBeta mainThread = engine.getMainThread();
 		for (String fen : benchPositions)
 		{
 			board.loadFromFen(fen);
-			engine.nextMove(board, new Limits(Integer.MAX_VALUE, Integer.MAX_VALUE, 1, -1, depth));
-			totalNodes += engine.getNodes();
+			engine.initThreads(board, new Limits(Integer.MAX_VALUE, Integer.MAX_VALUE, 1, -1, depth));
+			mainThread.prepareThreadAndDoIterativeDeepening();
+			totalNodes += mainThread.getNodesCount();
 		}
+
 		long endTime = System.nanoTime();
 
 		if (!OBStandard)
