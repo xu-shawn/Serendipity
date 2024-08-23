@@ -1,12 +1,9 @@
 package org.shawn.games.Serendipity.Search;
 
 import java.util.*;
+import java.util.concurrent.BrokenBarrierException;
 
 import org.shawn.games.Serendipity.NNUE.*;
-import org.shawn.games.Serendipity.Search.Debug.Debugger;
-import org.shawn.games.Serendipity.Search.History.CaptureHistory;
-import org.shawn.games.Serendipity.Search.History.ContinuationHistories;
-import org.shawn.games.Serendipity.Search.History.FromToHistory;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -15,52 +12,46 @@ import org.shawn.games.Serendipity.Search.Listener.SearchReport;
 import com.github.bhlangonijr.chesslib.*;
 import com.github.bhlangonijr.chesslib.move.*;
 
-public class AlphaBeta
+public class AlphaBeta implements Runnable
 {
 	public static final int VALUE_NONE = 30002;
 	public static final int MAX_EVAL = 32767;
 	public static final int MIN_EVAL = -32767;
 	public static final int MATE_EVAL = 32700;
 	public static final int DRAW_EVAL = 0;
-
 	public static final int MAX_PLY = 256;
 
-	public static final int[][] reduction = new int[MAX_PLY + 1][MAX_PLY + 1];
+	public final int[][] reduction = new int[MAX_PLY + 1][MAX_PLY + 1];
 
-	private TranspositionTable tt;
-
-	private TimeManager timeManager;
-
-	private long nodesCount;
 	private long nodesLimit;
 
 	private Move[] lastCompletePV;
 	private int nmpMinPly;
 
-	private NNUE network;
 	private AccumulatorStack accumulators;
 
 	private ThreadData threadData;
+	private SharedThreadData sharedThreadData;
 	private SearchStack ss;
+	private TimeManager timeManager;
 
 	private Board internalBoard;
-	private Limits limits;
 
 	private Move bestMove;
 
-	private List<ISearchListener> listeners;
-
-	public AlphaBeta(TranspositionTable tt, NNUE network)
+	public AlphaBeta(SharedThreadData sharedThreadData, ThreadData threadData)
 	{
-		this.nodesCount = 0;
 		this.nodesLimit = -1;
 
-		this.threadData = new ThreadData();
 		this.ss = new SearchStack(MAX_PLY);
-		this.listeners = new ArrayList<>();
 
-		this.tt = tt;
-		this.network = network;
+		this.sharedThreadData = sharedThreadData;
+		this.threadData = threadData;
+
+		if (threadData.id == 0)
+		{
+			this.timeManager = new TimeManager();
+		}
 
 		for (int i = 0; i < reduction.length; i++)
 		{
@@ -99,16 +90,23 @@ public class AlphaBeta
 						&& move.getTo() == board.getEnPassant());
 	}
 
+	private boolean shouldStop()
+	{
+		return (nodesLimit > 0 && this.threadData.nodes.get() > nodesLimit) || sharedThreadData.stopped.get()
+				|| (threadData.id == 0 && this.timeManager.shouldStop());
+	}
+
 	public int evaluate(Board board)
 	{
-		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(), NNUE.chooseOutputBucket(board));
+		int v = NNUE.evaluate(sharedThreadData.network, accumulators, board.getSideToMove(),
+				NNUE.chooseOutputBucket(board));
 
 		return v;
 	}
 
 	private void sortMoves(List<Move> moves, Board board, int ply)
 	{
-		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
+		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 
 		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 
@@ -141,7 +139,7 @@ public class AlphaBeta
 
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
 	{
-		this.nodesCount++;
+		this.threadData.nodes.incrementAndGet();
 
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
@@ -156,7 +154,7 @@ public class AlphaBeta
 
 		boolean isPV = beta - alpha > 1;
 
-		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
+		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 
 		if (!isPV && currentMoveEntry != null && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 		{
@@ -265,7 +263,7 @@ public class AlphaBeta
 	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean cutNode)
 			throws TimeOutException
 	{
-		this.nodesCount++;
+		this.threadData.nodes.incrementAndGet();
 		this.ss.get(ply + 2).killer = null;
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
@@ -288,8 +286,13 @@ public class AlphaBeta
 			threadData.pv[ply][0] = null;
 		}
 
-		if ((nodesCount & 1023) == 0 && (timeManager.shouldStop() || (nodesLimit > 0 && nodesCount > nodesLimit)))
+		if ((this.threadData.nodes.get() & 1023) == 0 && this.shouldStop())
 		{
+			if (threadData.id == 0)
+			{
+				sharedThreadData.stopped.set(true);
+			}
+
 			throw new TimeOutException();
 		}
 
@@ -311,7 +314,7 @@ public class AlphaBeta
 
 		if (depth <= 0 || ply >= MAX_PLY)
 		{
-			this.nodesCount--;
+			this.threadData.nodes.decrementAndGet();
 			return quiesce(board, alpha, beta, ply);
 		}
 
@@ -320,7 +323,7 @@ public class AlphaBeta
 			depth = MAX_PLY - 1;
 		}
 
-		TranspositionTable.Entry currentMoveEntry = tt.probe(board.getIncrementalHashKey());
+		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 
 		sse.ttHit = currentMoveEntry != null;
 
@@ -674,20 +677,20 @@ public class AlphaBeta
 		{
 			if (alpha >= beta)
 			{
-				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth, bestValue,
-						bestMove, sse.staticEval);
+				sharedThreadData.tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth,
+						bestValue, bestMove, sse.staticEval);
 			}
 
 			else if (alpha == oldAlpha)
 			{
-				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth, bestValue,
-						ttMove, sse.staticEval);
+				sharedThreadData.tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth,
+						bestValue, ttMove, sse.staticEval);
 			}
 
 			else if (alpha > oldAlpha)
 			{
-				tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth, bestValue, bestMove,
-						sse.staticEval);
+				sharedThreadData.tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth,
+						bestValue, bestMove, sse.staticEval);
 			}
 		}
 
@@ -709,9 +712,14 @@ public class AlphaBeta
 
 		try
 		{
-			for (int i = 1; i <= limits.getDepth() && (i < 4 || !timeManager.shouldStopIterativeDeepening())
-					&& i < MAX_PLY; i++)
+			for (int i = 1; i < MAX_PLY; i++)
 			{
+				if (this.threadData.id == 0 && (i > this.threadData.mainThreadData.limits.getDepth()
+						|| this.timeManager.shouldStopIterativeDeepening()))
+				{
+					break;
+				}
+
 				threadData.rootDepth = i;
 				threadData.selDepth = 0;
 				this.bestMove = null;
@@ -731,16 +739,26 @@ public class AlphaBeta
 					{
 						currentScore = newScore;
 						this.lastCompletePV = threadData.pv[0].clone();
-						if (!suppressOutput)
-						{
-							SearchReport report = new SearchReport(i, threadData.selDepth, nodesCount, tt.hashfull(),
-									currentScore, timeManager.timePassed(), this.internalBoard, this.lastCompletePV);
 
-							for (ISearchListener listener : listeners)
+						if (!suppressOutput && threadData.id == 0)
+						{
+							long totalNodes = 0;
+							
+							for (AlphaBeta thread : this.threadData.mainThreadData.threads)
+							{
+								totalNodes += thread.getNodesCount();
+							}
+							
+							SearchReport report = new SearchReport(i, threadData.selDepth, totalNodes,
+									sharedThreadData.tt.hashfull(), currentScore, this.timeManager.timePassed(),
+									this.internalBoard, this.lastCompletePV);
+
+							for (ISearchListener listener : threadData.mainThreadData.listeners)
 							{
 								listener.notify(report);
 							}
 						}
+
 						break;
 					}
 
@@ -764,58 +782,39 @@ public class AlphaBeta
 		{
 		}
 
-		if (!suppressOutput)
+		if (threadData.id == 0)
+		{
+			sharedThreadData.stopped.set(true);
+		}
+
+		if (!suppressOutput && threadData.id == 0)
 		{
 			FinalReport report = new FinalReport(this.bestMove == null ? lastCompletePV[0] : this.bestMove);
 
-			for (ISearchListener listener : listeners)
+			for (ISearchListener listener : threadData.mainThreadData.listeners)
 			{
 				listener.notify(report);
 			}
 		}
 	}
 
-	public Move nextMove(Board board, Limits limits)
-	{
-		return nextMove(board, limits, false);
-	}
-
-	public Move nextMove(Board board, Limits limits, boolean suppressOutput)
-	{
-		this.nodesCount = 0;
-		this.nodesLimit = limits.getNodes();
-		this.timeManager = new TimeManager(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), 100,
-				board.getMoveCounter());
-		this.ss = new SearchStack(MAX_PLY);
-		this.accumulators = new AccumulatorStack(network);
-		this.accumulators.init(board);
-		this.nmpMinPly = 0;
-
-		this.internalBoard = board.clone();
-		this.limits = limits.clone();
-
-		iterativeDeepening(suppressOutput);
-
-		return lastCompletePV[0];
-	}
-
 	public long getNodesCount()
 	{
-		return this.nodesCount;
+		return this.threadData.nodes.get();
 	}
 
 	public void reset()
 	{
-		this.nodesCount = 0;
 		this.nodesLimit = -1;
-		this.threadData.pv = new Move[MAX_PLY + 1][MAX_PLY + 1];
 		this.ss = new SearchStack(MAX_PLY);
+
+		this.threadData.nodes.set(0);
 		this.threadData.rootDepth = 0;
 		this.threadData.selDepth = 0;
-
 		this.threadData.history.fill(0);
 		this.threadData.captureHistory.fill(0);
 		this.threadData.continuationHistories.fill(0);
+		this.threadData.pv = new Move[MAX_PLY + 1][MAX_PLY + 1];
 
 		for (int i = 0; i < reduction.length; i++)
 		{
@@ -826,18 +825,46 @@ public class AlphaBeta
 		}
 	}
 
-	public List<ISearchListener> getListeners()
+	public void setBoard(Board board)
 	{
-		return listeners;
+		this.internalBoard = board.clone();
 	}
 
-	public void setListeners(List<ISearchListener> listeners)
+	public void updateTM(Limits limits)
 	{
-		this.listeners = listeners;
+		this.threadData.mainThreadData.limits = limits.clone();
+		this.timeManager.set(limits, 100);
 	}
 
-	public void addListener(ISearchListener listener)
+	@Override
+	public void run()
 	{
-		this.listeners.add(listener);
+		while (true)
+		{
+			try
+			{
+				this.sharedThreadData.endBarrier.await();
+				this.sharedThreadData.startBarrier.await();
+			}
+
+			catch (InterruptedException | BrokenBarrierException e)
+			{
+				break;
+			}
+
+			prepareThreadAndDoIterativeDeepening();
+		}
+	}
+	
+	public void prepareThreadAndDoIterativeDeepening()
+	{
+		this.nmpMinPly = 0;
+		this.threadData.nodes.set(0);
+		this.ss = new SearchStack(MAX_PLY);
+		this.sharedThreadData.stopped.set(false);
+		this.accumulators = new AccumulatorStack(sharedThreadData.network);
+		this.accumulators.init(this.internalBoard);
+
+		iterativeDeepening(false);
 	}
 }

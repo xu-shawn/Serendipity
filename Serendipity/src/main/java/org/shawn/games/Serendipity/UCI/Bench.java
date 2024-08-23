@@ -2,6 +2,7 @@ package org.shawn.games.Serendipity.UCI;
 
 import org.shawn.games.Serendipity.Search.AlphaBeta;
 import org.shawn.games.Serendipity.Search.Limits;
+import org.shawn.games.Serendipity.Search.ThreadManager;
 import org.shawn.games.Serendipity.Search.Debug.Debugger;
 
 import com.github.bhlangonijr.chesslib.*;
@@ -56,57 +57,36 @@ public class Bench
 			"r2r1n2/pp2bk2/2p1p2p/3q4/3PN1QP/2P3R1/P4PP1/5RK1 w - - 0 1", "8/8/8/8/8/6k1/6p1/6K1 w - -",
 			"7k/7P/6K1/8/3B4/8/8/8 b - -", };
 
-	public static void bench(AlphaBeta ai, int depth)
-	{
-		bench(ai, depth, false);
-	}
-
-	public static double bench(AlphaBeta ai, int depth, boolean suppressOutput)
-	{
-		return bench(ai, depth, suppressOutput, false);
-	}
-
-	public static double bench(AlphaBeta ai, int depth, boolean supressOutput, boolean OBStandard)
+	public static double bench(ThreadManager engine, int depth, boolean OBStandard)
 	{
 		long totalNodes = 0;
 		long startTime = System.nanoTime();
 		Board board = new Board();
+		AlphaBeta mainThread = engine.getMainThread();
 		for (String fen : benchPositions)
 		{
 			board.loadFromFen(fen);
-			ai.nextMove(board, new Limits(Integer.MAX_VALUE, Integer.MAX_VALUE, 1, -1, depth), supressOutput);
-			totalNodes += ai.getNodesCount();
+			engine.initThreads(board, new Limits(Integer.MAX_VALUE, Integer.MAX_VALUE, 1, -1, depth));
+			mainThread.prepareThreadAndDoIterativeDeepening();
+			totalNodes += mainThread.getNodesCount();
 		}
+
 		long endTime = System.nanoTime();
 
-		if (!supressOutput)
+		if (!OBStandard)
 		{
-			if (!OBStandard)
-			{
-				System.out.printf("Total time (ms)\t: %d\nNodes searched\t: %d\nNodes/second\t: %d\n",
-						(endTime - startTime) / 1000000L, totalNodes, totalNodes * 1000000000L / (endTime - startTime));
-			}
-			else
-			{
-				System.out.printf("%d nodes %d nps", totalNodes, totalNodes * 1000000000L / (endTime - startTime));
-			}
+			System.out.printf("Total time (ms)\t: %d\nNodes searched\t: %d\nNodes/second\t: %d\n",
+					(endTime - startTime) / 1000000L, totalNodes, totalNodes * 1000000000L / (endTime - startTime));
 		}
-		
+		else
+		{
+			System.out.printf("%d nodes %d nps", totalNodes, totalNodes * 1000000000L / (endTime - startTime));
+		}
+
 		Debugger.print();
-		
-		ai.reset();
+
+		engine.clearData();
 
 		return (double) (totalNodes) * 1000000000L / (endTime - startTime);
-	}
-
-	public static void benchMultiple(AlphaBeta ai, int depth, int sampleSize)
-	{
-		for (int i = 0; i < sampleSize - 1; i++)
-		{
-			ai.reset();
-			System.out.printf("%.2f, ", bench(ai, depth, true));
-		}
-		ai.reset();
-		System.out.printf("%.2f\n", bench(ai, depth, true));
 	}
 }
