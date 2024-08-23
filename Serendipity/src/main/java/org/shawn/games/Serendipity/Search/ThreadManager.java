@@ -1,15 +1,12 @@
 package org.shawn.games.Serendipity.Search;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.IntStream;
 
 import org.shawn.games.Serendipity.NNUE.NNUE;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -42,6 +39,11 @@ public class ThreadManager
 
 	public void init(int threadsCount, TranspositionTable tt, NNUE network)
 	{
+		if (this.threads != null)
+		{
+			this.shutdownAll();
+		}
+		
 		this.threadsCount = threadsCount;
 		this.startBarrier = new CyclicBarrier(this.threadsCount + 1);
 		this.endBarrier = new CyclicBarrier(this.threadsCount + 1);
