@@ -14,7 +14,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
     <revision>Test</revision>
   </properties>
