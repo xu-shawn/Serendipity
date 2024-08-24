@@ -9,11 +9,13 @@ public class TranspositionTable
 {
 	public static enum NodeType
 	{
-		EXACT, LOWERBOUND, UPPERBOUND
+		EXACT, LOWERBOUND, UPPERBOUND, None
 	}
 
 	private static NodeType[] byteToNodeType = new NodeType[] { NodeType.EXACT, NodeType.LOWERBOUND,
-			NodeType.UPPERBOUND };
+			NodeType.UPPERBOUND, NodeType.None };
+	
+	public static final int DEPTH_NONE = -3;
 
 	public class Entry
 	{
