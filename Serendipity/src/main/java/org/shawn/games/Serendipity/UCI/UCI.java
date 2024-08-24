@@ -88,7 +88,7 @@ public class UCI
 		transpositionTable = new TranspositionTable(4);
 		options = new HashMap<>();
 		networkName = new NNUEOption("embedded.nnue", "nnuefile");
-		threads = new ThreadsOption(1, 1, 64, "Threads");
+		threads = new ThreadsOption(1, 1, 1048576, "Threads");
 		hash = new HashOption(4, 1, 32768, transpositionTable, "Hash");
 
 		try
