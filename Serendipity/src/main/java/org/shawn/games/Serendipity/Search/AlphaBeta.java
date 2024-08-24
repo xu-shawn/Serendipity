@@ -267,8 +267,8 @@ public class AlphaBeta implements Runnable
 		this.ss.get(ply + 2).killer = null;
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
-		boolean improving, isPV, inCheck, givesCheck, inSingularSearch;
-		Move bestMove;
+		boolean improving, isPV, inCheck, givesCheck, inSingularSearch, ttCapture;
+		Move bestMove, ttMove;
 		int bestValue;
 		int eval;
 
@@ -325,10 +325,9 @@ public class AlphaBeta implements Runnable
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 
-		sse.ttHit = currentMoveEntry != null;
+		sse.ttHit = currentMoveEntry != null && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
 
-		if (!inSingularSearch && !isPV && currentMoveEntry != null && currentMoveEntry.getDepth() >= depth
-				&& currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
+		if (!inSingularSearch && !isPV && sse.ttHit && currentMoveEntry.getDepth() >= depth)
 		{
 			eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getType())
@@ -352,14 +351,16 @@ public class AlphaBeta implements Runnable
 			}
 		}
 
+		ttMove = sse.ttHit ? currentMoveEntry.getMove() : null;
+		ttCapture = ttMove == null ? false : !isQuiet(ttMove, board);
+
 		if (inCheck)
 		{
 			eval = sse.staticEval = VALUE_NONE;
 		}
 		else
 		{
-
-			if (currentMoveEntry != null && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
+			if (sse.ttHit)
 			{
 				sse.staticEval = currentMoveEntry.getStaticEval();
 				eval = currentMoveEntry.getEvaluation();
@@ -408,7 +409,8 @@ public class AlphaBeta implements Runnable
 			}
 		}
 
-		if (!inSingularSearch && !isPV && !inCheck && depth < 7 && eval >= beta && eval - depth * 70 >= beta)
+		if (!inSingularSearch && !isPV && !inCheck && (ttMove == null || ttCapture) && depth < 7 && eval >= beta
+				&& eval - depth * 70 >= beta)
 		{
 			return beta > -MATE_EVAL + 1024 ? beta + (eval - beta) / 3 : eval;
 		}
@@ -447,7 +449,7 @@ public class AlphaBeta implements Runnable
 			}
 		}
 
-		if (depth <= 5 && eval + 256 * depth < alpha)
+		if (!inCheck && depth <= 5 && eval + 256 * depth < alpha)
 		{
 			int razorValue = quiesce(board, alpha, alpha + 1, ply);
 
@@ -472,8 +474,6 @@ public class AlphaBeta implements Runnable
 		}
 
 		int oldAlpha = alpha;
-
-		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
@@ -743,12 +743,12 @@ public class AlphaBeta implements Runnable
 						if (!suppressOutput && threadData.id == 0)
 						{
 							long totalNodes = 0;
-							
+
 							for (AlphaBeta thread : this.threadData.mainThreadData.threads)
 							{
 								totalNodes += thread.getNodesCount();
 							}
-							
+
 							SearchReport report = new SearchReport(i, threadData.selDepth, totalNodes,
 									sharedThreadData.tt.hashfull(), currentScore, this.timeManager.timePassed(),
 									this.internalBoard, this.lastCompletePV);
@@ -855,7 +855,7 @@ public class AlphaBeta implements Runnable
 			prepareThreadAndDoIterativeDeepening();
 		}
 	}
-	
+
 	public void prepareThreadAndDoIterativeDeepening()
 	{
 		this.nmpMinPly = 0;
