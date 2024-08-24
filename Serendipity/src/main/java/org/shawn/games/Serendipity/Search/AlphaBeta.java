@@ -101,6 +101,14 @@ public class AlphaBeta implements Runnable
 		int v = NNUE.evaluate(sharedThreadData.network, accumulators, board.getSideToMove(),
 				NNUE.chooseOutputBucket(board));
 
+		final int material = Long
+				.bitCount(board.getBitboard(Piece.WHITE_BISHOP) | board.getBitboard(Piece.BLACK_BISHOP)) * 3
+				+ Long.bitCount(board.getBitboard(Piece.WHITE_KNIGHT) | board.getBitboard(Piece.BLACK_KNIGHT)) * 3
+				+ Long.bitCount(board.getBitboard(Piece.WHITE_ROOK) | board.getBitboard(Piece.BLACK_ROOK)) * 5
+				+ Long.bitCount(board.getBitboard(Piece.WHITE_QUEEN) | board.getBitboard(Piece.BLACK_QUEEN)) * 10;
+
+		v = v * (206 + material) / 256;
+
 		return v;
 	}
 
