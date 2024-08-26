@@ -45,12 +45,15 @@ public class TranspositionTable
 
 		public void write(long signature, NodeType type, short depth, int evaluation, Move move, int staticEval)
 		{
-			this.signature = (short) (signature >>> 48);
-			this.depth = (byte) depth;
-			this.type = (byte) type.ordinal();
-			this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
-			this.evaluation = (short) evaluation;
-			this.staticEval = (short) staticEval;
+			if (type.equals(NodeType.EXACT) || !this.verifySignature(signature) || depth > this.getDepth() - 4)
+			{
+				this.signature = (short) (signature >>> 48);
+				this.depth = (byte) depth;
+				this.type = (byte) type.ordinal();
+				this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
+				this.evaluation = (short) evaluation;
+				this.staticEval = (short) staticEval;
+			}
 		}
 
 		public long getSignature()
