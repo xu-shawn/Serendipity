@@ -18,40 +18,38 @@ public class TranspositionTable
 	public class Entry
 	{
 		// depth: (0-255) 8 bits
-		// NodeType: 2 bits
+		// NodeType: 8 bits
 		// evaluation: 16 bits
 		// staticEval: 16 bits
 		// Square: 6 bits
-		// Signature: 64 bits
+		// Signature: 16 bits
 
 		// Total: 32 Bytes (Padding and Class Header)
 
-		private long signature;
-		private short depthAndType;
+		private short signature;
+		private byte depth;
+		private byte type;
 		private short evaluation;
 		private short staticEval;
 		private short move;
 
 		public Entry(NodeType type, short depth, int evaluation, long signature, Move move, int staticEval)
 		{
-			this.signature = signature;
-			this.depthAndType = (short) ((depth << 2) + typeToByte(type));
+			this.signature = (short) (signature >>> 48);
+			this.depth = (byte) depth;
+			this.type = (byte) type.ordinal();
 			this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
 			this.evaluation = (short) evaluation;
 			this.staticEval = (short) staticEval;
-		}
-
-		private byte typeToByte(NodeType type)
-		{
-			return (byte) type.ordinal();
 		}
 
 		public void write(long signature, NodeType type, short depth, int evaluation, Move move, int staticEval)
 		{
 			if (type.equals(NodeType.EXACT) || !this.verifySignature(signature) || depth > this.getDepth() - 4)
 			{
-				this.signature = signature;
-				this.depthAndType = (short) ((depth << 2) + typeToByte(type));
+				this.signature = (short) (signature >>> 48);
+				this.depth = (byte) depth;
+				this.type = (byte) type.ordinal();
 				this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
 				this.evaluation = (short) evaluation;
 				this.staticEval = (short) staticEval;
@@ -65,17 +63,17 @@ public class TranspositionTable
 
 		public boolean verifySignature(long signature)
 		{
-			return signature == this.signature;
+			return (short) (signature >>> 48) == this.signature;
 		}
 
 		public NodeType getType()
 		{
-			return byteToNodeType[this.depthAndType & 0b11];
+			return byteToNodeType[this.type];
 		}
 
 		public short getDepth()
 		{
-			return (short) (depthAndType >> 2);
+			return (short) (this.depth);
 		}
 
 		public int getEvaluation()
