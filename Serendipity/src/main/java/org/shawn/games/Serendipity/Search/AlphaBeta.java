@@ -423,7 +423,7 @@ public class AlphaBeta implements Runnable
 			return beta > -MATE_EVAL + 1024 ? beta + (eval - beta) / 3 : eval;
 		}
 
-		if (!inSingularSearch && ply > 0 && eval >= beta && sse.staticEval >= beta - 20 * depth + 200
+		if (!inSingularSearch && ply > 0 && eval >= beta && sse.staticEval >= beta + 170 - 24 * depth
 				&& beta < MATE_EVAL - 1024 && !inCheck
 				&& (ss.get(-1).move == null || !ss.get(-1).move.equals(Constants.emptyMove))
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
