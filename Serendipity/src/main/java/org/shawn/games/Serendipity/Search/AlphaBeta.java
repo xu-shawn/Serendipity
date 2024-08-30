@@ -159,6 +159,16 @@ public class AlphaBeta implements Runnable
 		{
 			return DRAW_EVAL;
 		}
+		
+		if ((this.threadData.nodes.get() & 1023) == 0 && this.shouldStop())
+		{
+			if (threadData.id == 0)
+			{
+				sharedThreadData.stopped.set(true);
+			}
+
+			throw new TimeOutException();
+		}
 
 		boolean isPV = beta - alpha > 1;
 
