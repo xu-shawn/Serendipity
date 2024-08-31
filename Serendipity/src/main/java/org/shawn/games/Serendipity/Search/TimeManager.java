@@ -1,5 +1,7 @@
 package org.shawn.games.Serendipity.Search;
 
+import org.shawn.games.Serendipity.UCI.IntegerOption;
+
 public class TimeManager
 {
 	private long timeLeft;
@@ -11,19 +13,21 @@ public class TimeManager
 	private long hardLimitTimeStamp;
 	private long softLimitTimeStamp;
 
-	public void set(Limits limits, long moveOverHead)
+	private static IntegerOption moveOverHead = new IntegerOption(100, 0, 30000, "Move_Overhead");
+
+	public void set(Limits limits)
 	{
-		set(limits.getTime(), limits.getIncrement(), limits.getMovesToGo(), moveOverHead);
+		set(limits.getTime(), limits.getIncrement(), limits.getMovesToGo());
 	}
 
-	public void set(long timeLeft, long increment, int movesToGo, long moveOverHead)
+	public void set(long timeLeft, long increment, int movesToGo)
 	{
 		if (timeLeft < 0)
 		{
 			timeLeft = 1000;
 		}
-		
-		this.timeLeft = timeLeft - Math.min(moveOverHead, timeLeft) / 2;
+
+		this.timeLeft = timeLeft - Math.min(moveOverHead.get(), timeLeft) / 2;
 		this.increment = increment;
 
 		if (movesToGo != 0 && movesToGo != -1)

@@ -851,7 +851,7 @@ public class AlphaBeta implements Runnable
 	public void updateTM(Limits limits)
 	{
 		this.threadData.mainThreadData.limits = limits.clone();
-		this.timeManager.set(limits, 100);
+		this.timeManager.set(limits);
 	}
 
 	@Override
