@@ -370,7 +370,7 @@ public class AlphaBeta implements Runnable
 		}
 
 		ttMove = sse.ttHit ? currentMoveEntry.getMove() : null;
-		ttCapture = ttMove == null ? false : !isQuiet(ttMove, board);
+		ttCapture = ttMove != null && !isQuiet(ttMove, board);
 
 		if (inCheck)
 		{
