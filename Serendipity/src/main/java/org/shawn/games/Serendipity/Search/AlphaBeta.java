@@ -601,7 +601,7 @@ public class AlphaBeta implements Runnable
 			{
 				r -= isPV ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
-				r += ttCapture && isQuiet ? 1 : 0;
+				r += ttCapture ? 1 : 0;
 				r += cutNode ? 1 : 0;
 
 				final int history = threadData.history.get(board, move) + 4500;
