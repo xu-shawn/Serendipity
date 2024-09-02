@@ -159,7 +159,7 @@ public class AlphaBeta implements Runnable
 		{
 			return DRAW_EVAL;
 		}
-		
+
 		if ((this.threadData.nodes.get() & 1023) == 0 && this.shouldStop())
 		{
 			if (threadData.id == 0)
@@ -516,7 +516,7 @@ public class AlphaBeta implements Runnable
 			}
 
 			sse.moveCount++;
-			int newdepth = depth - 1;
+			int newDepth = depth - 1;
 			board.doMove(move);
 			givesCheck = board.isKingAttacked();
 			board.undoMove();
@@ -588,7 +588,7 @@ public class AlphaBeta implements Runnable
 				extension = 1;
 			}
 
-			newdepth += extension;
+			newDepth += extension;
 
 			accumulators.push(board, move);
 			board.doMove(move);
@@ -607,25 +607,29 @@ public class AlphaBeta implements Runnable
 
 				r -= history / 5000;
 
-				int d = newdepth - r;
-				d = Math.min(newdepth, newdepth - r);
+				int d = newDepth - r;
+				d = Math.min(newDepth, newDepth - r);
 
 				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
 
 				if (thisMoveEval > alpha)
 				{
-					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, !cutNode);
+					final boolean doDeeperSearch = thisMoveEval > beta + newDepth * 2 + 35;
+					final boolean doShallowerSearch = thisMoveEval < alpha + 8;
+
+					thisMoveEval = -mainSearch(board, newDepth + (doDeeperSearch ? 0 : 1) - (doShallowerSearch ? 0 : 1),
+							-(alpha + 1), -alpha, ply + 1, !cutNode);
 				}
 			}
 
 			else if (!isPV || sse.moveCount > 1)
 			{
-				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, !cutNode);
+				thisMoveEval = -mainSearch(board, newDepth, -(alpha + 1), -alpha, ply + 1, !cutNode);
 			}
 
 			if (isPV && (sse.moveCount == 1 || thisMoveEval > alpha))
 			{
-				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, false);
+				thisMoveEval = -mainSearch(board, newDepth, -beta, -alpha, ply + 1, false);
 			}
 
 			board.undoMove();
