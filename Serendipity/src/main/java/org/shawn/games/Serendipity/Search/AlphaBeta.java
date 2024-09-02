@@ -608,25 +608,12 @@ public class AlphaBeta implements Runnable
 				r -= history / 5000;
 
 				int d = newDepth - r;
-				d = Math.min(newDepth, newDepth - r);
+				d = Math.max(1, Math.min(newDepth, newDepth - r));
 
 				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
 
-				if (thisMoveEval > alpha)
+				if (thisMoveEval > alpha && d < newDepth)
 				{
-					final boolean doDeeperSearch = thisMoveEval > bestValue + newDepth * 2 + 35;
-					final boolean doShallowerSearch = thisMoveEval < bestValue + 8;
-
-					if (doDeeperSearch)
-					{
-						newDepth++;
-					}
-
-					else if (doShallowerSearch)
-					{
-						newDepth--;
-					}
-
 					thisMoveEval = -mainSearch(board, newDepth, -(alpha + 1), -alpha, ply + 1, !cutNode);
 				}
 			}
