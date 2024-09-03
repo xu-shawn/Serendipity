@@ -9,7 +9,7 @@ import com.github.bhlangonijr.chesslib.*;
 
 public class Bench
 {
-	static private String[] benchPositions = new String[] { "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+	static private final String[] benchPositions = new String[] { "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
 			"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 10",
 			"8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 11",
 			"4rrk1/pp1n3p/3q2pQ/2p1pb2/2PP4/2P3N1/P2B2PP/4RRK1 b - - 7 19",
@@ -57,7 +57,7 @@ public class Bench
 			"r2r1n2/pp2bk2/2p1p2p/3q4/3PN1QP/2P3R1/P4PP1/5RK1 w - - 0 1", "8/8/8/8/8/6k1/6p1/6K1 w - -",
 			"7k/7P/6K1/8/3B4/8/8/8 b - -", };
 
-	public static double bench(ThreadManager engine, int depth, boolean OBStandard)
+	public static void bench(ThreadManager engine, int depth, boolean OBStandard)
 	{
 		long totalNodes = 0;
 		long startTime = System.nanoTime();
@@ -87,6 +87,5 @@ public class Bench
 
 		engine.clearData();
 
-		return (double) (totalNodes) * 1000000000L / (endTime - startTime);
 	}
 }

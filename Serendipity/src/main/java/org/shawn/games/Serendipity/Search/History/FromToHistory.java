@@ -7,7 +7,7 @@ import com.github.bhlangonijr.chesslib.move.Move;
 
 public class FromToHistory implements History
 {
-	private int[] history;
+	private final int[] history;
 
 	static final int MAX_BONUS = 16384;
 
@@ -28,14 +28,14 @@ public class FromToHistory implements History
 		return get(move.getFrom(), move.getTo());
 	}
 
-	private static int clamp(int v, int max, int min)
+	private static int clamp(int v)
 	{
-		return v >= max ? max : (v <= min ? min : v);
+		return v >= FromToHistory.MAX_BONUS ? FromToHistory.MAX_BONUS : (Math.max(v, -16384));
 	}
 
 	public void register(Square from, Square to, int value)
 	{
-		int clampedValue = clamp(value, MAX_BONUS, -MAX_BONUS);
+		int clampedValue = clamp(value);
 
 		history[from.ordinal() * DIMENSION + to.ordinal()] += clampedValue
 				- history[from.ordinal() * DIMENSION + to.ordinal()] * Math.abs(clampedValue) / MAX_BONUS;

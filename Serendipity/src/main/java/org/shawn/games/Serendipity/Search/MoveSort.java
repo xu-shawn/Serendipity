@@ -9,7 +9,7 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class MoveSort
 {
-	private static int[] promoValue = { -2000000001, 2000000000, -2000000001, -2000000001, 2000000001 };
+	private static final int[] promoValue = { -2000000001, 2000000000, -2000000001, -2000000001, 2000000001 };
 
 	private static int pieceValue(Piece p)
 	{
@@ -77,26 +77,22 @@ public class MoveSort
 			moves.set(i, new ScoredMove(move, value));
 		}
 
-		moves.sort(new Comparator<Move>() {
-			@Override
-			public int compare(Move m1, Move m2)
-			{
-				if (((ScoredMove) m2).getScore() > ((ScoredMove) m1).getScore())
-				{
-					return 1;
-				}
+		moves.sort((m1, m2) -> {
+            if (((ScoredMove) m2).getScore() > ((ScoredMove) m1).getScore())
+            {
+                return 1;
+            }
 
-				else if (((ScoredMove) m2).getScore() == ((ScoredMove) m1).getScore())
-				{
-					return 0;
-				}
+            else if (((ScoredMove) m2).getScore() == ((ScoredMove) m1).getScore())
+            {
+                return 0;
+            }
 
-				return -1;
-			}
-		});
+            return -1;
+        });
 	}
 
-	public static List<Move> sortCaptures(List<Move> moves, Board board, History captureHistory)
+	public static void sortCaptures(List<Move> moves, Board board, History captureHistory)
 	{
 		for (int i = 0; i < moves.size(); i++)
 		{
@@ -105,14 +101,7 @@ public class MoveSort
 			moves.set(i, new ScoredMove(move, value));
 		}
 
-		moves.sort(new Comparator<Move>() {
-			@Override
-			public int compare(Move m1, Move m2)
-			{
-				return ((ScoredMove) m2).getScore() - ((ScoredMove) m1).getScore();
-			}
-		});
+		moves.sort((m1, m2) -> ((ScoredMove) m2).getScore() - ((ScoredMove) m1).getScore());
 
-		return moves;
 	}
 }

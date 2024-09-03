@@ -12,7 +12,7 @@ public class TranspositionTable
 		EXACT, LOWERBOUND, UPPERBOUND
 	}
 
-	private static NodeType[] byteToNodeType = new NodeType[] { NodeType.EXACT, NodeType.LOWERBOUND,
+	private static final NodeType[] byteToNodeType = new NodeType[] { NodeType.EXACT, NodeType.LOWERBOUND,
 			NodeType.UPPERBOUND };
 
 	public class Entry

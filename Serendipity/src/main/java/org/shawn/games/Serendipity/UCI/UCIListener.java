@@ -21,7 +21,7 @@ public class UCIListener implements ISearchListener
 				break;
 			}
 
-			pvString.append(" " + move.toString());
+			pvString.append(" ").append(move);
 		}
 
 		if (Math.abs(report.score) < AlphaBeta.MATE_EVAL - AlphaBeta.MAX_PLY)
@@ -32,7 +32,7 @@ public class UCIListener implements ISearchListener
 			System.out.printf(
 					"info depth %d seldepth %d nodes %d nps %d hashfull %d score cp %d wdl %d %d %d time %d pv%s\n",
 					report.depth, report.selDepth, report.nodes, report.nodes * 1000L / Math.max(1, report.ms),
-					report.hashfull, cp, wdl[0], wdl[1], wdl[2], report.ms, pvString.toString());
+					report.hashfull, cp, wdl[0], wdl[1], wdl[2], report.ms, pvString);
 		}
 
 		else

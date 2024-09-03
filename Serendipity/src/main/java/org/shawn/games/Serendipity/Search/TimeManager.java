@@ -4,16 +4,12 @@ import org.shawn.games.Serendipity.UCI.IntegerOption;
 
 public class TimeManager
 {
-	private long timeLeft;
-	private long increment;
-	private long hardLimit;
-	private long softLimit;
 
-	private long startTime;
+    private long startTime;
 	private long hardLimitTimeStamp;
 	private long softLimitTimeStamp;
 
-	private static IntegerOption moveOverHead = new IntegerOption(100, 0, 30000, "Move_Overhead");
+	private static final IntegerOption moveOverHead = new IntegerOption(100, 0, 30000, "Move_Overhead");
 
 	public void set(Limits limits)
 	{
@@ -27,40 +23,41 @@ public class TimeManager
 			timeLeft = 1000;
 		}
 
-		this.timeLeft = timeLeft - Math.min(moveOverHead.get(), timeLeft) / 2;
-		this.increment = increment;
+        long timeLeft1 = timeLeft - Math.min(moveOverHead.get(), timeLeft) / 2;
 
-		if (movesToGo != 0 && movesToGo != -1)
+        long hardLimit;
+        long softLimit;
+        if (movesToGo != 0 && movesToGo != -1)
 		{
-			this.hardLimit = this.timeLeft / movesToGo + this.increment * 3 / 4;
-			this.softLimit = this.hardLimit / 2;
+			hardLimit = timeLeft1 / movesToGo + increment * 3 / 4;
+			softLimit = hardLimit / 2;
 
 			this.startTime = System.nanoTime();
-			this.hardLimitTimeStamp = startTime + 1000000L * this.hardLimit;
-			this.softLimitTimeStamp = startTime + 1000000L * this.softLimit;
+			this.hardLimitTimeStamp = startTime + 1000000L * hardLimit;
+			this.softLimitTimeStamp = startTime + 1000000L * softLimit;
 
 			return;
 		}
 
 		else if (movesToGo == -1)
 		{
-			this.hardLimit = this.softLimit = this.timeLeft;
+			hardLimit = softLimit = timeLeft1;
 
 			this.startTime = System.nanoTime();
-			this.hardLimitTimeStamp = this.softLimitTimeStamp = startTime + 1000000L * this.timeLeft;
+			this.hardLimitTimeStamp = this.softLimitTimeStamp = startTime + 1000000L * timeLeft1;
 
 			return;
 		}
 
-		int baseTime = (int) (this.timeLeft * 0.054 + this.increment * 0.85);
-		int maxTime = (int) (this.timeLeft * 0.76);
+		int baseTime = (int) (timeLeft1 * 0.054 + increment * 0.85);
+		int maxTime = (int) (timeLeft1 * 0.76);
 
-		this.hardLimit = Math.min(maxTime, (int) (baseTime * 3.04));
-		this.softLimit = Math.min(maxTime, (int) (baseTime * 0.76));
+		hardLimit = Math.min(maxTime, (int) (baseTime * 3.04));
+		softLimit = Math.min(maxTime, (int) (baseTime * 0.76));
 
 		this.startTime = System.nanoTime();
-		this.hardLimitTimeStamp = startTime + 1000000L * this.hardLimit;
-		this.softLimitTimeStamp = startTime + 1000000L * this.softLimit;
+		this.hardLimitTimeStamp = startTime + 1000000L * hardLimit;
+		this.softLimitTimeStamp = startTime + 1000000L * softLimit;
 	}
 
 	public boolean shouldStop()
