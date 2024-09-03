@@ -1,63 +1,49 @@
 package org.shawn.games.Serendipity.UCI;
 
-public class IntegerOption implements UCIOption
-{
-	int value;
-	final String name;
-	final int defaultValue;
-	final int lowerBound;
-	final int upperBound;
+public class IntegerOption implements UCIOption {
+    int value;
+    final String name;
+    final int defaultValue;
+    final int lowerBound;
+    final int upperBound;
 
-	public IntegerOption(int value, int lowerBound, int upperBound, String name)
-	{
-		if (lowerBound > upperBound)
-		{
-			throw new IllegalArgumentException(
-					"lowerBound must be less than or equal to upperBound");
-		}
+    public IntegerOption(int value, int lowerBound, int upperBound, String name) {
+        if (lowerBound > upperBound) {
+            throw new IllegalArgumentException(
+                    "lowerBound must be less than or equal to upperBound");
+        }
 
-		this.value = this.defaultValue = value;
-		this.lowerBound = lowerBound;
-		this.upperBound = upperBound;
-		this.name = name;
+        this.value = this.defaultValue = value;
+        this.lowerBound = lowerBound;
+        this.upperBound = upperBound;
+        this.name = name;
 
-		UCI.addOption(name, this);
-	}
+        UCI.addOption(name, this);
+    }
 
-	@Override
-	public void set(String value)
-	{
-		int intValue = Integer.parseInt(value);
-		if (intValue < this.lowerBound)
-		{
-			this.value = this.lowerBound;
-		}
+    @Override
+    public void set(String value) {
+        int intValue = Integer.parseInt(value);
+        if (intValue < this.lowerBound) {
+            this.value = this.lowerBound;
+        } else if (intValue > this.upperBound) {
+            this.value = this.upperBound;
+        } else {
+            this.value = intValue;
+        }
+    }
 
-		else if (intValue > this.upperBound)
-		{
-			this.value = this.upperBound;
-		}
+    public int get() {
+        return value;
+    }
 
-		else
-		{
-			this.value = intValue;
-		}
-	}
+    public String toString() {
+        return "option name " + name + " type spin default " + defaultValue
+                + " min " + lowerBound + " max " + upperBound;
+    }
 
-	public int get()
-	{
-		return value;
-	}
-
-	public String toString()
-	{
-		return "option name " + name + " type spin default " + defaultValue
-				+ " min " + lowerBound + " max " + upperBound;
-	}
-
-	@Override
-	public String getString()
-	{
-		return Integer.toString(this.value);
-	}
+    @Override
+    public String getString() {
+        return Integer.toString(this.value);
+    }
 }
