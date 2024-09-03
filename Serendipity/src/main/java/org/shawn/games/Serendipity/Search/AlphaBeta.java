@@ -23,8 +23,6 @@ public class AlphaBeta implements Runnable
 
 	public final int[][] reduction = new int[MAX_PLY + 1][MAX_PLY + 1];
 
-	private long nodesLimit;
-
 	private Move[] lastCompletePV;
 	private int nmpMinPly;
 
@@ -41,8 +39,6 @@ public class AlphaBeta implements Runnable
 
 	public AlphaBeta(SharedThreadData sharedThreadData, ThreadData threadData)
 	{
-		this.nodesLimit = -1;
-
 		this.ss = new SearchStack(MAX_PLY);
 
 		this.sharedThreadData = sharedThreadData;
@@ -92,8 +88,9 @@ public class AlphaBeta implements Runnable
 
 	private boolean shouldStop()
 	{
-		return (nodesLimit > 0 && this.threadData.nodes.get() > nodesLimit) || sharedThreadData.stopped.get()
-				|| (threadData.id == 0 && this.timeManager.shouldStop());
+		return (this.threadData.id == 0 && this.threadData.mainThreadData.limits.getNodes() > 0
+				&& this.threadData.nodes.get() > threadData.mainThreadData.limits.getNodes())
+				|| sharedThreadData.stopped.get() || (this.threadData.id == 0 && this.timeManager.shouldStop());
 	}
 
 	public int evaluate(Board board)
@@ -159,7 +156,7 @@ public class AlphaBeta implements Runnable
 		{
 			return DRAW_EVAL;
 		}
-		
+
 		if ((this.threadData.nodes.get() & 1023) == 0 && this.shouldStop())
 		{
 			if (threadData.id == 0)
@@ -823,7 +820,6 @@ public class AlphaBeta implements Runnable
 
 	public void reset()
 	{
-		this.nodesLimit = -1;
 		this.ss = new SearchStack(MAX_PLY);
 
 		this.threadData.nodes.set(0);
