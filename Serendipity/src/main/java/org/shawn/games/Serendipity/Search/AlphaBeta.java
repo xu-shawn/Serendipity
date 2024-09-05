@@ -594,7 +594,7 @@ public class AlphaBeta implements Runnable
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (sse.moveCount > 2 + (ply == 0 ? 1 : 0) && depth > 2)
+			if (sse.moveCount > 2 + (ply == 0 ? 1 : 0) && depth >= 2)
 			{
 				r -= isPV ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
