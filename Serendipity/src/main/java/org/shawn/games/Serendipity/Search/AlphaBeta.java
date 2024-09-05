@@ -599,6 +599,7 @@ public class AlphaBeta implements Runnable
 				r -= isPV ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
 				r -= !isQuiet ? 1 : 0;
+				r += ttCapture ? 1 : 0;
 				r += cutNode ? 1 : 0;
 
 				if (isQuiet)
