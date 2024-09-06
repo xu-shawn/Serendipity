@@ -1,10 +1,5 @@
 package org.shawn.games.Serendipity.Search;
 
-import com.github.bhlangonijr.chesslib.Board;
-import org.shawn.games.Serendipity.NNUE.NNUE;
-import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
-import org.shawn.games.Serendipity.UCI.UCIListener;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
@@ -13,111 +8,139 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ThreadManager {
-    List<ThreadData> threadData;
-    List<AlphaBeta> threads;
-    int threadsCount;
+import org.shawn.games.Serendipity.NNUE.NNUE;
+import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
+import org.shawn.games.Serendipity.UCI.UCIListener;
 
-    CyclicBarrier startBarrier;
-    CyclicBarrier endBarrier;
-    ExecutorService pool;
+import com.github.bhlangonijr.chesslib.Board;
 
-    TranspositionTable tt;
-    NNUE network;
+public class ThreadManager
+{
+	List<ThreadData> threadData;
+	List<AlphaBeta> threads;
+	int threadsCount;
 
-    public void reinit(int threadsCount) {
-        init(threadsCount, tt, network);
-    }
+	CyclicBarrier startBarrier;
+	CyclicBarrier endBarrier;
+	ExecutorService pool;
 
-    public void reinit(NNUE network) {
-        init(threadsCount, tt, network);
-    }
+	TranspositionTable tt;
+	NNUE network;
 
-    public void init(int threadsCount, TranspositionTable tt, NNUE network) {
-        if (this.threads != null) {
-            this.shutdownAll();
-        }
+	public void reinit(int threadsCount)
+	{
+		init(threadsCount, tt, network);
+	}
 
-        this.threadsCount = threadsCount;
-        this.startBarrier = new CyclicBarrier(this.threadsCount + 1);
-        this.endBarrier = new CyclicBarrier(this.threadsCount + 1);
-        this.threadData = new ArrayList<>();
-        this.threads = new ArrayList<>();
+	public void reinit(NNUE network)
+	{
+		init(threadsCount, tt, network);
+	}
 
-        this.tt = tt;
-        this.network = network;
+	public void init(int threadsCount, TranspositionTable tt, NNUE network)
+	{
+		if (this.threads != null)
+		{
+			this.shutdownAll();
+		}
+		
+		this.threadsCount = threadsCount;
+		this.startBarrier = new CyclicBarrier(this.threadsCount + 1);
+		this.endBarrier = new CyclicBarrier(this.threadsCount + 1);
+		this.threadData = new ArrayList<>();
+		this.threads = new ArrayList<>();
 
-        pool = Executors.newFixedThreadPool(this.threadsCount);
+		this.tt = tt;
+		this.network = network;
 
-        final AtomicBoolean stopped = new AtomicBoolean(false);
-        final ArrayList<ISearchListener> listeners = new ArrayList<>();
+		pool = Executors.newFixedThreadPool(this.threadsCount);
 
-        startBarrier = new CyclicBarrier(this.threadsCount + 1);
-        endBarrier = new CyclicBarrier(this.threadsCount + 1);
+		final AtomicBoolean stopped = new AtomicBoolean(false);
+		final ArrayList<ISearchListener> listeners = new ArrayList<>();
 
-        final SharedThreadData sharedData = new SharedThreadData(tt, startBarrier, endBarrier, network, stopped);
-        final ThreadData.MainThreadData mainThreadData = new ThreadData.MainThreadData(null, listeners, threads);
+		startBarrier = new CyclicBarrier(this.threadsCount + 1);
+		endBarrier = new CyclicBarrier(this.threadsCount + 1);
 
-        threadData.add(new ThreadData(0, mainThreadData));
+		final SharedThreadData sharedData = new SharedThreadData(tt, startBarrier, endBarrier, network, stopped);
+		final ThreadData.MainThreadData mainThreadData = new ThreadData.MainThreadData(null, listeners, threads);
 
-        for (int i = 1; i < threadsCount; i++) {
-            threadData.add(new ThreadData(i));
-        }
+		threadData.add(new ThreadData(0, mainThreadData));
 
-        listeners.add(new UCIListener());
+		for (int i = 1; i < threadsCount; i++)
+		{
+			threadData.add(new ThreadData(i));
+		}
 
-        for (int i = 0; i < this.threadsCount; i++) {
-            threads.add(new AlphaBeta(sharedData, threadData.get(i)));
-            pool.execute(threads.get(i));
-        }
-    }
+		listeners.add(new UCIListener());
 
-    public void initThreads(Board board, Limits limits) {
-        for (AlphaBeta thread : threads) {
-            thread.setBoard(board);
-        }
+		for (int i = 0; i < this.threadsCount; i++)
+		{
+			threads.add(new AlphaBeta(sharedData, threadData.get(i)));
+			pool.execute(threads.get(i));
+		}
+	}
+	
+	public void initThreads(Board board, Limits limits)
+	{
+		for (AlphaBeta thread : threads)
+		{
+			thread.setBoard(board);
+		}
 
-        threads.get(0).updateTM(limits);
-    }
+		threads.get(0).updateTM(limits);
+	}
 
-    public void nextMove(Board board, Limits limits) {
-        try {
-            this.endBarrier.await();
-        } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
-            return;
-        }
+	public void nextMove(Board board, Limits limits)
+	{
+		try
+		{
+			this.endBarrier.await();
+		}
+		catch (InterruptedException | BrokenBarrierException e)
+		{
+			e.printStackTrace();
+			return;
+		}
+		
+		initThreads(board, limits);
 
-        initThreads(board, limits);
+		try
+		{
+			this.startBarrier.await();
+		}
+		catch (InterruptedException | BrokenBarrierException e)
+		{
+			e.printStackTrace();
+		}
+	}
 
-        try {
-            this.startBarrier.await();
-        } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
-        }
-    }
+	public void clearData()
+	{
+		for (AlphaBeta thread : threads)
+		{
+			thread.reset();
+		}
+	}
 
-    public void clearData() {
-        for (AlphaBeta thread : threads) {
-            thread.reset();
-        }
-    }
+	public long getNodes()
+	{
+		long nodes = 0;
 
-    public long getNodes() {
-        long nodes = 0;
+		for (AlphaBeta thread : threads)
+		{
+			nodes += thread.getNodesCount();
+		}
 
-        for (AlphaBeta thread : threads) {
-            nodes += thread.getNodesCount();
-        }
-
-        return nodes;
-    }
-
-    public AlphaBeta getMainThread() {
-        return threads.get(0);
-    }
-
-    public void shutdownAll() {
-        pool.shutdownNow();
-    }
+		return nodes;
+	}
+	
+	public AlphaBeta getMainThread()
+	{
+		return threads.get(0);
+	}
+	
+	public void shutdownAll()
+	{
+		pool.shutdownNow();
+	}
 }

@@ -1,147 +1,175 @@
 package org.shawn.games.Serendipity.Search;
 
-import com.github.bhlangonijr.chesslib.Square;
-import com.github.bhlangonijr.chesslib.move.Move;
-
 import java.util.Arrays;
 
-public class TranspositionTable {
-    public static enum NodeType {
-        EXACT, LOWERBOUND, UPPERBOUND
-    }
+import com.github.bhlangonijr.chesslib.Square;
+import com.github.bhlangonijr.chesslib.move.*;
 
-    private static final NodeType[] byteToNodeType = new NodeType[]{NodeType.EXACT, NodeType.LOWERBOUND,
-            NodeType.UPPERBOUND};
+public class TranspositionTable
+{
+	public static enum NodeType
+	{
+		EXACT, LOWERBOUND, UPPERBOUND
+	}
 
-    public class Entry {
-        // depth: (0-255) 8 bits
-        // NodeType: 8 bits
-        // evaluation: 16 bits
-        // staticEval: 16 bits
-        // Square: 6 bits
-        // Signature: 16 bits
+	private static final NodeType[] byteToNodeType = new NodeType[] { NodeType.EXACT, NodeType.LOWERBOUND,
+			NodeType.UPPERBOUND };
 
-        // Total: 32 Bytes (Padding and Class Header)
+	public class Entry
+	{
+		// depth: (0-255) 8 bits
+		// NodeType: 8 bits
+		// evaluation: 16 bits
+		// staticEval: 16 bits
+		// Square: 6 bits
+		// Signature: 16 bits
 
-        private short signature;
-        private byte depth;
-        private byte type;
-        private short evaluation;
-        private short staticEval;
-        private short move;
+		// Total: 32 Bytes (Padding and Class Header)
 
-        public Entry(NodeType type, short depth, int evaluation, long signature, Move move, int staticEval) {
-            this.signature = (short) (signature >>> 48);
-            this.depth = (byte) depth;
-            this.type = (byte) type.ordinal();
-            this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
-            this.evaluation = (short) evaluation;
-            this.staticEval = (short) staticEval;
-        }
+		private short signature;
+		private byte depth;
+		private byte type;
+		private short evaluation;
+		private short staticEval;
+		private short move;
 
-        public void write(long signature, NodeType type, short depth, int evaluation, Move move, int staticEval) {
-            if (type.equals(NodeType.EXACT) || !this.verifySignature(signature) || depth > this.getDepth() - 4) {
-                this.signature = (short) (signature >>> 48);
-                this.depth = (byte) depth;
-                this.type = (byte) type.ordinal();
-                this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
-                this.evaluation = (short) evaluation;
-                this.staticEval = (short) staticEval;
-            }
-        }
+		public Entry(NodeType type, short depth, int evaluation, long signature, Move move, int staticEval)
+		{
+			this.signature = (short) (signature >>> 48);
+			this.depth = (byte) depth;
+			this.type = (byte) type.ordinal();
+			this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
+			this.evaluation = (short) evaluation;
+			this.staticEval = (short) staticEval;
+		}
 
-        public long getSignature() {
-            return signature;
-        }
+		public void write(long signature, NodeType type, short depth, int evaluation, Move move, int staticEval)
+		{
+			if (type.equals(NodeType.EXACT) || !this.verifySignature(signature) || depth > this.getDepth() - 4)
+			{
+				this.signature = (short) (signature >>> 48);
+				this.depth = (byte) depth;
+				this.type = (byte) type.ordinal();
+				this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
+				this.evaluation = (short) evaluation;
+				this.staticEval = (short) staticEval;
+			}
+		}
 
-        public boolean verifySignature(long signature) {
-            return (short) (signature >>> 48) == this.signature;
-        }
+		public long getSignature()
+		{
+			return signature;
+		}
 
-        public NodeType getType() {
-            return byteToNodeType[this.type];
-        }
+		public boolean verifySignature(long signature)
+		{
+			return (short) (signature >>> 48) == this.signature;
+		}
 
-        public short getDepth() {
-            return (short) (this.depth);
-        }
+		public NodeType getType()
+		{
+			return byteToNodeType[this.type];
+		}
 
-        public int getEvaluation() {
-            return evaluation;
-        }
+		public short getDepth()
+		{
+			return (short) (this.depth);
+		}
 
-        public int getStaticEval() {
-            return staticEval;
-        }
+		public int getEvaluation()
+		{
+			return evaluation;
+		}
 
-        public Move getMove() {
-            return move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
-        }
-    }
+		public int getStaticEval()
+		{
+			return staticEval;
+		}
 
-    private int size;
-    private int mask;
-    private Entry[] entries;
+		public Move getMove()
+		{
+			return move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
+		}
+	}
 
-    private static final int ENTRY_SIZE = 32;
+	private int size;
+	private int mask;
+	private Entry[] entries;
 
-    public TranspositionTable(int size) {
-        size *= 1048576 / ENTRY_SIZE;
+	private static final int ENTRY_SIZE = 32;
 
-        this.size = Integer.highestOneBit(size);
-        this.mask = this.size - 1;
-        this.entries = new Entry[this.size];
-    }
+	public TranspositionTable(int size)
+	{
+		size *= 1048576 / ENTRY_SIZE;
 
-    public Entry probe(long hash) {
-        return entries[(int) (hash & mask)];
-    }
+		this.size = Integer.highestOneBit(size);
+		this.mask = this.size - 1;
+		this.entries = new Entry[this.size];
+	}
 
-    public void write(long hash, NodeType type, int depth, int evaluation, Move move, int staticEval) {
-        if (entries[(int) (hash & mask)] == null) {
-            entries[(int) (hash & mask)] = new Entry(type, (short) depth, evaluation, hash, move, staticEval);
-        } else {
-            entries[(int) (hash & mask)].write(hash, type, (short) depth, evaluation, move, staticEval);
-        }
-    }
+	public Entry probe(long hash)
+	{
+		return entries[(int) (hash & mask)];
+	}
 
-    public void clear() {
-        Arrays.fill(entries, null);
-    }
+	public void write(long hash, NodeType type, int depth, int evaluation, Move move, int staticEval)
+	{
+		if (entries[(int) (hash & mask)] == null)
+		{
+			entries[(int) (hash & mask)] = new Entry(type, (short) depth, evaluation, hash, move, staticEval);
+		}
+		else
+		{
+			entries[(int) (hash & mask)].write(hash, type, (short) depth, evaluation, move, staticEval);
+		}
+	}
 
-    public void resize(int size) {
-        size *= 1048576 / ENTRY_SIZE;
-        this.size = Integer.highestOneBit(size);
-        this.mask = this.size - 1;
-        this.entries = new Entry[this.size];
-    }
+	public void clear()
+	{
+		Arrays.fill(entries, null);
+	}
 
-    public int hashfull() {
-        int hashfull = 0;
+	public void resize(int size)
+	{
+		size *= 1048576 / ENTRY_SIZE;
+		this.size = Integer.highestOneBit(size);
+		this.mask = this.size - 1;
+		this.entries = new Entry[this.size];
+	}
 
-        for (int i = 0; i < 1000; i++) {
-            if (this.entries[i] != null) {
-                hashfull++;
-            }
-        }
+	public int hashfull()
+	{
+		int hashfull = 0;
 
-        return hashfull;
-    }
+		for (int i = 0; i < 1000; i++)
+		{
+			if (this.entries[i] != null)
+			{
+				hashfull++;
+			}
+		}
 
-    public int hashfull_accurate() {
-        int hashfull = 0;
-        int minimum_hash = 1048576 / ENTRY_SIZE;
+		return hashfull;
+	}
 
-        for (int i = 0; i < minimum_hash; i++) {
-            if (this.entries[i] != null) {
-                hashfull++;
-            }
-        }
+	public int hashfull_accurate()
+	{
+		int hashfull = 0;
+		int minimum_hash = 1048576 / ENTRY_SIZE;
 
-        return hashfull * 1000 / minimum_hash;
-    }
+		for (int i = 0; i < minimum_hash; i++)
+		{
+			if (this.entries[i] != null)
+			{
+				hashfull++;
+			}
+		}
 
-    public int getSize() {
-        return this.size * ENTRY_SIZE / 1048576;
-    }
+		return hashfull * 1000 / minimum_hash;
+	}
+
+	public int getSize()
+	{
+		return this.size * ENTRY_SIZE / 1048576;
+	}
 }

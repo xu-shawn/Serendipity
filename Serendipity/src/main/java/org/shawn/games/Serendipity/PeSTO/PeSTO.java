@@ -2,8 +2,9 @@ package org.shawn.games.Serendipity.PeSTO;
 
 import com.github.bhlangonijr.chesslib.*;
 
-public class PeSTO {
-    // @formatter:off
+public class PeSTO
+{
+	// @formatter:off
 	final static int[] MG_PAWN_TABLE = new int[]
 	{
 		      0,   0,   0,   0,   0,   0,  0,   0,
@@ -161,33 +162,35 @@ public class PeSTO {
 	};
 	// @formatter:on
 
-    final static int MG_PAWN_VALUE = 82;
-    final static int MG_KNIGHT_VALUE = 337;
-    final static int MG_BISHOP_VALUE = 365;
-    final static int MG_ROOK_VALUE = 477;
-    final static int MG_QUEEN_VALUE = 1025;
+	final static int MG_PAWN_VALUE = 82;
+	final static int MG_KNIGHT_VALUE = 337;
+	final static int MG_BISHOP_VALUE = 365;
+	final static int MG_ROOK_VALUE = 477;
+	final static int MG_QUEEN_VALUE = 1025;
 
-    final static int EG_PAWN_VALUE = 94;
-    final static int EG_KNIGHT_VALUE = 281;
-    final static int EG_BISHOP_VALUE = 297;
-    final static int EG_ROOK_VALUE = 512;
-    final static int EG_QUEEN_VALUE = 936;
+	final static int EG_PAWN_VALUE = 94;
+	final static int EG_KNIGHT_VALUE = 281;
+	final static int EG_BISHOP_VALUE = 297;
+	final static int EG_ROOK_VALUE = 512;
+	final static int EG_QUEEN_VALUE = 936;
 
-    final static int PAWN_PHASE = 0;
-    final static int KNIGHT_PHASE = 1;
-    final static int BISHOP_PHASE = 1;
-    final static int ROOK_PHASE = 2;
-    final static int QUEEN_PHASE = 4;
+	final static int PAWN_PHASE = 0;
+	final static int KNIGHT_PHASE = 1;
+	final static int BISHOP_PHASE = 1;
+	final static int ROOK_PHASE = 2;
+	final static int QUEEN_PHASE = 4;
 
-    final static int TEMPO = 8;
+	final static int TEMPO = 8;
 
-    final static int MAX_PHASE = KNIGHT_PHASE * 4 + BISHOP_PHASE * 4 + ROOK_PHASE * 4 + QUEEN_PHASE * 2;
+	final static int MAX_PHASE = KNIGHT_PHASE * 4 + BISHOP_PHASE * 4 + ROOK_PHASE * 4 + QUEEN_PHASE * 2;
 
-    private static int getIndex(Side side, Square square) {
-        return side == Side.BLACK ? square.ordinal() : MIRRORED_SQUARE_VALUE[square.ordinal()];
-    }
+	private static int getIndex(Side side, Square square)
+	{
+		return side == Side.BLACK ? square.ordinal() : MIRRORED_SQUARE_VALUE[square.ordinal()];
+	}
 
-    private static int pieceMiddleGameValue(Piece piece, Square square) {
+	private static int pieceMiddleGameValue(Piece piece, Square square)
+	{
         return switch (piece.getPieceType()) {
             case PAWN -> MG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + MG_PAWN_VALUE;
             case KNIGHT -> MG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + MG_KNIGHT_VALUE;
@@ -197,9 +200,10 @@ public class PeSTO {
             case KING -> MG_KING_TABLE[getIndex(piece.getPieceSide(), square)];
             default -> 0;
         };
-    }
+	}
 
-    private static int pieceEndGameValue(Piece piece, Square square) {
+	private static int pieceEndGameValue(Piece piece, Square square)
+	{
         return switch (piece.getPieceType()) {
             case PAWN -> EG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + EG_PAWN_VALUE;
             case KNIGHT -> EG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + EG_KNIGHT_VALUE;
@@ -209,56 +213,63 @@ public class PeSTO {
             case KING -> EG_KING_TABLE[getIndex(piece.getPieceSide(), square)];
             default -> 0;
         };
-    }
+	}
 
-    private static int middleGameEval(Board board) {
-        long pieces = board.getBitboard(board.getSideToMove());
+	private static int middleGameEval(Board board)
+	{
+		long pieces = board.getBitboard(board.getSideToMove());
 
-        int score = 0;
+		int score = 0;
 
-        while (pieces != 0) {
-            Square square = Square.squareAt(Bitboard.bitScanForward(pieces));
-            pieces = Bitboard.extractLsb(pieces);
-            score += pieceMiddleGameValue(board.getPiece(square), square);
-        }
+		while (pieces != 0)
+		{
+			Square square = Square.squareAt(Bitboard.bitScanForward(pieces));
+			pieces = Bitboard.extractLsb(pieces);
+			score += pieceMiddleGameValue(board.getPiece(square), square);
+		}
 
-        pieces = board.getBitboard(board.getSideToMove().flip());
+		pieces = board.getBitboard(board.getSideToMove().flip());
 
-        while (pieces != 0) {
-            Square square = Square.squareAt(Bitboard.bitScanForward(pieces));
-            pieces = Bitboard.extractLsb(pieces);
-            score -= pieceMiddleGameValue(board.getPiece(square), square);
-        }
+		while (pieces != 0)
+		{
+			Square square = Square.squareAt(Bitboard.bitScanForward(pieces));
+			pieces = Bitboard.extractLsb(pieces);
+			score -= pieceMiddleGameValue(board.getPiece(square), square);
+		}
 
-        return score;
-    }
+		return score;
+	}
 
-    private static int endGameEval(Board board) {
-        long pieces = board.getBitboard(board.getSideToMove());
+	private static int endGameEval(Board board)
+	{
+		long pieces = board.getBitboard(board.getSideToMove());
 
-        int score = 0;
+		int score = 0;
 
-        while (pieces != 0) {
-            Square square = Square.squareAt(Bitboard.bitScanForward(pieces));
-            pieces = Bitboard.extractLsb(pieces);
-            score += pieceEndGameValue(board.getPiece(square), square);
-        }
+		while (pieces != 0)
+		{
+			Square square = Square.squareAt(Bitboard.bitScanForward(pieces));
+			pieces = Bitboard.extractLsb(pieces);
+			score += pieceEndGameValue(board.getPiece(square), square);
+		}
 
-        pieces = board.getBitboard(board.getSideToMove().flip());
+		pieces = board.getBitboard(board.getSideToMove().flip());
 
-        while (pieces != 0) {
-            Square square = Square.squareAt(Bitboard.bitScanForward(pieces));
-            pieces = Bitboard.extractLsb(pieces);
-            score -= pieceEndGameValue(board.getPiece(square), square);
-        }
+		while (pieces != 0)
+		{
+			Square square = Square.squareAt(Bitboard.bitScanForward(pieces));
+			pieces = Bitboard.extractLsb(pieces);
+			score -= pieceEndGameValue(board.getPiece(square), square);
+		}
 
-        return score;
-    }
+		return score;
+	}
 
-    private static int gamePhase(Board board) {
-        Side ourSide = board.getSideToMove();
-        Side opposite = board.getSideToMove().flip();
-        // @formatter:off
+	private static int gamePhase(Board board)
+	{
+		Side ourSide = board.getSideToMove();
+		Side opposite = board.getSideToMove().flip();
+		// @formatter:off
 		return Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.PAWN))) * PAWN_PHASE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.KNIGHT))) * KNIGHT_PHASE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.BISHOP))) * BISHOP_PHASE
@@ -270,13 +281,14 @@ public class PeSTO {
 				+ Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.ROOK))) * ROOK_PHASE
 				+ Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.QUEEN))) * QUEEN_PHASE;
 		// @formatter:on
-    }
+	}
 
-    private static int middleGameMaterialEval(Board board) {
+	private static int middleGameMaterialEval(Board board)
+	{
 
-        Side ourSide = board.getSideToMove();
-        Side opposite = board.getSideToMove().flip();
-        // @formatter:off
+		Side ourSide = board.getSideToMove();
+		Side opposite = board.getSideToMove().flip();
+		// @formatter:off
 		return Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.PAWN))) * MG_PAWN_VALUE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.KNIGHT))) * MG_KNIGHT_VALUE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.BISHOP))) * MG_BISHOP_VALUE
@@ -288,13 +300,14 @@ public class PeSTO {
 				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.ROOK))) * MG_ROOK_VALUE
 				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.QUEEN))) * MG_QUEEN_VALUE;
 		// @formatter:on
-    }
+	}
 
-    private static int endGameMaterialEval(Board board) {
+	private static int endGameMaterialEval(Board board)
+	{
 
-        Side ourSide = board.getSideToMove();
-        Side opposite = board.getSideToMove().flip();
-        // @formatter:off
+		Side ourSide = board.getSideToMove();
+		Side opposite = board.getSideToMove().flip();
+		// @formatter:off
 		return Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) * EG_PAWN_VALUE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.KNIGHT))) * EG_KNIGHT_VALUE
 				+ Long.bitCount(board.getBitboard(Piece.make(ourSide, PieceType.BISHOP))) * EG_BISHOP_VALUE
@@ -306,23 +319,26 @@ public class PeSTO {
 				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.ROOK))) * EG_ROOK_VALUE
 				- Long.bitCount(board.getBitboard(Piece.make(opposite, PieceType.QUEEN))) * EG_QUEEN_VALUE;
 		// @formatter:on
-    }
+	}
 
-    private static int bishopPairAdjustment(Board board) {
-        return (Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove(), PieceType.BISHOP))) == 2 ? 720 : 0)
-                - (Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove().flip(), PieceType.BISHOP))) == 2
-                ? 720
-                : 0);
-    }
+	private static int bishopPairAdjustment(Board board)
+	{
+		return (Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove(), PieceType.BISHOP))) == 2 ? 720 : 0)
+				- (Long.bitCount(board.getBitboard(Piece.make(board.getSideToMove().flip(), PieceType.BISHOP))) == 2
+						? 720
+						: 0);
+	}
 
-    public static int materialEval(Board board) {
-        int gamePhase = Math.min(MAX_PHASE, gamePhase(board));
-        return middleGameMaterialEval(board) * gamePhase + endGameMaterialEval(board) * (MAX_PHASE - gamePhase);
-    }
+	public static int materialEval(Board board)
+	{
+		int gamePhase = Math.min(MAX_PHASE, gamePhase(board));
+		return middleGameMaterialEval(board) * gamePhase + endGameMaterialEval(board) * (MAX_PHASE - gamePhase);
+	}
 
-    public static int evaluate(Board board) {
-        int gamePhase = Math.min(MAX_PHASE, gamePhase(board));
-        return middleGameEval(board) * gamePhase + endGameEval(board) * (MAX_PHASE - gamePhase)
-                + bishopPairAdjustment(board) + TEMPO * MAX_PHASE;
-    }
+	public static int evaluate(Board board)
+	{
+		int gamePhase = Math.min(MAX_PHASE, gamePhase(board));
+		return middleGameEval(board) * gamePhase + endGameEval(board) * (MAX_PHASE - gamePhase)
+				+ bishopPairAdjustment(board) + TEMPO * MAX_PHASE;
+	}
 }
