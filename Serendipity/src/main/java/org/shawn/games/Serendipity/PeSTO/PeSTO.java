@@ -191,28 +191,46 @@ public class PeSTO
 
 	private static int pieceMiddleGameValue(Piece piece, Square square)
 	{
-        return switch (piece.getPieceType()) {
-            case PAWN -> MG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + MG_PAWN_VALUE;
-            case KNIGHT -> MG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + MG_KNIGHT_VALUE;
-            case BISHOP -> MG_BISHOP_TABLE[getIndex(piece.getPieceSide(), square)] + MG_BISHOP_VALUE;
-            case ROOK -> MG_ROOK_TABLE[getIndex(piece.getPieceSide(), square)] + MG_ROOK_VALUE;
-            case QUEEN -> MG_QUEEN_TABLE[getIndex(piece.getPieceSide(), square)] + MG_QUEEN_VALUE;
-            case KING -> MG_KING_TABLE[getIndex(piece.getPieceSide(), square)];
-            default -> 0;
-        };
+		switch (piece.getPieceType())
+		{
+			case PAWN:
+				return MG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + MG_PAWN_VALUE;
+			case KNIGHT:
+				return MG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + MG_KNIGHT_VALUE;
+			case BISHOP:
+				return MG_BISHOP_TABLE[getIndex(piece.getPieceSide(), square)] + MG_BISHOP_VALUE;
+			case ROOK:
+				return MG_ROOK_TABLE[getIndex(piece.getPieceSide(), square)] + MG_ROOK_VALUE;
+			case QUEEN:
+				return MG_QUEEN_TABLE[getIndex(piece.getPieceSide(), square)] + MG_QUEEN_VALUE;
+			case KING:
+				return MG_KING_TABLE[getIndex(piece.getPieceSide(), square)];
+			default:
+				return 0;
+
+		}
 	}
 
 	private static int pieceEndGameValue(Piece piece, Square square)
 	{
-        return switch (piece.getPieceType()) {
-            case PAWN -> EG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + EG_PAWN_VALUE;
-            case KNIGHT -> EG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + EG_KNIGHT_VALUE;
-            case BISHOP -> EG_BISHOP_TABLE[getIndex(piece.getPieceSide(), square)] + EG_BISHOP_VALUE;
-            case ROOK -> EG_ROOK_TABLE[getIndex(piece.getPieceSide(), square)] + EG_ROOK_VALUE;
-            case QUEEN -> EG_QUEEN_TABLE[getIndex(piece.getPieceSide(), square)] + EG_QUEEN_VALUE;
-            case KING -> EG_KING_TABLE[getIndex(piece.getPieceSide(), square)];
-            default -> 0;
-        };
+		switch (piece.getPieceType())
+		{
+			case PAWN:
+				return EG_PAWN_TABLE[getIndex(piece.getPieceSide(), square)] + EG_PAWN_VALUE;
+			case KNIGHT:
+				return EG_KNIGHT_TABLE[getIndex(piece.getPieceSide(), square)] + EG_KNIGHT_VALUE;
+			case BISHOP:
+				return EG_BISHOP_TABLE[getIndex(piece.getPieceSide(), square)] + EG_BISHOP_VALUE;
+			case ROOK:
+				return EG_ROOK_TABLE[getIndex(piece.getPieceSide(), square)] + EG_ROOK_VALUE;
+			case QUEEN:
+				return EG_QUEEN_TABLE[getIndex(piece.getPieceSide(), square)] + EG_QUEEN_VALUE;
+			case KING:
+				return EG_KING_TABLE[getIndex(piece.getPieceSide(), square)];
+			default:
+				return 0;
+
+		}
 	}
 
 	private static int middleGameEval(Board board)

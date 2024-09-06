@@ -603,7 +603,7 @@ public class AlphaBeta implements Runnable
 
 				r -= history / 5000;
 
-				int d = newdepth - r;
+				int d;
 				d = Math.min(newdepth, newdepth - r);
 
 				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
