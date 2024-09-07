@@ -7,7 +7,7 @@ import com.github.bhlangonijr.chesslib.move.Move;
 
 public class CaptureHistory implements History
 {
-	private int[][][] history;
+	private final int[][][] history;
 
 	static final int MAX_BONUS = 16384;
 
@@ -21,14 +21,14 @@ public class CaptureHistory implements History
 		return history[piece.ordinal()][to.ordinal()][captured.ordinal()];
 	}
 
-	private static int clamp(int v, int max, int min)
+	private static int clamp(int v)
 	{
-		return v >= max ? max : (v <= min ? min : v);
+		return v >= CaptureHistory.MAX_BONUS ? CaptureHistory.MAX_BONUS : (Math.max(v, -16384));
 	}
 
 	public void register(Piece piece, Square to, PieceType captured, int value)
 	{
-		int clampedValue = clamp(value, MAX_BONUS, -MAX_BONUS);
+		int clampedValue = clamp(value);
 
 		if (captured == null)
 		{

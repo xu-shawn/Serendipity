@@ -9,7 +9,7 @@ import com.github.bhlangonijr.chesslib.move.Move;
 
 public class ContinuationHistories
 {
-	private PieceToHistory[][] continuationHistories;
+	private final PieceToHistory[][] continuationHistories;
 
 	public ContinuationHistories()
 	{

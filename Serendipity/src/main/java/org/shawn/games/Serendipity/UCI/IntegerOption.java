@@ -51,8 +51,8 @@ public class IntegerOption implements UCIOption
 
 	public String toString()
 	{
-		return "option name " + name + " type spin default " + Integer.toString(defaultValue)
-				+ " min " + Integer.toString(lowerBound) + " max " + Integer.toString(upperBound);
+		return "option name " + name + " type spin default " + defaultValue
+				+ " min " + lowerBound + " max " + upperBound;
 	}
 
 	@Override

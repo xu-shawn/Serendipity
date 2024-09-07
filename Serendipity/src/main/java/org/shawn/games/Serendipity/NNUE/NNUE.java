@@ -1,6 +1,7 @@
 package org.shawn.games.Serendipity.NNUE;
 
 import java.io.*;
+import java.util.Objects;
 
 import com.github.bhlangonijr.chesslib.*;
 
@@ -35,9 +36,9 @@ public class NNUE
 	final short[][] L1Weights;
 	final short[] L1Biases;
 	private final short[][] L2Weights;
-	private final short outputBiases[];
+	private final short[] outputBiases;
 
-	private final static int screlu[] = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
+	private final static int[] screlu = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
 
 	static
 	{
@@ -54,7 +55,7 @@ public class NNUE
 
 	public NNUE(String filePath) throws IOException
 	{
-		DataInputStream networkData = new DataInputStream(getClass().getResourceAsStream(filePath));
+		DataInputStream networkData = new DataInputStream(Objects.requireNonNull(getClass().getResourceAsStream(filePath)));
 
 		L1Weights = new short[FEATURE_SIZE * INPUT_BUCKET_SIZE][HIDDEN_SIZE];
 

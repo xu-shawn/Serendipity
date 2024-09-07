@@ -20,11 +20,9 @@ public class UCI
 	private static TranspositionTable transpositionTable;
 	private static NNUE network;
 
-	private static StringOption networkName;
-	private static ThreadsOption threads;
-	private static HashOption hash;
+    private static ThreadsOption threads;
 
-	public static class NNUEOption extends StringOption
+    public static class NNUEOption extends StringOption
 	{
 		public NNUEOption(String value, String name)
 		{
@@ -52,7 +50,7 @@ public class UCI
 
 	public static class HashOption extends IntegerOption
 	{
-		private TranspositionTable tt;
+		private final TranspositionTable tt;
 
 		public HashOption(int value, int lowerBound, int upperBound, TranspositionTable tt, String name)
 		{
@@ -83,13 +81,13 @@ public class UCI
 		}
 	}
 
-	public static void main(String args[])
+	public static void main(String[] args)
 	{
 		transpositionTable = new TranspositionTable(4);
 		options = new HashMap<>();
-		networkName = new NNUEOption("embedded.nnue", "nnuefile");
+        StringOption networkName = new NNUEOption("embedded.nnue", "nnuefile");
 		threads = new ThreadsOption(1, 1, 1048576, "Threads");
-		hash = new HashOption(4, 1, 32768, transpositionTable, "Hash");
+        HashOption hash = new HashOption(4, 1, 32768, transpositionTable, "Hash");
 
 		try
 		{

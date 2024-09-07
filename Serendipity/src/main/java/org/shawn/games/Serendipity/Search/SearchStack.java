@@ -7,7 +7,7 @@ import com.github.bhlangonijr.chesslib.move.Move;
 
 public class SearchStack
 {
-	public class SearchState
+	public static class SearchState
 	{
 		public boolean inCheck;
 		public boolean ttHit;
@@ -19,7 +19,7 @@ public class SearchStack
 		public History continuationHistory;
 	}
 
-	private SearchState[] stack;
+	private final SearchState[] stack;
 
 	public SearchStack(int n)
 	{

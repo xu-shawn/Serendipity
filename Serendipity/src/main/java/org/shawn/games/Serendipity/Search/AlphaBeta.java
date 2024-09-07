@@ -23,13 +23,12 @@ public class AlphaBeta implements Runnable
 
 	public final int[][] reduction = new int[MAX_PLY + 1][MAX_PLY + 1];
 
-	private Move[] lastCompletePV;
-	private int nmpMinPly;
+    private int nmpMinPly;
 
 	private AccumulatorStack accumulators;
 
-	private ThreadData threadData;
-	private SharedThreadData sharedThreadData;
+	private final ThreadData threadData;
+	private final SharedThreadData sharedThreadData;
 	private SearchStack ss;
 	private TimeManager timeManager;
 
@@ -607,7 +606,7 @@ public class AlphaBeta implements Runnable
 					r -= history / 5000;
 				}
 
-				int d = newdepth - r;
+				int d;
 				d = Math.min(newdepth, newdepth - r);
 
 				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
@@ -722,7 +721,7 @@ public class AlphaBeta implements Runnable
 		int delta;
 
 		currentScore = MIN_EVAL;
-		lastCompletePV = null;
+        Move[] lastCompletePV = null;
 		alpha = MIN_EVAL;
 		beta = MAX_EVAL;
 		delta = 25;
@@ -756,7 +755,7 @@ public class AlphaBeta implements Runnable
 					if (newScore > alpha && newScore < beta)
 					{
 						currentScore = newScore;
-						this.lastCompletePV = threadData.pv[0].clone();
+						lastCompletePV = threadData.pv[0].clone();
 
 						if (!suppressOutput && threadData.id == 0)
 						{
@@ -769,7 +768,7 @@ public class AlphaBeta implements Runnable
 
 							SearchReport report = new SearchReport(i, threadData.selDepth, totalNodes,
 									sharedThreadData.tt.hashfull(), currentScore, this.timeManager.timePassed(),
-									this.internalBoard, this.lastCompletePV);
+									this.internalBoard, lastCompletePV);
 
 							for (ISearchListener listener : threadData.mainThreadData.listeners)
 							{
@@ -807,7 +806,7 @@ public class AlphaBeta implements Runnable
 
 		if (!suppressOutput && threadData.id == 0)
 		{
-			FinalReport report = new FinalReport(this.bestMove == null ? lastCompletePV[0] : this.bestMove);
+			FinalReport report = new FinalReport(this.bestMove == null ? Objects.requireNonNull(lastCompletePV)[0] : this.bestMove);
 
 			for (ISearchListener listener : threadData.mainThreadData.listeners)
 			{

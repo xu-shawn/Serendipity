@@ -5,7 +5,7 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class SEE
 {
-	private static int[] SEEPieceValues = new int[] { 103, 422, 437, 694, 1313, 0 };
+	private static final int[] SEEPieceValues = new int[] { 103, 422, 437, 694, 1313, 0 };
 
 	public static int moveEstimatedValue(Board board, Move move)
 	{

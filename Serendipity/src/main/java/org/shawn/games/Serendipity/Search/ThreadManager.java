@@ -111,7 +111,6 @@ public class ThreadManager
 		catch (InterruptedException | BrokenBarrierException e)
 		{
 			e.printStackTrace();
-			return;
 		}
 	}
 
