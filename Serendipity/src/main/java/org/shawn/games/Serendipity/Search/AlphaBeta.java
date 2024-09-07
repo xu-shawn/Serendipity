@@ -610,6 +610,11 @@ public class AlphaBeta implements Runnable
 				int d = newdepth - r;
 				d = Math.min(newdepth, newdepth - r);
 
+				if (!isQuiet)
+				{
+					d = Math.max(1, d);
+				}
+
 				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
 
 				if (thisMoveEval > alpha)
