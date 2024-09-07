@@ -3,6 +3,7 @@ package org.shawn.games.Serendipity.UCI;
 import java.io.IOException;
 import java.util.*;
 
+import org.shawn.games.Serendipity.Datagen.ViriBinpackWriter;
 import org.shawn.games.Serendipity.NNUE.AccumulatorStack;
 import org.shawn.games.Serendipity.NNUE.NNUE;
 import org.shawn.games.Serendipity.Search.Limits;
