@@ -5,7 +5,7 @@ import org.shawn.games.Serendipity.UCI.IntegerOption;
 public class TimeManager
 {
 
-    private long startTime;
+	private long startTime;
 	private long hardLimitTimeStamp;
 	private long softLimitTimeStamp;
 
@@ -23,13 +23,13 @@ public class TimeManager
 			timeLeft = 1000;
 		}
 
-        long timeLeft1 = timeLeft - Math.min(moveOverHead.get(), timeLeft) / 2;
+		timeLeft -= Math.min(moveOverHead.get(), timeLeft) / 2;
+		long hardLimit;
+		long softLimit;
 
-        long hardLimit;
-        long softLimit;
-        if (movesToGo != 0 && movesToGo != -1)
+		if (movesToGo != 0 && movesToGo != -1)
 		{
-			hardLimit = timeLeft1 / movesToGo + increment * 3 / 4;
+			hardLimit = timeLeft / movesToGo + increment * 3 / 4;
 			softLimit = hardLimit / 2;
 
 			this.startTime = System.nanoTime();
@@ -41,16 +41,16 @@ public class TimeManager
 
 		else if (movesToGo == -1)
 		{
-			hardLimit = softLimit = timeLeft1;
+			hardLimit = softLimit = timeLeft;
 
 			this.startTime = System.nanoTime();
-			this.hardLimitTimeStamp = this.softLimitTimeStamp = startTime + 1000000L * timeLeft1;
+			this.hardLimitTimeStamp = this.softLimitTimeStamp = startTime + 1000000L * timeLeft;
 
 			return;
 		}
 
-		int baseTime = (int) (timeLeft1 * 0.054 + increment * 0.85);
-		int maxTime = (int) (timeLeft1 * 0.76);
+		int baseTime = (int) (timeLeft * 0.054 + increment * 0.85);
+		int maxTime = (int) (timeLeft * 0.76);
 
 		hardLimit = Math.min(maxTime, (int) (baseTime * 3.04));
 		softLimit = Math.min(maxTime, (int) (baseTime * 0.76));

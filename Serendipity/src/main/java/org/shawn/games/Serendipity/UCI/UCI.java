@@ -20,9 +20,9 @@ public class UCI
 	private static TranspositionTable transpositionTable;
 	private static NNUE network;
 
-    private static ThreadsOption threads;
+	private static ThreadsOption threads;
 
-    public static class NNUEOption extends StringOption
+	public static class NNUEOption extends StringOption
 	{
 		public NNUEOption(String value, String name)
 		{
@@ -85,9 +85,9 @@ public class UCI
 	{
 		transpositionTable = new TranspositionTable(4);
 		options = new HashMap<>();
-        StringOption networkName = new NNUEOption("embedded.nnue", "nnuefile");
+		StringOption networkName = new NNUEOption("embedded.nnue", "nnuefile");
 		threads = new ThreadsOption(1, 1, 1048576, "Threads");
-        HashOption hash = new HashOption(4, 1, 32768, transpositionTable, "Hash");
+		HashOption hash = new HashOption(4, 1, 32768, transpositionTable, "Hash");
 
 		try
 		{
