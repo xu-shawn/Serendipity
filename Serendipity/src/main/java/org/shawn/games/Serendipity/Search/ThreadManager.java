@@ -24,6 +24,8 @@ public class ThreadManager
 	CyclicBarrier endBarrier;
 	ExecutorService pool;
 
+	AtomicBoolean stopped;
+
 	TranspositionTable tt;
 	NNUE network;
 
@@ -43,7 +45,7 @@ public class ThreadManager
 		{
 			this.shutdownAll();
 		}
-		
+
 		this.threadsCount = threadsCount;
 		this.startBarrier = new CyclicBarrier(this.threadsCount + 1);
 		this.endBarrier = new CyclicBarrier(this.threadsCount + 1);
@@ -55,13 +57,13 @@ public class ThreadManager
 
 		pool = Executors.newFixedThreadPool(this.threadsCount);
 
-		final AtomicBoolean stopped = new AtomicBoolean(false);
+		this.stopped = new AtomicBoolean(false);
 		final ArrayList<ISearchListener> listeners = new ArrayList<>();
 
 		startBarrier = new CyclicBarrier(this.threadsCount + 1);
 		endBarrier = new CyclicBarrier(this.threadsCount + 1);
 
-		final SharedThreadData sharedData = new SharedThreadData(tt, startBarrier, endBarrier, network, stopped);
+		final SharedThreadData sharedData = new SharedThreadData(tt, startBarrier, endBarrier, network, this.stopped);
 		final ThreadData.MainThreadData mainThreadData = new ThreadData.MainThreadData(null, listeners, threads);
 
 		threadData.add(new ThreadData(0, mainThreadData));
@@ -79,7 +81,7 @@ public class ThreadManager
 			pool.execute(threads.get(i));
 		}
 	}
-	
+
 	public void initThreads(Board board, Limits limits)
 	{
 		for (AlphaBeta thread : threads)
@@ -101,7 +103,7 @@ public class ThreadManager
 			e.printStackTrace();
 			return;
 		}
-		
+
 		initThreads(board, limits);
 
 		try
@@ -133,14 +135,19 @@ public class ThreadManager
 
 		return nodes;
 	}
-	
+
 	public AlphaBeta getMainThread()
 	{
 		return threads.get(0);
 	}
-	
+
 	public void shutdownAll()
 	{
 		pool.shutdownNow();
+	}
+
+	public void stop()
+	{
+		this.stopped.set(true);
 	}
 }

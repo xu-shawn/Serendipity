@@ -303,6 +303,9 @@ public class UCI
 						System.out.println(option);
 					}
 					break;
+				case "stop":
+					engine.stop();
+					break;
 				case "setoption":
 					String key = "";
 					for (int i = 1; i < fullCommand.length; i++)
@@ -311,7 +314,7 @@ public class UCI
 						{
 							key = fullCommand[i + 1];
 						}
-						if (fullCommand[i].equals("value"))
+						if (fullCommand[i].equals("value") && options.containsKey(key))
 						{
 							options.get(key).set(fullCommand[i + 1]);
 						}
