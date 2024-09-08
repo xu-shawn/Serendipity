@@ -97,6 +97,7 @@ public class UCI
 		catch (IOException e)
 		{
 			System.out.print("Error Loading NNUE");
+			return;
 		}
 
 		internalBoard = new Board();
