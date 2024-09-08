@@ -1,6 +1,5 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
-*.nnue
 
 ### STS ###
 .apt_generated
