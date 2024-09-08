@@ -12,7 +12,7 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-	static final int HIDDEN_SIZE = 1024;
+	static final int HIDDEN_SIZE = 1536;
 	static final int FEATURE_SIZE = 768;
 	private static final int OUTPUT_BUCKETS = 8;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
@@ -112,8 +112,6 @@ public class NNUE
 		IntVector sum = IntVector.zero(SHORT_SPECIES.vectorShape().withLanes(int.class));
 
 		int upperBound = SHORT_SPECIES.loopBound(HIDDEN_SIZE);
-
-		// int eval = 0;
 
 		for (int i = 0; i < upperBound; i += SHORT_SPECIES.length())
 		{
