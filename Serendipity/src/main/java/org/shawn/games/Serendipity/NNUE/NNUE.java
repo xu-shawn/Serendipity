@@ -37,6 +37,7 @@ public class NNUE
 
 	private static final VectorSpecies<Short> SHORT_SPECIES = ShortVector.SPECIES_PREFERRED;
 	private static final int UPPERBOUND = SHORT_SPECIES.loopBound(HIDDEN_SIZE);
+	private static final boolean SIMD = SHORT_SPECIES.length() != 1;
 
 	final short[][] L1Weights;
 	final short[] L1Biases;
@@ -111,37 +112,55 @@ public class NNUE
 		AccumulatorStack.Accumulator us = accumulators.getAccumulator(side);
 		AccumulatorStack.Accumulator them = accumulators.getAccumulator(side.flip());
 
-		IntVector sum = IntVector.zero(SHORT_SPECIES.vectorShape().withLanes(int.class));
+		int eval;
 
-		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
+		if (SIMD)
 		{
-			ShortVector usInputs = ShortVector.fromArray(SHORT_SPECIES, us.values, i);
-			ShortVector themInputs = ShortVector.fromArray(SHORT_SPECIES, them.values, i);
-			ShortVector usWeights = ShortVector.fromArray(SHORT_SPECIES, network.L2Weights[chosenBucket], i);
-			ShortVector themWeights = ShortVector.fromArray(SHORT_SPECIES, network.L2Weights[chosenBucket],
-					i + HIDDEN_SIZE);
+			IntVector sum = IntVector.zero(SHORT_SPECIES.vectorShape().withLanes(int.class));
 
-			usInputs = usInputs.max(ShortVector.zero(SHORT_SPECIES)).min(ShortVector.broadcast(SHORT_SPECIES, QA));
-			themInputs = themInputs.max(ShortVector.zero(SHORT_SPECIES)).min(ShortVector.broadcast(SHORT_SPECIES, QA));
+			for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
+			{
+				ShortVector usInputs = ShortVector.fromArray(SHORT_SPECIES, us.values, i);
+				ShortVector themInputs = ShortVector.fromArray(SHORT_SPECIES, them.values, i);
+				ShortVector usWeights = ShortVector.fromArray(SHORT_SPECIES, network.L2Weights[chosenBucket], i);
+				ShortVector themWeights = ShortVector.fromArray(SHORT_SPECIES, network.L2Weights[chosenBucket],
+						i + HIDDEN_SIZE);
 
-			ShortVector usWeightedTerms = usInputs.mul(usWeights);
-			ShortVector themWeightedTerms = themInputs.mul(themWeights);
+				usInputs = usInputs.max(ShortVector.zero(SHORT_SPECIES)).min(ShortVector.broadcast(SHORT_SPECIES, QA));
+				themInputs = themInputs.max(ShortVector.zero(SHORT_SPECIES))
+						.min(ShortVector.broadcast(SHORT_SPECIES, QA));
 
-			Vector<Integer> usInputsLo = usInputs.convert(S2I, 0);
-			Vector<Integer> usInputsHi = usInputs.convert(S2I, 1);
-			Vector<Integer> themInputsLo = themInputs.convert(S2I, 0);
-			Vector<Integer> themInputsHi = themInputs.convert(S2I, 1);
+				ShortVector usWeightedTerms = usInputs.mul(usWeights);
+				ShortVector themWeightedTerms = themInputs.mul(themWeights);
 
-			Vector<Integer> usWeightedTermsLo = usWeightedTerms.convert(S2I, 0);
-			Vector<Integer> usWeightedTermsHi = usWeightedTerms.convert(S2I, 1);
-			Vector<Integer> themWeightedTermsLo = themWeightedTerms.convert(S2I, 0);
-			Vector<Integer> themWeightedTermsHi = themWeightedTerms.convert(S2I, 1);
+				Vector<Integer> usInputsLo = usInputs.convert(S2I, 0);
+				Vector<Integer> usInputsHi = usInputs.convert(S2I, 1);
+				Vector<Integer> themInputsLo = themInputs.convert(S2I, 0);
+				Vector<Integer> themInputsHi = themInputs.convert(S2I, 1);
 
-			sum = sum.add(usInputsLo.mul(usWeightedTermsLo)).add(usInputsHi.mul(usWeightedTermsHi))
-					.add(themInputsLo.mul(themWeightedTermsLo)).add(themInputsHi.mul(themWeightedTermsHi));
+				Vector<Integer> usWeightedTermsLo = usWeightedTerms.convert(S2I, 0);
+				Vector<Integer> usWeightedTermsHi = usWeightedTerms.convert(S2I, 1);
+				Vector<Integer> themWeightedTermsLo = themWeightedTerms.convert(S2I, 0);
+				Vector<Integer> themWeightedTermsHi = themWeightedTerms.convert(S2I, 1);
+
+				sum = sum.add(usInputsLo.mul(usWeightedTermsLo)).add(usInputsHi.mul(usWeightedTermsHi))
+						.add(themInputsLo.mul(themWeightedTermsLo)).add(themInputsHi.mul(themWeightedTermsHi));
+			}
+
+			eval = sum.reduceLanes(VectorOperators.ADD);
 		}
 
-		int eval = sum.reduceLanes(VectorOperators.ADD);
+		else
+		{
+			eval = 0;
+
+			for (int i = 0; i < HIDDEN_SIZE; i++)
+			{
+				eval += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i]
+						+ screlu[them.values[i] - (int) Short.MIN_VALUE]
+								* (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
+			}
+		}
 
 		eval /= QA;
 		eval += network.outputBiases[chosenBucket];
