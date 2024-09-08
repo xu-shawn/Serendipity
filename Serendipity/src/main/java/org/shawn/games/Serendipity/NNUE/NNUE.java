@@ -36,6 +36,7 @@ public class NNUE
 	private static final int QB = 64;
 
 	private static final VectorSpecies<Short> SHORT_SPECIES = ShortVector.SPECIES_PREFERRED;
+	private static final int UPPERBOUND = SHORT_SPECIES.loopBound(HIDDEN_SIZE);
 
 	final short[][] L1Weights;
 	final short[] L1Biases;
@@ -59,7 +60,8 @@ public class NNUE
 
 	public NNUE(String filePath) throws IOException
 	{
-		DataInputStream networkData = new DataInputStream(Objects.requireNonNull(getClass().getResourceAsStream(filePath)));
+		DataInputStream networkData = new DataInputStream(
+				Objects.requireNonNull(getClass().getResourceAsStream(filePath)));
 
 		L1Weights = new short[FEATURE_SIZE * INPUT_BUCKET_SIZE][HIDDEN_SIZE];
 
@@ -111,9 +113,7 @@ public class NNUE
 
 		IntVector sum = IntVector.zero(SHORT_SPECIES.vectorShape().withLanes(int.class));
 
-		int upperBound = SHORT_SPECIES.loopBound(HIDDEN_SIZE);
-
-		for (int i = 0; i < upperBound; i += SHORT_SPECIES.length())
+		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
 		{
 			ShortVector usInputs = ShortVector.fromArray(SHORT_SPECIES, us.values, i);
 			ShortVector themInputs = ShortVector.fromArray(SHORT_SPECIES, them.values, i);
