@@ -2,6 +2,8 @@ package org.shawn.games.Serendipity.NNUE;
 
 import java.io.*;
 import java.util.Objects;
+import jdk.incubator.vector.*;
+import static jdk.incubator.vector.VectorOperators.S2I;
 
 import com.github.bhlangonijr.chesslib.*;
 
@@ -10,7 +12,7 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-	static final int HIDDEN_SIZE = 1024;
+	static final int HIDDEN_SIZE = 1536;
 	static final int FEATURE_SIZE = 768;
 	private static final int OUTPUT_BUCKETS = 8;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
@@ -32,6 +34,9 @@ public class NNUE
 	private static final int SCALE = 400;
 	private static final int QA = 255;
 	private static final int QB = 64;
+
+	private static final VectorSpecies<Short> SHORT_SPECIES = ShortVector.SPECIES_PREFERRED;
+	private static final int UPPERBOUND = SHORT_SPECIES.loopBound(HIDDEN_SIZE);
 
 	final short[][] L1Weights;
 	final short[] L1Biases;
@@ -55,7 +60,8 @@ public class NNUE
 
 	public NNUE(String filePath) throws IOException
 	{
-		DataInputStream networkData = new DataInputStream(Objects.requireNonNull(getClass().getResourceAsStream(filePath)));
+		DataInputStream networkData = new DataInputStream(
+				Objects.requireNonNull(getClass().getResourceAsStream(filePath)));
 
 		L1Weights = new short[FEATURE_SIZE * INPUT_BUCKET_SIZE][HIDDEN_SIZE];
 
@@ -102,17 +108,40 @@ public class NNUE
 
 	public static int evaluate(NNUE network, AccumulatorStack accumulators, Side side, int chosenBucket)
 	{
-		int eval = 0;
-
 		AccumulatorStack.Accumulator us = accumulators.getAccumulator(side);
 		AccumulatorStack.Accumulator them = accumulators.getAccumulator(side.flip());
 
-		for (int i = 0; i < HIDDEN_SIZE; i++)
+		IntVector sum = IntVector.zero(SHORT_SPECIES.vectorShape().withLanes(int.class));
+
+		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
 		{
-			eval += screlu[us.values[i] - (int) Short.MIN_VALUE] * (int) network.L2Weights[chosenBucket][i]
-					+ screlu[them.values[i] - (int) Short.MIN_VALUE]
-							* (int) network.L2Weights[chosenBucket][i + HIDDEN_SIZE];
+			ShortVector usInputs = ShortVector.fromArray(SHORT_SPECIES, us.values, i);
+			ShortVector themInputs = ShortVector.fromArray(SHORT_SPECIES, them.values, i);
+			ShortVector usWeights = ShortVector.fromArray(SHORT_SPECIES, network.L2Weights[chosenBucket], i);
+			ShortVector themWeights = ShortVector.fromArray(SHORT_SPECIES, network.L2Weights[chosenBucket],
+					i + HIDDEN_SIZE);
+
+			usInputs = usInputs.max(ShortVector.zero(SHORT_SPECIES)).min(ShortVector.broadcast(SHORT_SPECIES, QA));
+			themInputs = themInputs.max(ShortVector.zero(SHORT_SPECIES)).min(ShortVector.broadcast(SHORT_SPECIES, QA));
+
+			ShortVector usWeightedTerms = usInputs.mul(usWeights);
+			ShortVector themWeightedTerms = themInputs.mul(themWeights);
+
+			Vector<Integer> usInputsLo = usInputs.convert(S2I, 0);
+			Vector<Integer> usInputsHi = usInputs.convert(S2I, 1);
+			Vector<Integer> themInputsLo = themInputs.convert(S2I, 0);
+			Vector<Integer> themInputsHi = themInputs.convert(S2I, 1);
+
+			Vector<Integer> usWeightedTermsLo = usWeightedTerms.convert(S2I, 0);
+			Vector<Integer> usWeightedTermsHi = usWeightedTerms.convert(S2I, 1);
+			Vector<Integer> themWeightedTermsLo = themWeightedTerms.convert(S2I, 0);
+			Vector<Integer> themWeightedTermsHi = themWeightedTerms.convert(S2I, 1);
+
+			sum = sum.add(usInputsLo.mul(usWeightedTermsLo)).add(usInputsHi.mul(usWeightedTermsHi))
+					.add(themInputsLo.mul(themWeightedTermsLo)).add(themInputsHi.mul(themWeightedTermsHi));
 		}
+
+		int eval = sum.reduceLanes(VectorOperators.ADD);
 
 		eval /= QA;
 		eval += network.outputBiases[chosenBucket];
