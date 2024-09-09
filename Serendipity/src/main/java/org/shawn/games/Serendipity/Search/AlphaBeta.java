@@ -112,7 +112,7 @@ public class AlphaBeta implements Runnable
 	{
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 
-		Move ttMove = currentMoveEntry == null ? null : currentMoveEntry.getMove();
+		Move ttMove = currentMoveEntry.hit() ? currentMoveEntry.getMove() : null;
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
@@ -169,28 +169,29 @@ public class AlphaBeta implements Runnable
 		boolean isPV = beta - alpha > 1;
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
+		boolean ttHit = currentMoveEntry.hit();
 
-		if (!isPV && currentMoveEntry != null && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
+		if (!isPV && ttHit && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 		{
 			int eval = currentMoveEntry.getEvaluation();
-			switch (currentMoveEntry.getType())
+			switch (currentMoveEntry.getNodeType())
 			{
-				case EXACT:
+				case TranspositionTable.NODETYPE_EXACT:
 					return eval;
-				case UPPERBOUND:
+				case TranspositionTable.NODETYPE_UPPERBOUND:
 					if (eval <= alpha)
 					{
 						return eval;
 					}
 					break;
-				case LOWERBOUND:
+				case TranspositionTable.NODETYPE_LOWERBOUND:
 					if (eval >= beta)
 					{
 						return eval;
 					}
 					break;
 				default:
-					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
+					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getNodeType());
 			}
 		}
 
@@ -339,29 +340,29 @@ public class AlphaBeta implements Runnable
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 
-		sse.ttHit = currentMoveEntry != null && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
+		sse.ttHit = currentMoveEntry.hit();
 
 		if (!inSingularSearch && !isPV && sse.ttHit && currentMoveEntry.getDepth() >= depth)
 		{
 			eval = currentMoveEntry.getEvaluation();
-			switch (currentMoveEntry.getType())
+			switch (currentMoveEntry.getNodeType())
 			{
-				case EXACT:
+				case TranspositionTable.NODETYPE_EXACT:
 					return eval;
-				case UPPERBOUND:
+				case TranspositionTable.NODETYPE_UPPERBOUND:
 					if (eval <= alpha)
 					{
 						return eval;
 					}
 					break;
-				case LOWERBOUND:
+				case TranspositionTable.NODETYPE_LOWERBOUND:
 					if (eval >= beta)
 					{
 						return eval;
 					}
 					break;
 				default:
-					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
+					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getNodeType());
 			}
 		}
 
@@ -378,24 +379,24 @@ public class AlphaBeta implements Runnable
 			{
 				sse.staticEval = currentMoveEntry.getStaticEval();
 				eval = currentMoveEntry.getEvaluation();
-				switch (currentMoveEntry.getType())
+				switch (currentMoveEntry.getNodeType())
 				{
-					case EXACT:
+					case TranspositionTable.NODETYPE_EXACT:
 						break;
-					case UPPERBOUND:
+					case TranspositionTable.NODETYPE_UPPERBOUND:
 						if (eval > sse.staticEval)
 						{
 							eval = sse.staticEval;
 						}
 						break;
-					case LOWERBOUND:
+					case TranspositionTable.NODETYPE_LOWERBOUND:
 						if (eval < sse.staticEval)
 						{
 							eval = sse.staticEval;
 						}
 						break;
 					default:
-						throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getType());
+						throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getNodeType());
 				}
 			}
 			else
@@ -547,10 +548,10 @@ public class AlphaBeta implements Runnable
 
 			int extension = 0;
 
-			if (!inSingularSearch && ply > 0 && move.equals(ttMove) && depth >= 4
+			if (!inSingularSearch && ply > 0 && sse.ttHit && move.equals(ttMove) && depth >= 4
 					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
-					&& (currentMoveEntry.getType().equals(TranspositionTable.NodeType.EXACT)
-							|| currentMoveEntry.getType().equals(TranspositionTable.NodeType.LOWERBOUND))
+					&& (currentMoveEntry.getNodeType() == TranspositionTable.NODETYPE_EXACT
+							|| currentMoveEntry.getNodeType() == TranspositionTable.NODETYPE_LOWERBOUND)
 					&& currentMoveEntry.getDepth() > depth - 4)
 			{
 				int singularBeta = currentMoveEntry.getEvaluation() - 2 * depth;
@@ -693,20 +694,20 @@ public class AlphaBeta implements Runnable
 		{
 			if (alpha >= beta)
 			{
-				sharedThreadData.tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.LOWERBOUND, depth,
-						bestValue, bestMove, sse.staticEval);
+				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
+						TranspositionTable.NODETYPE_LOWERBOUND, depth, bestValue, bestMove, sse.staticEval);
 			}
 
 			else if (alpha == oldAlpha)
 			{
-				sharedThreadData.tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.UPPERBOUND, depth,
-						bestValue, ttMove, sse.staticEval);
+				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
+						TranspositionTable.NODETYPE_UPPERBOUND, depth, bestValue, ttMove, sse.staticEval);
 			}
 
 			else if (alpha > oldAlpha)
 			{
-				sharedThreadData.tt.write(board.getIncrementalHashKey(), TranspositionTable.NodeType.EXACT, depth,
-						bestValue, bestMove, sse.staticEval);
+				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
+						TranspositionTable.NODETYPE_EXACT, depth, bestValue, bestMove, sse.staticEval);
 			}
 		}
 

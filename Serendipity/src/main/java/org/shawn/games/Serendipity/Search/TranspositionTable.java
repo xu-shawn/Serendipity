@@ -22,14 +22,16 @@ public class TranspositionTable
 		private final int evaluation;
 		private final int staticEval;
 		private final Move move;
+		private final boolean hit;
 
 		public Entry(short fragment1, long fragment2)
 		{
-			this(fragment1 & 0b11, fragment1 >>> 2, (int) (fragment2 & 0xFFFF), (int) (fragment2 & 0xFFF0000),
-					(int) (fragment2 & 0xFFFF0000000L), (int) (fragment2 >>> 44));
+			this(fragment1 & 0b11, fragment1 >> 2, (int) (fragment2 & 0xFFFF), (int) ((fragment2 & 0xFFF0000) >> 16),
+					(int) ((fragment2 & 0xFFFF0000000L) >> 28), (int) (fragment2 >> 44),
+					(fragment1 != 0) && (fragment2 != 0));
 		}
 
-		public Entry(int nodeType, int depth, int signature, int move, int staticEval, int evaluation)
+		public Entry(int nodeType, int depth, int signature, int move, int staticEval, int evaluation, boolean hit)
 		{
 			this.signature = signature;
 			this.depth = depth;
@@ -37,6 +39,7 @@ public class TranspositionTable
 			this.move = move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
 			this.evaluation = evaluation;
 			this.staticEval = staticEval;
+			this.hit = hit;
 		}
 
 		public long getSignature()
@@ -72,6 +75,11 @@ public class TranspositionTable
 		public Move getMove()
 		{
 			return move;
+		}
+
+		public boolean hit()
+		{
+			return hit;
 		}
 	}
 
@@ -118,8 +126,8 @@ public class TranspositionTable
 		{
 			final short fragment1 = (short) (nodeType | (depth << 2));
 			final long fragment2 = ((hash >>> 48)
-					| (((move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal())) << 16)
-					| ((long)staticEval << 28) | ((long)evaluation << 44));
+					| (((move == null) ? 0 : ((move.getFrom().ordinal() << 6) | move.getTo().ordinal())) << 16)
+					| ((long) staticEval << 28) | ((long) evaluation << 44));
 
 			data1[(int) hash & mask] = fragment1;
 			data2[(int) hash & mask] = fragment2;
