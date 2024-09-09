@@ -152,6 +152,7 @@ public class NNUE
 
 		else
 		{
+			System.out.println("bestmove simd");
 			eval = 0;
 
 			for (int i = 0; i < HIDDEN_SIZE; i++)
