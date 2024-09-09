@@ -577,6 +577,10 @@ public class AlphaBeta implements Runnable
 					return singularValue;
 				}
 
+				else if (cutNode)
+				{
+					extension = -1;
+				}
 			}
 
 			else if (givesCheck)
