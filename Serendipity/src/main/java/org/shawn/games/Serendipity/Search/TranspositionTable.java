@@ -27,7 +27,7 @@ public class TranspositionTable
 		public Entry(short fragment1, long fragment2)
 		{
 			this(fragment1 & 0b11, fragment1 >> 2, (int) (fragment2 & 0xFFFF), (int) ((fragment2 & 0xFFF0000) >> 16),
-					(int) ((fragment2 & 0xFFFF0000000L) >> 28), (int) (fragment2 >> 44),
+					(short) ((fragment2 & 0xFFFF0000000L) >> 28), (int) (fragment2 >> 44),
 					(fragment1 != 0) && (fragment2 != 0));
 		}
 
@@ -122,12 +122,13 @@ public class TranspositionTable
 
 	public void write(Entry entry, long hash, int nodeType, int depth, int evaluation, Move move, int staticEval)
 	{
-		if (entry == null || nodeType == NODETYPE_EXACT || !entry.verifySignature(hash) || depth > entry.getDepth() - 4)
+		if (entry == null || !entry.hit() || nodeType == NODETYPE_EXACT || !entry.verifySignature(hash)
+				|| depth > entry.getDepth() - 4)
 		{
 			final short fragment1 = (short) (nodeType | (depth << 2));
 			final long fragment2 = ((hash >>> 48)
 					| (((move == null) ? 0 : ((move.getFrom().ordinal() << 6) | move.getTo().ordinal())) << 16)
-					| ((long) staticEval << 28) | ((long) evaluation << 44));
+					| ((staticEval & 0xFFFFL) << 28) | ((long) evaluation << 44));
 
 			data1[(int) hash & mask] = fragment1;
 			data2[(int) hash & mask] = fragment2;

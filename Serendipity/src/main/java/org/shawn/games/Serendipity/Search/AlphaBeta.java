@@ -105,6 +105,8 @@ public class AlphaBeta implements Runnable
 
 		v = v * (206 + material) / 256;
 
+		v = Math.min(Math.max(-MATE_EVAL + 1024, v), MATE_EVAL - 1024);
+
 		return v;
 	}
 
@@ -169,7 +171,7 @@ public class AlphaBeta implements Runnable
 		boolean isPV = beta - alpha > 1;
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
-		boolean ttHit = currentMoveEntry.hit();
+		boolean ttHit = currentMoveEntry.hit() && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
 
 		if (!isPV && ttHit && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 		{
@@ -340,7 +342,7 @@ public class AlphaBeta implements Runnable
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 
-		sse.ttHit = currentMoveEntry.hit();
+		sse.ttHit = currentMoveEntry.hit() && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
 
 		if (!inSingularSearch && !isPV && sse.ttHit && currentMoveEntry.getDepth() >= depth)
 		{
@@ -709,6 +711,8 @@ public class AlphaBeta implements Runnable
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 						TranspositionTable.NODETYPE_EXACT, depth, bestValue, bestMove, sse.staticEval);
 			}
+
+			TranspositionTable.Entry entry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 		}
 
 		return bestValue;
