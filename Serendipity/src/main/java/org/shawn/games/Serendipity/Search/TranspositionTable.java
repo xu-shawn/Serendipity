@@ -7,53 +7,39 @@ import com.github.bhlangonijr.chesslib.move.*;
 
 public class TranspositionTable
 {
-	public static enum NodeType
-	{
-		EXACT, LOWERBOUND, UPPERBOUND
-	}
+	public static final int NODETYPE_NONE = 0b00;
+	public static final int NODETYPE_LOWERBOUND = 0b01;
+	public static final int NODETYPE_UPPERBOUND = 0b10;
+	public static final int NODETYPE_EXACT = 0b11;
 
-	private static final NodeType[] byteToNodeType = new NodeType[] { NodeType.EXACT, NodeType.LOWERBOUND,
-			NodeType.UPPERBOUND };
+	public static final int DEPTH_NONE = -1;
 
 	public class Entry
 	{
-		// depth: (0-255) 8 bits
-		// NodeType: 8 bits
-		// evaluation: 16 bits
-		// staticEval: 16 bits
-		// Square: 6 bits
-		// Signature: 16 bits
+		private final int signature;
+		private final int depth;
+		private final int type;
+		private final int evaluation;
+		private final int staticEval;
+		private final Move move;
+		private final boolean hit;
 
-		// Total: 32 Bytes (Padding and Class Header)
-
-		private short signature;
-		private byte depth;
-		private byte type;
-		private short evaluation;
-		private short staticEval;
-		private short move;
-
-		public Entry(NodeType type, short depth, int evaluation, long signature, Move move, int staticEval)
+		public Entry(short fragment1, long fragment2)
 		{
-			this.signature = (short) (signature >>> 48);
-			this.depth = (byte) depth;
-			this.type = (byte) type.ordinal();
-			this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
-			this.evaluation = (short) evaluation;
-			this.staticEval = (short) staticEval;
+			this(fragment1 & 0b11, fragment1 >> 2, (int) (fragment2 & 0xFFFF), (int) ((fragment2 & 0xFFF0000) >> 16),
+					(short) ((fragment2 & 0xFFFF0000000L) >> 28), (int) (fragment2 >> 44),
+					(fragment1 != 0) && (fragment2 != 0));
 		}
 
-		public void write(long signature, NodeType type, short depth, int evaluation, Move move, int staticEval)
+		public Entry(int nodeType, int depth, int signature, int move, int staticEval, int evaluation, boolean hit)
 		{
-			if (type.equals(NodeType.EXACT) || !this.verifySignature(signature) || depth > this.getDepth() - 4)
-			{
-				this.signature = (short) (signature >>> 48);
-				this.depth = (byte) depth;
-				this.type = (byte) type.ordinal();
-				this.move = (move == null) ? 0 : (short) ((move.getFrom().ordinal() << 6) + move.getTo().ordinal());
-				this.evaluation = (short) evaluation;
-				this.staticEval = (short) staticEval;
-			}
+			this.signature = signature;
+			this.depth = depth;
+			this.type = nodeType;
+			this.move = move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
+			this.evaluation = evaluation;
+			this.staticEval = staticEval;
+			this.hit = hit;
 		}
 
 		public long getSignature()
@@ -63,17 +49,17 @@ public class TranspositionTable
 
 		public boolean verifySignature(long signature)
 		{
-			return (short) (signature >>> 48) == this.signature;
+			return (int) (signature >>> 48) == this.signature;
 		}
 
-		public NodeType getType()
+		public int getDepth()
 		{
-			return byteToNodeType[this.type];
+			return this.depth;
 		}
 
-		public short getDepth()
+		public int getNodeType()
 		{
-			return (short) (this.depth);
+			return this.type;
 		}
 
 		public int getEvaluation()
@@ -88,15 +74,33 @@ public class TranspositionTable
 
 		public Move getMove()
 		{
-			return move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
+			return move;
+		}
+
+		public boolean hit()
+		{
+			return hit;
 		}
 	}
 
 	private int size;
 	private int mask;
-	private Entry[] entries;
 
-	private static final int ENTRY_SIZE = 32;
+	// depth: (0-255) 8 bits
+	// NodeType: 2 bits
+
+	private short[] data1;
+
+	// evaluation: 16 bits
+	// staticEval: 16 bits
+	// Move: 12 bits
+	// Square: 6 bits
+	// Square: 6 bits
+	// Signature: 16 bits
+
+	private long[] data2;
+
+	private static final int ENTRY_SIZE = 10;
 
 	public TranspositionTable(int size)
 	{
@@ -104,29 +108,37 @@ public class TranspositionTable
 
 		this.size = Integer.highestOneBit(size);
 		this.mask = this.size - 1;
-		this.entries = new Entry[this.size];
+		this.data1 = new short[this.size];
+		this.data2 = new long[this.size];
 	}
 
 	public Entry probe(long hash)
 	{
-		return entries[(int) (hash & mask)];
+		final short fragment1 = data1[(int) (hash & mask)];
+		final long fragment2 = data2[(int) (hash & mask)];
+
+		return new Entry(fragment1, fragment2);
 	}
 
-	public void write(long hash, NodeType type, int depth, int evaluation, Move move, int staticEval)
+	public void write(Entry entry, long hash, int nodeType, int depth, int evaluation, Move move, int staticEval)
 	{
-		if (entries[(int) (hash & mask)] == null)
+		if (entry == null || !entry.hit() || nodeType == NODETYPE_EXACT || !entry.verifySignature(hash)
+				|| depth > entry.getDepth() - 4)
 		{
-			entries[(int) (hash & mask)] = new Entry(type, (short) depth, evaluation, hash, move, staticEval);
-		}
-		else
-		{
-			entries[(int) (hash & mask)].write(hash, type, (short) depth, evaluation, move, staticEval);
+			final short fragment1 = (short) (nodeType | (depth << 2));
+			final long fragment2 = ((hash >>> 48)
+					| (((move == null) ? 0 : ((move.getFrom().ordinal() << 6) | move.getTo().ordinal())) << 16)
+					| ((staticEval & 0xFFFFL) << 28) | ((long) evaluation << 44));
+
+			data1[(int) hash & mask] = fragment1;
+			data2[(int) hash & mask] = fragment2;
 		}
 	}
 
 	public void clear()
 	{
-		Arrays.fill(entries, null);
+		Arrays.fill(data1, (short) 0);
+		Arrays.fill(data2, 0);
 	}
 
 	public void resize(int size)
@@ -134,7 +146,8 @@ public class TranspositionTable
 		size *= 1048576 / ENTRY_SIZE;
 		this.size = Integer.highestOneBit(size);
 		this.mask = this.size - 1;
-		this.entries = new Entry[this.size];
+		this.data1 = new short[this.size];
+		this.data2 = new long[this.size];
 	}
 
 	public int hashfull()
@@ -143,7 +156,7 @@ public class TranspositionTable
 
 		for (int i = 0; i < 1000; i++)
 		{
-			if (this.entries[i] != null)
+			if (this.data2[i] != 0)
 			{
 				hashfull++;
 			}
@@ -159,7 +172,7 @@ public class TranspositionTable
 
 		for (int i = 0; i < minimum_hash; i++)
 		{
-			if (this.entries[i] != null)
+			if (this.data2[i] != 0)
 			{
 				hashfull++;
 			}
