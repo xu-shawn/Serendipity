@@ -6,7 +6,7 @@ public class InferenceChooser
 {
 	public static Inference chooseInference()
 	{
-		if (ShortVector.SPECIES_PREFERRED.vectorBitSize() >= 16)
+		if (ShortVector.SPECIES_PREFERRED.vectorBitSize() >= 128)
 		{
 			return new SIMDInference();
 		}
