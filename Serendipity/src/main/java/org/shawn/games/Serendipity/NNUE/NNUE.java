@@ -2,8 +2,6 @@ package org.shawn.games.Serendipity.NNUE;
 
 import java.io.*;
 import java.util.Objects;
-import jdk.incubator.vector.*;
-import static jdk.incubator.vector.VectorOperators.S2I;
 
 import com.github.bhlangonijr.chesslib.*;
 
@@ -31,27 +29,16 @@ public class NNUE
 	};
 	// @formatter:on
 
-	private static final int SCALE = 400;
-	private static final int QA = 255;
-	private static final int QB = 64;
-
-	private static final VectorSpecies<Short> SHORT_SPECIES = ShortVector.SPECIES_PREFERRED;
-	private static final int UPPERBOUND = SHORT_SPECIES.loopBound(HIDDEN_SIZE);
+	public static final int SCALE = 400;
+	public static final int QA = 255;
+	public static final int QB = 64;
 
 	final short[][] L1Weights;
 	final short[] L1Biases;
 	private final short[][] L2Weights;
 	private final short[] outputBiases;
 
-	private final static int[] screlu = new int[Short.MAX_VALUE - Short.MIN_VALUE + 1];
-
-	static
-	{
-		for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++)
-		{
-			screlu[i - (int) Short.MIN_VALUE] = screlu((short) (i));
-		}
-	}
+	private static final Inference INFERENCE = InferenceChooser.chooseInference();
 
 	private short toLittleEndian(short input)
 	{
@@ -100,61 +87,15 @@ public class NNUE
 		networkData.close();
 	}
 
-	private static int screlu(short i)
+	public static int chooseOutputBucket(Board board)
 	{
-		int v = Math.max(0, Math.min(i, QA));
-		return v * v;
+		return (Long.bitCount(board.getBitboard()) - 2) / DIVISOR;
 	}
 
 	public static int evaluate(NNUE network, AccumulatorStack accumulators, Side side, int chosenBucket)
 	{
-		AccumulatorStack.Accumulator us = accumulators.getAccumulator(side);
-		AccumulatorStack.Accumulator them = accumulators.getAccumulator(side.flip());
-
-		IntVector sum = IntVector.zero(SHORT_SPECIES.vectorShape().withLanes(int.class));
-
-		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
-		{
-			ShortVector usInputs = ShortVector.fromArray(SHORT_SPECIES, us.values, i);
-			ShortVector themInputs = ShortVector.fromArray(SHORT_SPECIES, them.values, i);
-			ShortVector usWeights = ShortVector.fromArray(SHORT_SPECIES, network.L2Weights[chosenBucket], i);
-			ShortVector themWeights = ShortVector.fromArray(SHORT_SPECIES, network.L2Weights[chosenBucket],
-					i + HIDDEN_SIZE);
-
-			usInputs = usInputs.max(ShortVector.zero(SHORT_SPECIES)).min(ShortVector.broadcast(SHORT_SPECIES, QA));
-			themInputs = themInputs.max(ShortVector.zero(SHORT_SPECIES)).min(ShortVector.broadcast(SHORT_SPECIES, QA));
-
-			ShortVector usWeightedTerms = usInputs.mul(usWeights);
-			ShortVector themWeightedTerms = themInputs.mul(themWeights);
-
-			Vector<Integer> usInputsLo = usInputs.convert(S2I, 0);
-			Vector<Integer> usInputsHi = usInputs.convert(S2I, 1);
-			Vector<Integer> themInputsLo = themInputs.convert(S2I, 0);
-			Vector<Integer> themInputsHi = themInputs.convert(S2I, 1);
-
-			Vector<Integer> usWeightedTermsLo = usWeightedTerms.convert(S2I, 0);
-			Vector<Integer> usWeightedTermsHi = usWeightedTerms.convert(S2I, 1);
-			Vector<Integer> themWeightedTermsLo = themWeightedTerms.convert(S2I, 0);
-			Vector<Integer> themWeightedTermsHi = themWeightedTerms.convert(S2I, 1);
-
-			sum = sum.add(usInputsLo.mul(usWeightedTermsLo)).add(usInputsHi.mul(usWeightedTermsHi))
-					.add(themInputsLo.mul(themWeightedTermsLo)).add(themInputsHi.mul(themWeightedTermsHi));
-		}
-
-		int eval = sum.reduceLanes(VectorOperators.ADD);
-
-		eval /= QA;
-		eval += network.outputBiases[chosenBucket];
-
-		eval *= SCALE;
-		eval /= QA * QB;
-
-		return eval;
-	}
-
-	public static int chooseOutputBucket(Board board)
-	{
-		return (Long.bitCount(board.getBitboard()) - 2) / DIVISOR;
+		return INFERENCE.forward(accumulators, side, network.L2Weights[chosenBucket],
+				network.outputBiases[chosenBucket]);
 	}
 
 	public static int chooseInputBucket(Board board, Side side)
