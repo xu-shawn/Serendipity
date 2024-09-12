@@ -3,6 +3,7 @@ package org.shawn.games.Serendipity.Search;
 import java.util.Arrays;
 
 import com.github.bhlangonijr.chesslib.Square;
+import com.github.bhlangonijr.chesslib.Piece;
 import com.github.bhlangonijr.chesslib.move.*;
 
 public class TranspositionTable
@@ -26,8 +27,8 @@ public class TranspositionTable
 
 		public Entry(short fragment1, long fragment2)
 		{
-			this(fragment1 & 0b11, fragment1 >> 2, (int) (fragment2 & 0xFFFF), (int) ((fragment2 & 0xFFF0000) >> 16),
-					(short) ((fragment2 & 0xFFFF0000000L) >> 28), (int) (fragment2 >> 44),
+			this(fragment1 & 0b11, fragment1 >> 2, (int) (fragment2 & 0xFFFF), ((int) (fragment2 & 0xFFFF0000) >>> 16),
+					(short) ((fragment2 & 0xFFFF00000000L) >> 32), (int) (fragment2 >> 48),
 					(fragment1 != 0) && (fragment2 != 0));
 		}
 
@@ -36,7 +37,9 @@ public class TranspositionTable
 			this.signature = signature;
 			this.depth = depth;
 			this.type = nodeType;
-			this.move = move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
+			this.move = move == 0 ? null
+					: new Move(Square.squareAt((move & 0b111111000000) >> 6), Square.squareAt(move & 0b111111),
+							Piece.values()[move >> 12]);
 			this.evaluation = evaluation;
 			this.staticEval = staticEval;
 			this.hit = hit;
@@ -127,8 +130,10 @@ public class TranspositionTable
 		{
 			final short fragment1 = (short) (nodeType | (depth << 2));
 			final long fragment2 = ((hash >>> 48)
-					| (((move == null) ? 0 : ((move.getFrom().ordinal() << 6) | move.getTo().ordinal())) << 16)
-					| ((staticEval & 0xFFFFL) << 28) | ((long) evaluation << 44));
+					| ((move == null) ? 0
+							: ((long) (move.getPromotion().ordinal() << 12) | (move.getFrom().ordinal() << 6)
+									| move.getTo().ordinal()) << 16)
+					| ((((long) (staticEval)) << 32) & 0xFFFF00000000L) | (((long) evaluation) << 48));
 
 			data1[(int) hash & mask] = fragment1;
 			data2[(int) hash & mask] = fragment2;

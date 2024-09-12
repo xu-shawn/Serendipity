@@ -711,8 +711,6 @@ public class AlphaBeta implements Runnable
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 						TranspositionTable.NODETYPE_EXACT, depth, bestValue, bestMove, sse.staticEval);
 			}
-
-			TranspositionTable.Entry entry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 		}
 
 		return bestValue;

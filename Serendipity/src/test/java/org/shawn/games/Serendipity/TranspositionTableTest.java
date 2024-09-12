@@ -26,12 +26,12 @@ public class TranspositionTableTest
 		assertTrue(tt.probe(board.getIncrementalHashKey()).verifySignature(board.getIncrementalHashKey()));
 
 		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_NONE,
-				-6900, new Move(Square.E2, Square.E4), -200);
+				-6900, new Move(Square.E2, Square.E4, Piece.BLACK_BISHOP), -200);
 		assertEquals(TranspositionTable.NODETYPE_NONE, tt.probe(board.getIncrementalHashKey()).getNodeType());
 		assertEquals(TranspositionTable.DEPTH_NONE, tt.probe(board.getIncrementalHashKey()).getDepth());
 		assertEquals(-6900, tt.probe(board.getIncrementalHashKey()).getEvaluation());
 		assertEquals(-200, tt.probe(board.getIncrementalHashKey()).getStaticEval());
-		assertTrue(tt.probe(board.getIncrementalHashKey()).getMove().equals(new Move(Square.E2, Square.E4)));
+		assertTrue(tt.probe(board.getIncrementalHashKey()).getMove().equals(new Move(Square.E2, Square.E4, Piece.BLACK_BISHOP)));
 		assertTrue(tt.probe(board.getIncrementalHashKey()).verifySignature(board.getIncrementalHashKey()));
 	}
 }
