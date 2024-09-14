@@ -12,6 +12,6 @@ if test -n "$JAVA_HOME"; then
     java="$JAVA_HOME/bin/java"
 fi
 
-exec "$java" --add-modules=jdk.incubator.vector -XX:+UseParallelGC -Xmx32m $java_args -jar $MYSELF "$@"
+exec "$java" --add-modules=jdk.incubator.vector -XX:+UseParallelGC -Xmx96m $java_args -jar $MYSELF "$@"
 
 exit 1
