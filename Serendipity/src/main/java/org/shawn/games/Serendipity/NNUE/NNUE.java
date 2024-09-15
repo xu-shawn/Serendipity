@@ -14,18 +14,18 @@ public class NNUE
 	static final int FEATURE_SIZE = 768;
 	private static final int OUTPUT_BUCKETS = 8;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
-	private static final int INPUT_BUCKET_SIZE = 7;
+	private static final int INPUT_BUCKET_SIZE = 4;
 	// @formatter:off
 	private static final int[] INPUT_BUCKETS = new int[]
 	{
-			0, 0, 1, 1, 2, 2, 3, 3,
-			4, 4, 4, 4, 5, 5, 5, 5,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
+			0, 0, 1, 1, 4, 4, 5, 5,
+			2, 2, 2, 2, 6, 6, 6, 6,
+			3, 3, 3, 3, 7, 7, 7, 7,
+			3, 3, 3, 3, 7, 7, 7, 7,
+			3, 3, 3, 3, 7, 7, 7, 7,
+			3, 3, 3, 3, 7, 7, 7, 7,
+			3, 3, 3, 3, 7, 7, 7, 7,
+			3, 3, 3, 3, 7, 7, 7, 7,
 	};
 	// @formatter:on
 
@@ -50,13 +50,18 @@ public class NNUE
 		DataInputStream networkData = new DataInputStream(
 				Objects.requireNonNull(getClass().getResourceAsStream(filePath)));
 
-		L1Weights = new short[FEATURE_SIZE * INPUT_BUCKET_SIZE][HIDDEN_SIZE];
+		L1Weights = new short[FEATURE_SIZE * INPUT_BUCKET_SIZE * 2][HIDDEN_SIZE];
 
-		for (int i = 0; i < FEATURE_SIZE * INPUT_BUCKET_SIZE; i++)
+		for (int bucket = 0; bucket < INPUT_BUCKET_SIZE; bucket++)
 		{
-			for (int j = 0; j < HIDDEN_SIZE; j++)
+			for (int i = 0; i < FEATURE_SIZE; i++)
 			{
-				L1Weights[i][j] = toLittleEndian(networkData.readShort());
+				for (int j = 0; j < HIDDEN_SIZE; j++)
+				{
+					L1Weights[i + FEATURE_SIZE * bucket][j] = toLittleEndian(networkData.readShort());
+					L1Weights[NNUE.flipIndex(i) + FEATURE_SIZE * (bucket + INPUT_BUCKET_SIZE)][j] = L1Weights[i
+							+ FEATURE_SIZE * bucket][j];
+				}
 			}
 		}
 
@@ -116,5 +121,10 @@ public class NNUE
 						+ square.ordinal()
 				: (piece.getPieceSide().ordinal() ^ 1) * COLOR_STRIDE + piece.getPieceType().ordinal() * PIECE_STRIDE
 						+ (square.ordinal() ^ 0b111000);
+	}
+
+	private static int flipIndex(final int index)
+	{
+		return (index / 64) * 64 + (index % 64) ^ 0b111;
 	}
 }
