@@ -18,7 +18,7 @@ public class NNUE
 	// @formatter:off
 	private static final int[] INPUT_BUCKETS = new int[]
 	{
-			0, 0, 1, 1, 4, 4, 5, 5,
+			0, 0, 1, 1, 5, 5, 4, 4,
 			2, 2, 2, 2, 6, 6, 6, 6,
 			3, 3, 3, 3, 7, 7, 7, 7,
 			3, 3, 3, 3, 7, 7, 7, 7,
