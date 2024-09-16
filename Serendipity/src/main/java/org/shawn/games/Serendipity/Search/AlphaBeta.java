@@ -476,19 +476,7 @@ public class AlphaBeta implements Runnable
 			}
 		}
 
-		final List<Move> legalMoves = board.legalMoves();
-
-		if (legalMoves.isEmpty())
-		{
-			if (inCheck)
-			{
-				return -MATE_EVAL + ply;
-			}
-			else
-			{
-				return DRAW_EVAL;
-			}
-		}
+		final List<Move> legalMoves = board.pseudoLegalMoves();
 
 		int oldAlpha = alpha;
 
@@ -510,6 +498,11 @@ public class AlphaBeta implements Runnable
 		for (Move move : legalMoves)
 		{
 			if (move.equals(sse.excludedMove))
+			{
+				continue;
+			}
+
+			if (!board.isMoveLegal(move, false))
 			{
 				continue;
 			}
@@ -689,7 +682,20 @@ public class AlphaBeta implements Runnable
 
 		if (sse.moveCount == 0)
 		{
-			return inSingularSearch ? alpha : -MATE_EVAL + ply;
+			if (inSingularSearch)
+			{
+				return alpha;
+			}
+
+			else if (inCheck)
+			{
+				return -MATE_EVAL + ply;
+			}
+
+			else
+			{
+				return DRAW_EVAL;
+			}
 		}
 
 		if (!inSingularSearch)
