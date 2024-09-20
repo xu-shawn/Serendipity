@@ -169,14 +169,15 @@ public class AlphaBeta implements Runnable
 		}
 
 		boolean isPV = beta - alpha > 1;
+		final int oldAlpha = alpha;
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 		boolean ttHit = currentMoveEntry.hit() && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
 		Move ttMove = ttHit ? currentMoveEntry.getMove() : null;
 
-		if (!isPV && ttHit && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
+		if (!isPV && ttHit)
 		{
-			int eval = currentMoveEntry.getEvaluation();
+			int eval = sse.staticEval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getNodeType())
 			{
 				case TranspositionTable.NODETYPE_EXACT:
@@ -275,7 +276,7 @@ public class AlphaBeta implements Runnable
 			return -MATE_EVAL + ply;
 		}
 
-		if (alpha >= beta)
+		if (alpha >= oldAlpha)
 		{
 			sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 					TranspositionTable.NODETYPE_LOWERBOUND, TranspositionTable.DEPTH_QS, bestScore, bestMove,
