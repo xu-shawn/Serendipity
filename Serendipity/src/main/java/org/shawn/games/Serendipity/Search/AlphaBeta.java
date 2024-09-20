@@ -217,7 +217,7 @@ public class AlphaBeta implements Runnable
 
 		else
 		{
-			int standPat = bestScore = evaluate(board);
+			int standPat = bestScore = sse.staticEval = evaluate(board);
 
 			alpha = Math.max(alpha, standPat);
 
