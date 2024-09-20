@@ -172,6 +172,7 @@ public class AlphaBeta implements Runnable
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 		boolean ttHit = currentMoveEntry.hit() && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
+		Move ttMove = ttHit ? currentMoveEntry.getMove() : null;
 
 		if (!isPV && ttHit && currentMoveEntry.verifySignature(board.getIncrementalHashKey()))
 		{
@@ -272,6 +273,20 @@ public class AlphaBeta implements Runnable
 		if (bestScore == MIN_EVAL && inCheck)
 		{
 			return -MATE_EVAL + ply;
+		}
+
+		if (alpha >= beta)
+		{
+			sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
+					TranspositionTable.NODETYPE_LOWERBOUND, TranspositionTable.DEPTH_QS, bestScore, bestMove,
+					sse.staticEval);
+		}
+
+		else
+		{
+			sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
+					TranspositionTable.NODETYPE_UPPERBOUND, TranspositionTable.DEPTH_QS, bestScore, ttMove,
+					sse.staticEval);
 		}
 
 		return bestScore;

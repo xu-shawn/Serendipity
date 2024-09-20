@@ -12,7 +12,8 @@ public class TranspositionTable
 	public static final int NODETYPE_UPPERBOUND = 0b10;
 	public static final int NODETYPE_EXACT = 0b11;
 
-	public static final int DEPTH_NONE = -1;
+	public static final int DEPTH_NONE = -7;
+	public static final int DEPTH_QS = -1;
 
 	public class Entry
 	{
