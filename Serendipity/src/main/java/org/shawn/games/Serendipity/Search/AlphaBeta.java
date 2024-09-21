@@ -175,9 +175,9 @@ public class AlphaBeta implements Runnable
 		boolean ttHit = currentMoveEntry.hit() && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
 		Move ttMove = ttHit ? currentMoveEntry.getMove() : null;
 
-		if (!isPV && ttHit)
+		if (!isPV && ttHit && currentMoveEntry.getNodeType() != TranspositionTable.NODETYPE_NONE)
 		{
-			int eval = sse.staticEval = currentMoveEntry.getEvaluation();
+			int eval = currentMoveEntry.getEvaluation();
 			switch (currentMoveEntry.getNodeType())
 			{
 				case TranspositionTable.NODETYPE_EXACT:
@@ -217,16 +217,27 @@ public class AlphaBeta implements Runnable
 
 		else
 		{
-			int standPat = bestScore = sse.staticEval = evaluate(board);
+			if (ttHit)
+			{
+				bestScore = sse.staticEval = currentMoveEntry.getStaticEval();
+			}
 
-			alpha = Math.max(alpha, standPat);
+			else
+			{
+				bestScore = sse.staticEval = evaluate(board);
+				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
+						TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_NONE, VALUE_NONE, null,
+						sse.staticEval);
+			}
+
+			alpha = Math.max(alpha, sse.staticEval);
 
 			if (alpha >= beta)
 			{
 				return alpha;
 			}
 
-			futilityBase = standPat + 205;
+			futilityBase = sse.staticEval + 205;
 			moves = board.pseudoLegalCaptures();
 			MoveSort.sortCaptures(moves, board, threadData.captureHistory);
 		}
@@ -395,31 +406,39 @@ public class AlphaBeta implements Runnable
 		{
 			if (sse.ttHit)
 			{
-				sse.staticEval = currentMoveEntry.getStaticEval();
-				eval = currentMoveEntry.getEvaluation();
-				switch (currentMoveEntry.getNodeType())
+				eval = sse.staticEval = currentMoveEntry.getStaticEval();
+
+				if (currentMoveEntry.getEvaluation() != VALUE_NONE)
 				{
-					case TranspositionTable.NODETYPE_EXACT:
-						break;
-					case TranspositionTable.NODETYPE_UPPERBOUND:
-						if (eval > sse.staticEval)
-						{
-							eval = sse.staticEval;
-						}
-						break;
-					case TranspositionTable.NODETYPE_LOWERBOUND:
-						if (eval < sse.staticEval)
-						{
-							eval = sse.staticEval;
-						}
-						break;
-					default:
-						throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getNodeType());
+					eval = currentMoveEntry.getEvaluation();
+					switch (currentMoveEntry.getNodeType())
+					{
+						case TranspositionTable.NODETYPE_EXACT:
+							break;
+						case TranspositionTable.NODETYPE_UPPERBOUND:
+							if (eval > sse.staticEval)
+							{
+								eval = sse.staticEval;
+							}
+							break;
+						case TranspositionTable.NODETYPE_LOWERBOUND:
+							if (eval < sse.staticEval)
+							{
+								eval = sse.staticEval;
+							}
+							break;
+						default:
+							throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getNodeType());
+					}
 				}
 			}
 			else
 			{
 				eval = sse.staticEval = evaluate(board);
+
+				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
+						TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_NONE, VALUE_NONE, null,
+						sse.staticEval);
 			}
 		}
 
@@ -436,6 +455,7 @@ public class AlphaBeta implements Runnable
 			{
 				improving = ss.get(-4).staticEval < sse.staticEval;
 			}
+
 			else
 			{
 				improving = true;
