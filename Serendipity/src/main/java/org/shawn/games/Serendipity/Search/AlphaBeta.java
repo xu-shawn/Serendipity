@@ -110,20 +110,6 @@ public class AlphaBeta implements Runnable
 		return v;
 	}
 
-	private void sortMoves(List<Move> moves, Board board, int ply)
-	{
-		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
-
-		Move ttMove = currentMoveEntry.hit() ? currentMoveEntry.getMove() : null;
-
-		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
-				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
-				ss.get(ply - 6).continuationHistory };
-
-		MoveSort.sortMoves(moves, ttMove, null, threadData.history, threadData.captureHistory,
-				currentContinuationHistories, board);
-	}
-
 	private void updateContinuationHistories(int ply, int depth, Board board, Move move, List<Move> quietsSearched)
 	{
 		History conthist;
@@ -212,7 +198,13 @@ public class AlphaBeta implements Runnable
 		{
 			bestScore = futilityBase = MIN_EVAL;
 			moves = board.legalMoves();
-			sortMoves(moves, board, ply);
+
+			History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
+					ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
+					ss.get(ply - 6).continuationHistory };
+
+			MoveSort.sortMoves(moves, ttMove, null, threadData.history, threadData.captureHistory,
+					currentContinuationHistories, board);
 		}
 
 		else
@@ -239,7 +231,7 @@ public class AlphaBeta implements Runnable
 
 			futilityBase = sse.staticEval + 205;
 			moves = board.pseudoLegalCaptures();
-			MoveSort.sortCaptures(moves, board, threadData.captureHistory);
+			MoveSort.sortCaptures(moves, ttMove, board, threadData.captureHistory);
 		}
 
 		for (Move move : moves)

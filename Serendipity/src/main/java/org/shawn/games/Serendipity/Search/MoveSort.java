@@ -78,26 +78,26 @@ public class MoveSort
 		}
 
 		moves.sort((m1, m2) -> {
-            if (((ScoredMove) m2).getScore() > ((ScoredMove) m1).getScore())
-            {
-                return 1;
-            }
+			if (((ScoredMove) m2).getScore() > ((ScoredMove) m1).getScore())
+			{
+				return 1;
+			}
 
-            else if (((ScoredMove) m2).getScore() == ((ScoredMove) m1).getScore())
-            {
-                return 0;
-            }
+			else if (((ScoredMove) m2).getScore() == ((ScoredMove) m1).getScore())
+			{
+				return 0;
+			}
 
-            return -1;
-        });
+			return -1;
+		});
 	}
 
-	public static void sortCaptures(List<Move> moves, Board board, History captureHistory)
+	public static void sortCaptures(List<Move> moves, Move ttMove, Board board, History captureHistory)
 	{
 		for (int i = 0; i < moves.size(); i++)
 		{
 			Move move = moves.get(i);
-			int value = qSearchValue(move, board, captureHistory);
+			int value = (move.equals(ttMove)) ? 2000000000 : qSearchValue(move, board, captureHistory);
 			moves.set(i, new ScoredMove(move, value));
 		}
 
