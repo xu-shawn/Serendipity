@@ -224,6 +224,7 @@ public class UCI
 					break;
 				case "go":
 					Limits limits = new Limits();
+					limits.setTime(157680000000L);
 
 					for (int i = 1; i < fullCommand.length; i++)
 					{
