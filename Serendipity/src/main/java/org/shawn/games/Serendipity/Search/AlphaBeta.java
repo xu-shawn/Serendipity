@@ -624,7 +624,7 @@ public class AlphaBeta implements Runnable
 
 			int thisMoveEval = MIN_EVAL;
 
-			if (sse.moveCount > 1 + (ply == 0 ? 1 : 0) && depth > 2)
+			if (sse.moveCount > 1 + (ply == 0 ? 1 : 0) && depth > 1)
 			{
 				r -= isPV ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
@@ -638,6 +638,11 @@ public class AlphaBeta implements Runnable
 				}
 
 				int d = Math.min(newdepth, newdepth - r);
+
+				if (depth == 2)
+				{
+					d = Math.max(d, 1);
+				}
 
 				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
 
