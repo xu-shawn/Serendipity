@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
 import org.shawn.games.Serendipity.NNUE.*;
+import org.shawn.games.Serendipity.Search.Debug.Debugger;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -617,6 +618,14 @@ public class AlphaBeta implements Runnable
 
 			newdepth += extension;
 
+			if (isQuiet)
+			{
+				final int history = threadData.history.get(board, move)
+						+ currentContinuationHistories[0].get(board, move) + 4600;
+				
+				r -= history / 5000;
+			}
+
 			accumulators.push(board, move);
 			board.doMove(move);
 			sse.move = move;
@@ -630,12 +639,6 @@ public class AlphaBeta implements Runnable
 				r -= givesCheck ? 1 : 0;
 				r -= !isQuiet ? 1 : 0;
 				r += cutNode ? 1 : 0;
-
-				if (isQuiet)
-				{
-					final int history = threadData.history.get(board, move) + 4500;
-					r -= history / 5000;
-				}
 
 				int d = Math.min(newdepth, newdepth - r);
 
