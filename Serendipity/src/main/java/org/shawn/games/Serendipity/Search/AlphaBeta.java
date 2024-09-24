@@ -624,7 +624,7 @@ public class AlphaBeta implements Runnable
 						+ currentContinuationHistories[1].get(board, move)
 						+ currentContinuationHistories[3].get(board, move) + 6628;
 
-				r -= history / 70000;
+				r -= history / 140000;
 			}
 
 			accumulators.push(board, move);
