@@ -23,7 +23,7 @@ public class MoveSort
 
 	private static int captureValue(Move move, Board board, History captureHistory)
 	{
-		return pieceValue(board.getPiece(move.getTo())) * 100 + captureHistory.get(board, move) / 256;
+		return pieceValue(board.getPiece(move.getTo())) * 100 + captureHistory.get(board, move) / 128;
 	}
 
 	private static int qSearchValue(Move move, Board board, History captureHistory)
