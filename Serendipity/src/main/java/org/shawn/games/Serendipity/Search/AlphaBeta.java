@@ -610,11 +610,6 @@ public class AlphaBeta implements Runnable
 
 			}
 
-			else if (givesCheck)
-			{
-				extension = 1;
-			}
-
 			newdepth += extension;
 
 			if (isQuiet)
