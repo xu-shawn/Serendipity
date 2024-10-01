@@ -75,7 +75,7 @@ public class AlphaBeta implements Runnable
 
 	private static int stat_malus(int depth)
 	{
-		return -stat_bonus(depth);
+		return -2 * stat_bonus(depth);
 	}
 
 	public static boolean isQuiet(Move move, Board board)
@@ -615,7 +615,7 @@ public class AlphaBeta implements Runnable
 			if (isQuiet)
 			{
 				final int history = threadData.history.get(board, move) * 2
-						+ +currentContinuationHistories[0].get(board, move)
+						+ currentContinuationHistories[0].get(board, move)
 						+ currentContinuationHistories[1].get(board, move)
 						+ currentContinuationHistories[3].get(board, move) + 6628;
 
