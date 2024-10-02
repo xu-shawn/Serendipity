@@ -52,7 +52,7 @@ public class AlphaBeta implements Runnable
 		{
 			for (int j = 0; j < reduction[0].length; j++)
 			{
-				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
+				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.07);
 			}
 		}
 	}
