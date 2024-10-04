@@ -183,7 +183,7 @@ public class MovePicker
 
 	public void initMoves()
 	{
-		this.moves = board.legalMoves();
+		this.moves = board.pseudoLegalMoves();
 		this.moveScore = new int[this.moves.size()];
 
 		for (int i = 0; i < this.moves.size(); i++)

@@ -549,6 +549,11 @@ public class AlphaBeta implements Runnable
 			{
 				continue;
 			}
+			
+			if (!board.isMoveLegal(move, false))
+			{
+				continue;
+			}
 
 			sse.moveCount++;
 			int newdepth = depth - 1;
