@@ -540,31 +540,6 @@ public class AlphaBeta implements Runnable
 
 		Move move;
 
-		int iii = 0;
-		while ((move = movePicker.next()) != null)
-		{
-			if (!move.equals(legalMoves.get(iii)))
-			{
-				System.out.println(MovePicker.isPseudoLegal(board, ttMove));
-				System.out.println(iii);
-				System.out.println(legalMoves.toString());
-				System.out.println(board);
-				movePicker = new MovePicker(board, ttMove, sse.killer, threadData.history, threadData.captureHistory,
-						currentContinuationHistories);
-
-				while ((move = movePicker.next()) != null)
-				{
-					System.out.print(move + " ");
-				}
-
-				System.out.println();
-				System.out.println("ERR");
-				throw new TimeOutException();
-			}
-
-			iii++;
-		}
-
 		movePicker = new MovePicker(board, ttMove, sse.killer, threadData.history, threadData.captureHistory,
 				currentContinuationHistories);
 
