@@ -1,7 +1,10 @@
 package org.shawn.games.Serendipity.Search;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.shawn.games.Serendipity.Search.History.History;
 
@@ -26,7 +29,7 @@ public class MovePicker
 	private History[] continuationHistories;
 
 	private int[] moveScore;
-	private List<Move> moves;
+	private LinkedList<Move> moves;
 
 	private int stage;
 	private int moveIndex;
@@ -183,7 +186,7 @@ public class MovePicker
 
 	public void initMoves()
 	{
-		this.moves = board.pseudoLegalMoves();
+		this.moves = (LinkedList<Move>) board.pseudoLegalMoves();
 		this.moveScore = new int[this.moves.size()];
 
 		for (int i = 0; i < this.moves.size(); i++)
@@ -199,22 +202,35 @@ public class MovePicker
 			return null;
 		}
 
-		int temp;
-		for (int i = this.moves.size() - 1; i > this.moveIndex; i--)
-		{
-			if (this.moveScore[i] > this.moveScore[i - 1])
-			{
-				Collections.swap(moves, i, i - 1);
+		int tempScore;
+		Move currMove;
+		Move prevMove;
 
-				temp = this.moveScore[i];
-				this.moveScore[i] = this.moveScore[i - 1];
-				this.moveScore[i - 1] = temp;
+		ListIterator<Move> moveIterator = moves.listIterator(moves.size());
+
+		for (int i = moves.size() - 1; i > this.moveIndex; i--)
+		{
+			if (moveScore[i] > moveScore[i - 1])
+			{
+				currMove = moveIterator.previous();
+				prevMove = moveIterator.previous();
+				moveIterator.next();
+
+				moveIterator.set(currMove);
+				moveIterator.next();
+				moveIterator.set(prevMove);
+
+				tempScore = moveScore[i];
+				moveScore[i] = moveScore[i - 1];
+				moveScore[i - 1] = tempScore;
 			}
+
+			moveIterator.previous();
 		}
 
 		this.moveIndex++;
 
-		return this.moves.get(moveIndex - 1);
+		return moveIterator.previous();
 	}
 
 	public Move next()
