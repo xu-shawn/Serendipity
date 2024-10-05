@@ -90,50 +90,53 @@ public class MovePicker
 			return false;
 		}
 
-		switch (movedPieceType)
+		if (PieceType.PAWN.equals(movedPieceType))
 		{
-			case PAWN:
-				long pawnThreats = Bitboard.getPawnCaptures(side, from,
-						to.getBitboard() & (board.getBbSide()[1 - side.ordinal()] | board.getEnPassant().getBitboard()),
-						board.getEnPassant());
-				pawnThreats |= Bitboard.getPawnMoves(side, from, board.getBitboard()) & to.getBitboard();
-				if (pawnThreats == 0L)
-				{
-					return false;
-				}
-				break;
-			case KNIGHT:
-				if (Bitboard.getKnightAttacks(from, to.getBitboard()) == 0L)
-				{
-					return false;
-				}
-				break;
-			case BISHOP:
-				if ((Bitboard.getBishopAttacks(occupied, from) & to.getBitboard()) == 0L)
-				{
-					return false;
-				}
-				break;
-			case ROOK:
-				if ((Bitboard.getRookAttacks(occupied, from) & to.getBitboard()) == 0L)
-				{
-					return false;
-				}
-				break;
-			case QUEEN:
-				if ((Bitboard.getQueenAttacks(occupied, from) & to.getBitboard()) == 0L)
-				{
-					return false;
-				}
-				break;
-			case KING:
-				if (Bitboard.getKingAttacks(from, to.getBitboard()) == 0L)
-				{
-					return false;
-				}
-				break;
-			default:
+			long pawnThreats = Bitboard.getPawnCaptures(side, from,
+					to.getBitboard() & (board.getBbSide()[1 - side.ordinal()] | board.getEnPassant().getBitboard()),
+					board.getEnPassant());
+			pawnThreats |= Bitboard.getPawnMoves(side, from, board.getBitboard()) & to.getBitboard();
+			if (pawnThreats == 0L)
+			{
 				return false;
+			}
+		}
+
+		else if (PieceType.KNIGHT.equals(movedPieceType))
+		{
+			if (Bitboard.getKnightAttacks(from, to.getBitboard()) == 0L)
+			{
+				return false;
+			}
+		}
+
+		else if (PieceType.BISHOP.equals(movedPieceType))
+		{
+			if ((Bitboard.getBishopAttacks(occupied, from) & to.getBitboard()) == 0L)
+			{
+				return false;
+			}
+		}
+
+		else if (PieceType.ROOK.equals(movedPieceType))
+		{
+			if ((Bitboard.getRookAttacks(occupied, from) & to.getBitboard()) == 0L)
+			{
+				return false;
+			}
+		}
+
+		else if (PieceType.QUEEN.equals(movedPieceType))
+		{
+			if ((Bitboard.getQueenAttacks(occupied, from) & to.getBitboard()) == 0L)
+			{
+				return false;
+			}
+		}
+
+		else if (Bitboard.getKingAttacks(from, to.getBitboard()) == 0L)
+		{
+			return false;
 		}
 
 		return true;
@@ -185,7 +188,7 @@ public class MovePicker
 
 	public void initMoves()
 	{
-		this.moves = (LinkedList<Move>) board.legalMoves();
+		this.moves = (LinkedList<Move>) board.pseudoLegalMoves();
 		MoveSort.sortMoves(moves, ttMove, killer, history, captureHistory, continuationHistories, board);
 		this.moveIterator = this.moves.listIterator();
 	}

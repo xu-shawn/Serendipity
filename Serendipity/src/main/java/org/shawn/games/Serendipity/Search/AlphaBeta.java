@@ -504,28 +504,11 @@ public class AlphaBeta implements Runnable
 			}
 		}
 
-		final List<Move> legalMoves = board.legalMoves();
-
-		if (legalMoves.isEmpty())
-		{
-			if (inCheck)
-			{
-				return -MATE_EVAL + ply;
-			}
-			else
-			{
-				return DRAW_EVAL;
-			}
-		}
-
 		int oldAlpha = alpha;
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
 				ss.get(ply - 6).continuationHistory };
-
-		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, threadData.history, threadData.captureHistory,
-				currentContinuationHistories, board);
 
 		List<Move> quietsSearched = new ArrayList<>();
 		List<Move> capturesSearched = new ArrayList<>();
@@ -726,7 +709,17 @@ public class AlphaBeta implements Runnable
 
 		if (sse.moveCount == 0)
 		{
-			return inSingularSearch ? alpha : -MATE_EVAL + ply;
+			if (inSingularSearch)
+			{
+				return alpha;
+			}
+
+			if (inCheck)
+			{
+				return -MATE_EVAL + ply;
+			}
+
+			return DRAW_EVAL;
 		}
 
 		if (!inSingularSearch)
