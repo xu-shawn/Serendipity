@@ -504,28 +504,11 @@ public class AlphaBeta implements Runnable
 			}
 		}
 
-		final List<Move> legalMoves = board.legalMoves();
-
-		if (legalMoves.isEmpty())
-		{
-			if (inCheck)
-			{
-				return -MATE_EVAL + ply;
-			}
-			else
-			{
-				return DRAW_EVAL;
-			}
-		}
-
 		int oldAlpha = alpha;
 
 		History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
 				ss.get(ply - 6).continuationHistory };
-
-		MoveSort.sortMoves(legalMoves, ttMove, sse.killer, threadData.history, threadData.captureHistory,
-				currentContinuationHistories, board);
 
 		List<Move> quietsSearched = new ArrayList<>();
 		List<Move> capturesSearched = new ArrayList<>();
@@ -535,18 +518,38 @@ public class AlphaBeta implements Runnable
 			depth -= 2;
 		}
 
-		for (Move move : legalMoves)
+		MovePicker movePicker = new MovePicker(board, ttMove, sse.killer, threadData.history, threadData.captureHistory,
+				currentContinuationHistories);
+
+		Move move;
+
+		while ((move = movePicker.next()) != null)
 		{
 			if (move.equals(sse.excludedMove))
 			{
 				continue;
 			}
 
+			if (!board.isMoveLegal(move, false))
+			{
+				continue;
+			}
+
 			sse.moveCount++;
 			int newdepth = depth - 1;
-			board.doMove(move);
-			givesCheck = board.isKingAttacked();
-			board.undoMove();
+			try
+			{
+				board.doMove(move);
+				givesCheck = board.isKingAttacked();
+				board.undoMove();
+			}
+			catch (Exception e)
+			{
+				board.undoMove();
+				System.out.println(board.getFen());
+				System.out.println(move);
+				throw e;
+			}
 			boolean isQuiet = isQuiet(move, board);
 
 			int r = reduction[depth][sse.moveCount];
@@ -716,7 +719,17 @@ public class AlphaBeta implements Runnable
 
 		if (sse.moveCount == 0)
 		{
-			return inSingularSearch ? alpha : -MATE_EVAL + ply;
+			if (inSingularSearch)
+			{
+				return alpha;
+			}
+
+			if (inCheck)
+			{
+				return -MATE_EVAL + ply;
+			}
+
+			return DRAW_EVAL;
 		}
 
 		if (!inSingularSearch)
