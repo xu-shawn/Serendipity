@@ -540,16 +540,13 @@ public class AlphaBeta implements Runnable
 
 		Move move;
 
-		movePicker = new MovePicker(board, ttMove, sse.killer, threadData.history, threadData.captureHistory,
-				currentContinuationHistories);
-
 		while ((move = movePicker.next()) != null)
 		{
 			if (move.equals(sse.excludedMove))
 			{
 				continue;
 			}
-			
+
 			if (!board.isMoveLegal(move, false))
 			{
 				continue;

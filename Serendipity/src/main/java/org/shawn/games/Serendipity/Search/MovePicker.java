@@ -72,11 +72,6 @@ public class MovePicker
 			return false;
 		}
 
-		if (board.getContext().isCastleMove(move))
-		{
-			return true;
-		}
-
 		Square from = move.getFrom();
 		Square to = move.getTo();
 		Piece movedPiece = board.getPiece(move.getFrom());
@@ -84,6 +79,11 @@ public class MovePicker
 		PieceType movedPieceType = movedPiece.getPieceType();
 
 		long occupied = board.getBitboard();
+
+		if (movedPiece.getPieceType().equals(PieceType.KING) && board.getContext().isCastleMove(move))
+		{
+			return !board.isKingAttacked();
+		}
 
 		if ((board.getBbSide()[side.ordinal()] & to.getBitboard()) != 0)
 		{
@@ -185,7 +185,7 @@ public class MovePicker
 
 	public void initMoves()
 	{
-		this.moves = (LinkedList<Move>) board.pseudoLegalMoves();
+		this.moves = (LinkedList<Move>) board.legalMoves();
 		MoveSort.sortMoves(moves, ttMove, killer, history, captureHistory, continuationHistories, board);
 		this.moveIterator = this.moves.listIterator();
 	}
