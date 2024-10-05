@@ -10,12 +10,18 @@ import com.github.bhlangonijr.chesslib.Side;
 import com.github.bhlangonijr.chesslib.Square;
 import com.github.bhlangonijr.chesslib.move.Move;
 
+import jdk.incubator.vector.ShortVector;
+import jdk.incubator.vector.VectorSpecies;
+
 public class AccumulatorStack
 {
 	NNUE network;
 
 	private final AccumulatorPair[] stack;
 	private short top;
+
+	private static final VectorSpecies<Short> SHORT_SPECIES = ShortVector.SPECIES_PREFERRED;
+	private static final int UPPERBOUND = SHORT_SPECIES.loopBound(NNUE.HIDDEN_SIZE);
 
 	public class Accumulator
 	{
@@ -52,18 +58,24 @@ public class AccumulatorStack
 		public void add(int featureIndex)
 		{
 			featureIndex = featureIndex + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+
+			for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
 			{
-				values[i] += network.L1Weights[featureIndex][i];
+				ShortVector prevVec = ShortVector.fromArray(SHORT_SPECIES, values, i);
+				ShortVector weightsToAdd = ShortVector.fromArray(SHORT_SPECIES, network.L1Weights[featureIndex], i);
+				prevVec.add(weightsToAdd).intoArray(values, i);
 			}
 		}
 
 		public void add(Accumulator prev, int featureIndex)
 		{
 			featureIndex = featureIndex + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+
+			for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
 			{
-				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndex][i]);
+				ShortVector prevVec = ShortVector.fromArray(SHORT_SPECIES, prev.values, i);
+				ShortVector weightsToAdd = ShortVector.fromArray(SHORT_SPECIES, network.L1Weights[featureIndex], i);
+				prevVec.add(weightsToAdd).intoArray(values, i);
 			}
 		}
 
@@ -71,39 +83,59 @@ public class AccumulatorStack
 		{
 			featureIndexToAdd = featureIndexToAdd + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract = featureIndexToSubtract + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+
+			for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
 			{
-				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndexToAdd][i]
-						- network.L1Weights[featureIndexToSubtract][i]);
+				ShortVector prevVec = ShortVector.fromArray(SHORT_SPECIES, prev.values, i);
+				ShortVector weightsToAdd = ShortVector.fromArray(SHORT_SPECIES, network.L1Weights[featureIndexToAdd],
+						i);
+				ShortVector weightsToSubtract = ShortVector.fromArray(SHORT_SPECIES,
+						network.L1Weights[featureIndexToSubtract], i);
+				prevVec.add(weightsToAdd).sub(weightsToSubtract).intoArray(values, i);
 			}
 		}
 
 		public void addSubSub(Accumulator prev, int featureIndexToAdd, int featureIndexToSubtract1,
-							  int featureIndexToSubtract2)
+				int featureIndexToSubtract2)
 		{
 			featureIndexToAdd = featureIndexToAdd + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract1 = featureIndexToSubtract1 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract2 = featureIndexToSubtract2 + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+
+			for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
 			{
-				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndexToAdd][i]
-						- network.L1Weights[featureIndexToSubtract1][i]
-						- network.L1Weights[featureIndexToSubtract2][i]);
+				ShortVector prevVec = ShortVector.fromArray(SHORT_SPECIES, prev.values, i);
+				ShortVector weightsToAdd = ShortVector.fromArray(SHORT_SPECIES, network.L1Weights[featureIndexToAdd],
+						i);
+				ShortVector weightsToSubtract1 = ShortVector.fromArray(SHORT_SPECIES,
+						network.L1Weights[featureIndexToSubtract1], i);
+				ShortVector weightsToSubtract2 = ShortVector.fromArray(SHORT_SPECIES,
+						network.L1Weights[featureIndexToSubtract2], i);
+				prevVec.add(weightsToAdd).sub(weightsToSubtract1).sub(weightsToSubtract2).intoArray(values, i);
 			}
 		}
 
 		public void addAddSubSub(Accumulator prev, int featureIndexToAdd1, int featureIndexToAdd2,
-								 int featureIndexToSubtract1, int featureIndexToSubtract2)
+				int featureIndexToSubtract1, int featureIndexToSubtract2)
 		{
 			featureIndexToAdd1 = featureIndexToAdd1 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToAdd2 = featureIndexToAdd2 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract1 = featureIndexToSubtract1 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract2 = featureIndexToSubtract2 + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+
+			for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
 			{
-				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndexToAdd1][i]
-						+ network.L1Weights[featureIndexToAdd2][i] - network.L1Weights[featureIndexToSubtract1][i]
-						- network.L1Weights[featureIndexToSubtract2][i]);
+				ShortVector prevVec = ShortVector.fromArray(SHORT_SPECIES, prev.values, i);
+				ShortVector weightsToAdd1 = ShortVector.fromArray(SHORT_SPECIES, network.L1Weights[featureIndexToAdd1],
+						i);
+				ShortVector weightsToAdd2 = ShortVector.fromArray(SHORT_SPECIES, network.L1Weights[featureIndexToAdd2],
+						i);
+				ShortVector weightsToSubtract1 = ShortVector.fromArray(SHORT_SPECIES,
+						network.L1Weights[featureIndexToSubtract1], i);
+				ShortVector weightsToSubtract2 = ShortVector.fromArray(SHORT_SPECIES,
+						network.L1Weights[featureIndexToSubtract2], i);
+				prevVec.add(weightsToAdd1).add(weightsToAdd2).sub(weightsToSubtract1).sub(weightsToSubtract2)
+						.intoArray(values, i);
 			}
 		}
 
@@ -184,7 +216,7 @@ public class AccumulatorStack
 
 				this.addSub(prev, NNUE.getIndex(to, moved, this.color), NNUE.getIndex(from, moved, this.color));
 
-            }
+			}
 
 			else
 			{
@@ -198,7 +230,7 @@ public class AccumulatorStack
 
 				this.addSub(prev, NNUE.getIndex(to, promoted, this.color), NNUE.getIndex(from, moved, this.color));
 
-            }
+			}
 		}
 
 		private void fullAccumulatorUpdate(Board board)
