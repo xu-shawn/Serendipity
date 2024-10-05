@@ -618,7 +618,7 @@ public class AlphaBeta implements Runnable
 			if (isQuiet)
 			{
 				final int history = threadData.history.get(board, move) * 2
-						+ +currentContinuationHistories[0].get(board, move)
+						+ currentContinuationHistories[0].get(board, move)
 						+ currentContinuationHistories[1].get(board, move)
 						+ currentContinuationHistories[3].get(board, move) + 6628;
 
