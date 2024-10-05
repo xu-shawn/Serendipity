@@ -27,6 +27,7 @@ public class MovePicker
 	private LinkedList<Move> moves;
 
 	private int stage;
+	private int moveIndex;
 	private ListIterator<Move> moveIterator;
 
 	private static final int STAGE_TT_MOVE = 0;
@@ -184,18 +185,50 @@ public class MovePicker
 	public void initMoves()
 	{
 		this.moves = (LinkedList<Move>) board.pseudoLegalMoves();
-		MoveSort.sortMoves(moves, ttMove, killer, history, captureHistory, continuationHistories, board);
-		this.moveIterator = this.moves.listIterator();
+		this.moveScore = new int[this.moves.size()];
+
+		for (int i = 0; i < this.moves.size(); i++)
+		{
+			this.moveScore[i] = scoreMove(this.moves.get(i));
+		}
 	}
 
 	public Move selectMove()
 	{
-		if (!this.moveIterator.hasNext())
+		if (this.moveIndex >= this.moves.size())
 		{
 			return null;
 		}
 
-		return this.moveIterator.next();
+		int tempScore;
+		Move currMove;
+		Move prevMove;
+
+		ListIterator<Move> moveIterator = moves.listIterator(moves.size());
+
+		for (int i = moves.size() - 1; i > this.moveIndex; i--)
+		{
+			if (moveScore[i] > moveScore[i - 1])
+			{
+				currMove = moveIterator.previous();
+				prevMove = moveIterator.previous();
+				moveIterator.next();
+
+				moveIterator.set(currMove);
+				moveIterator.next();
+				moveIterator.set(prevMove);
+
+				tempScore = moveScore[i];
+				moveScore[i] = moveScore[i - 1];
+				moveScore[i - 1] = tempScore;
+			}
+
+			moveIterator.previous();
+		}
+
+		this.moveIndex++;
+
+		return moveIterator.previous();
 	}
 
 	public Move next()
