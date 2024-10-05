@@ -1,22 +1,17 @@
 package org.shawn.games.Serendipity.Search;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 
 import org.shawn.games.Serendipity.Search.History.History;
 
 import com.github.bhlangonijr.chesslib.Bitboard;
 import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.CastleRight;
 import com.github.bhlangonijr.chesslib.Piece;
 import com.github.bhlangonijr.chesslib.PieceType;
 import com.github.bhlangonijr.chesslib.Side;
 import com.github.bhlangonijr.chesslib.Square;
 import com.github.bhlangonijr.chesslib.move.Move;
-import com.github.bhlangonijr.chesslib.move.MoveGenerator;
 
 public class MovePicker
 {
@@ -94,8 +89,8 @@ public class MovePicker
 		{
 			long pawnThreats = Bitboard.getPawnCaptures(side, from,
 					to.getBitboard() & (board.getBbSide()[1 - side.ordinal()] | board.getEnPassant().getBitboard()),
-					board.getEnPassant());
-			pawnThreats |= Bitboard.getPawnMoves(side, from, board.getBitboard()) & to.getBitboard();
+					board.getEnPassant()) & to.getBitboard();
+			pawnThreats |= Bitboard.getPawnMoves(side, from, occupied) & to.getBitboard();
 			if (pawnThreats == 0L)
 			{
 				return false;
