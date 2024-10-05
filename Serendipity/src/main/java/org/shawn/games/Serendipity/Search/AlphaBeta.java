@@ -537,19 +537,9 @@ public class AlphaBeta implements Runnable
 
 			sse.moveCount++;
 			int newdepth = depth - 1;
-			try
-			{
-				board.doMove(move);
-				givesCheck = board.isKingAttacked();
-				board.undoMove();
-			}
-			catch (Exception e)
-			{
-				board.undoMove();
-				System.out.println(board.getFen());
-				System.out.println(move);
-				throw e;
-			}
+			board.doMove(move);
+			givesCheck = board.isKingAttacked();
+			board.undoMove();
 			boolean isQuiet = isQuiet(move, board);
 
 			int r = reduction[depth][sse.moveCount];
