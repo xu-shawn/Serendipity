@@ -110,7 +110,7 @@ public class AlphaBeta implements Runnable
 		return v;
 	}
 
-	private void updateContinuationHistories(int ply, int depth, Board board, Move move, List<Move> quietsSearched)
+	private void updateContinuationHistories(int ply, int depth, Board board, Move move, Move[] quietsSearched, int quietsCount)
 	{
 		History conthist;
 		int bonus = stat_bonus(depth);
@@ -122,9 +122,9 @@ public class AlphaBeta implements Runnable
 
 			conthist.register(board, move, (i == 6) ? bonus / 2 : bonus);
 
-			for (Move quietMove : quietsSearched)
+			for (int j = 0; j < quietsCount; j ++)
 			{
-				conthist.register(board, quietMove, (i == 6) ? malus / 2 : malus);
+				conthist.register(board, quietsSearched[j], (i == 6) ? malus / 2 : malus);
 			}
 		}
 	}
@@ -510,8 +510,10 @@ public class AlphaBeta implements Runnable
 				ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
 				ss.get(ply - 6).continuationHistory };
 
-		List<Move> quietsSearched = new ArrayList<>();
-		List<Move> capturesSearched = new ArrayList<>();
+		Move[] quietsSearched = new Move[32];
+		Move[] capturesSearched = new Move[32];
+		int quietsCount = 0;
+		int capturesCount = 0;
 
 		if (isPV && ttMove == null && threadData.rootDepth > 1 && depth > 5)
 		{
@@ -676,20 +678,20 @@ public class AlphaBeta implements Runnable
 
 						threadData.history.register(board, move, stat_bonus(depth));
 
-						for (Move quietMove : quietsSearched)
+						for (int i = 0; i < quietsCount; i ++)
 						{
-							threadData.history.register(board, quietMove, stat_malus(depth));
+							threadData.history.register(board, quietsSearched[i], stat_malus(depth));
 						}
 
-						updateContinuationHistories(ply, depth, board, move, quietsSearched);
+						updateContinuationHistories(ply, depth, board, move, quietsSearched, quietsCount);
 					}
 					else
 					{
 						threadData.captureHistory.register(board, move, stat_bonus(depth));
-
-						for (Move capture : capturesSearched)
+						
+						for (int i = 0; i < capturesCount; i ++)
 						{
-							threadData.captureHistory.register(board, capture, stat_malus(depth));
+							threadData.history.register(board, capturesSearched[i], stat_malus(depth));
 						}
 					}
 
@@ -697,13 +699,16 @@ public class AlphaBeta implements Runnable
 				}
 			}
 
-			if (isQuiet)
+			if (sse.moveCount < 32)
 			{
-				quietsSearched.add(move);
-			}
-			else
-			{
-				capturesSearched.add(move);
+				if (isQuiet)
+				{
+					quietsSearched[quietsCount++] = move;
+				}
+				else
+				{
+					capturesSearched[capturesCount++] = move;
+				}
 			}
 		}
 
