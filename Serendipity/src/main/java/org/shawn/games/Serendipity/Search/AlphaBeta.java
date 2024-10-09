@@ -191,7 +191,7 @@ public class AlphaBeta implements Runnable
 		}
 
 		int futilityBase;
-		boolean inCheck = ss.get(ply).inCheck = board.isKingAttacked();
+		boolean inCheck = sse.inCheck = board.isKingAttacked();
 		final List<Move> moves;
 
 		if (inCheck)
