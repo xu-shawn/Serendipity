@@ -466,7 +466,7 @@ public class AlphaBeta implements Runnable
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 								.getBitboard(board.getSideToMove()))
 		{
-			int r = depth / 3 + 4 + Math.min((eval - beta) / 200, 3);
+			int r = depth / 3 + 5 + Math.min((eval - beta) / 200, 6);
 
 			board.doNullMove();
 			sse.move = Constants.emptyMove;
@@ -701,6 +701,7 @@ public class AlphaBeta implements Runnable
 			{
 				quietsSearched.add(move);
 			}
+			
 			else
 			{
 				capturesSearched.add(move);
