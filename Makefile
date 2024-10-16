@@ -1,6 +1,9 @@
 EXE = Serendipity-Dev
 EMBEDDED_NET_LOCATION = ./Serendipity/src/main/resources/embedded.nnue
 NET_NAME = net1.nnue
+ifndef MAVEN_EXE
+	MAVEN_EXE = mvn
+endif
 
 all:
 ifdef EVALFILE
@@ -9,9 +12,9 @@ else
 	$(MAKE) net
 endif
 ifdef JAVA_HOME
-	JAVA_HOME=$(JAVA_HOME) mvn -f ./Serendipity/pom.xml package
+	JAVA_HOME=$(JAVA_HOME) $(MAVEN_EXE) -f ./Serendipity/pom.xml package
 else
-	mvn -f ./Serendipity/pom.xml package
+	$(MAVEN_EXE) -f ./Serendipity/pom.xml package
 endif
 	cat header.sh ./Serendipity/target/Serendipity-Test.jar > $(EXE)
 	chmod +x $(EXE)
