@@ -181,7 +181,7 @@ public class AlphaBeta implements Runnable
 					}
 					break;
 				default:
-					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getNodeType());
+					ttHit = false; // TT write race
 			}
 		}
 
@@ -383,7 +383,7 @@ public class AlphaBeta implements Runnable
 					}
 					break;
 				default:
-					throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getNodeType());
+					sse.ttHit = false; // TT write race
 			}
 		}
 
@@ -420,7 +420,7 @@ public class AlphaBeta implements Runnable
 							}
 							break;
 						default:
-							throw new IllegalArgumentException("Unexpected value: " + currentMoveEntry.getNodeType());
+							sse.ttHit = false; // TT write race
 					}
 				}
 			}
