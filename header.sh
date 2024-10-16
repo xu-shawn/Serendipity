@@ -8,10 +8,6 @@ MYSELF=`which "$0" 2>/dev/null`
 
 java=java
 
-if test -n "$JAVA_HOME"; then
-    java="$JAVA_HOME/bin/java"
-fi
-
 exec "$java" --add-modules=jdk.incubator.vector -XX:+UseParallelGC $java_args -jar $MYSELF "$@"
 
 exit 1
