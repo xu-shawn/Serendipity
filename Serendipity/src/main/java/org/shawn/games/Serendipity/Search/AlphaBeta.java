@@ -838,14 +838,33 @@ public class AlphaBeta implements Runnable
 
 		if (!suppressOutput && threadData.id == 0)
 		{
-			FinalReport report = new FinalReport(
-					this.bestMove == null ? Objects.requireNonNull(lastCompletePV)[0] : this.bestMove);
+			Move reportedBestMove = this.bestMove;
+
+			if (reportedBestMove == null)
+			{
+				if (lastCompletePV == null)
+				{
+					reportedBestMove = getEmergencyBestMove();
+				}
+
+				else
+				{
+					reportedBestMove = lastCompletePV[0];
+				}
+			}
+
+			FinalReport report = new FinalReport(reportedBestMove);
 
 			for (ISearchListener listener : threadData.mainThreadData.listeners)
 			{
 				listener.notify(report);
 			}
 		}
+	}
+
+	private Move getEmergencyBestMove()
+	{
+		return this.internalBoard.legalMoves().get(0);
 	}
 
 	public long getNodesCount()
