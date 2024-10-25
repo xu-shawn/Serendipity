@@ -318,7 +318,7 @@ public class AlphaBeta implements Runnable
 		inCheck = sse.inCheck = board.isKingAttacked();
 		inSingularSearch = sse.excludedMove != null;
 
-		if (isPV)
+		if (isPV && ply != 0)
 		{
 			threadData.pv[ply][0] = null;
 		}
@@ -389,6 +389,7 @@ public class AlphaBeta implements Runnable
 		}
 
 		ttMove = (rootDepth > 1 && ply == 0) ? this.threadData.pv[0][0] : (sse.ttHit ? currentMoveEntry.getMove() : null);
+		
 		ttCapture = ttMove != null && !isQuiet(ttMove, board);
 
 		if (inCheck)
