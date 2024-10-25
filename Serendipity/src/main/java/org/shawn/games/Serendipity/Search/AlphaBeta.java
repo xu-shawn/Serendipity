@@ -24,6 +24,7 @@ public class AlphaBeta implements Runnable
 	public final int[][] reduction = new int[MAX_PLY + 1][MAX_PLY + 1];
 
 	private int nmpMinPly;
+	private int rootDepth;
 
 	private AccumulatorStack accumulators;
 
@@ -387,7 +388,7 @@ public class AlphaBeta implements Runnable
 			}
 		}
 
-		ttMove = sse.ttHit ? currentMoveEntry.getMove() : null;
+		ttMove = (rootDepth > 1 && ply == 0) ? this.threadData.pv[0][0] : (sse.ttHit ? currentMoveEntry.getMove() : null);
 		ttCapture = ttMove != null && !isQuiet(ttMove, board);
 
 		if (inCheck)
@@ -761,19 +762,19 @@ public class AlphaBeta implements Runnable
 
 		try
 		{
-			for (int i = 1; i < MAX_PLY; i++)
+			for (rootDepth = 1; rootDepth < MAX_PLY; rootDepth++)
 			{
-				if (this.threadData.id == 0 && (i > this.threadData.mainThreadData.limits.getDepth()
+				if (this.threadData.id == 0 && (rootDepth > this.threadData.mainThreadData.limits.getDepth()
 						|| this.timeManager.shouldStopIterativeDeepening()))
 				{
 					break;
 				}
 
-				threadData.rootDepth = i;
+				threadData.rootDepth = rootDepth;
 				threadData.selDepth = 0;
 				this.bestMove = null;
 
-				if (i > 3)
+				if (rootDepth > 3)
 				{
 					delta = 25;
 					alpha = currentScore - delta;
@@ -782,7 +783,7 @@ public class AlphaBeta implements Runnable
 
 				while (true)
 				{
-					int newScore = mainSearch(this.internalBoard, i, alpha, beta, 0, false);
+					int newScore = mainSearch(this.internalBoard, rootDepth, alpha, beta, 0, false);
 
 					if (newScore > alpha && newScore < beta)
 					{
@@ -798,7 +799,7 @@ public class AlphaBeta implements Runnable
 								totalNodes += thread.getNodesCount();
 							}
 
-							SearchReport report = new SearchReport(i, threadData.selDepth, totalNodes,
+							SearchReport report = new SearchReport(rootDepth, threadData.selDepth, totalNodes,
 									sharedThreadData.tt.hashfull(), currentScore, this.timeManager.timePassed(),
 									this.internalBoard, lastCompletePV);
 
