@@ -628,6 +628,7 @@ public class AlphaBeta implements Runnable
 				r -= givesCheck ? 1 : 0;
 				r -= !isQuiet ? 1 : 0;
 				r += cutNode ? 1 : 0;
+				r += (!improving && r > 3) ? 1 : 0;
 
 				int d = Math.min(newdepth, newdepth - r);
 
