@@ -18,6 +18,6 @@ else
 endif
 	cat header.sh ./Serendipity/target/Serendipity-Test.jar > $(EXE)
 	chmod +x $(EXE)
-
+	cp ./Serendipity/target/Serendipity-Test.jar Serendipity.jar
 net:
 	wget -O $(EMBEDDED_NET_LOCATION) https://github.com/xu-shawn/Serendipity-Networks/raw/main/$(NET_NAME)
