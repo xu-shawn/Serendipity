@@ -8,7 +8,7 @@ Serendipity is a UCI chess engine written in the Java programming language. With
 
 ### History
 
-In the early January of 2024, I was inspired by a [tom7 video][elo_world] to create a [chess arena][chess_arena] in Java.
+In early January 2024, I was inspired by a [tom7 video][elo_world] to create a [chess arena][chess_arena] in Java.
 It didn't get very far, however, as I soon focused all my development effort in a minimax implementation.
 
 In March, I began to work on NNUE support.
