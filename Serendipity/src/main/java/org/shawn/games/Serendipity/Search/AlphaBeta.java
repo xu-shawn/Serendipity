@@ -455,7 +455,7 @@ public class AlphaBeta implements Runnable
 		}
 
 		if (!inSingularSearch && !isPV && !inCheck && (ttMove == null || ttCapture) && depth < 7 && eval >= beta
-				&& eval - depth * 70 >= beta)
+				&& eval - depth * 70 - (improving ? 60 : 0) >= beta)
 		{
 			return beta > -MATE_EVAL + 1024 ? beta + (eval - beta) / 3 : eval;
 		}
