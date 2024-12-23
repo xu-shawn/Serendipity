@@ -10,22 +10,22 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-	static final int HIDDEN_SIZE = 1536;
+	static final int HIDDEN_SIZE = 32;
 	static final int FEATURE_SIZE = 768;
-	private static final int OUTPUT_BUCKETS = 8;
+	private static final int OUTPUT_BUCKETS = 1;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
-	private static final int INPUT_BUCKET_SIZE = 7;
+	private static final int INPUT_BUCKET_SIZE = 1;
 	// @formatter:off
 	private static final int[] INPUT_BUCKETS = new int[]
 	{
-			0, 0, 1, 1, 2, 2, 3, 3,
-			4, 4, 4, 4, 5, 5, 5, 5,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
 	};
 	// @formatter:on
 
@@ -94,6 +94,13 @@ public class NNUE
 
 	public static int evaluate(NNUE network, AccumulatorStack accumulators, Side side, int chosenBucket)
 	{
+		for (int i = 0; i < HIDDEN_SIZE; i ++)
+		{
+			System.out.print(accumulators.getAccumulator(Side.WHITE).values[i] + " ");
+		}
+
+		System.out.println();
+
 		return INFERENCE.forward(accumulators, side, network.L2Weights[chosenBucket],
 				network.outputBiases[chosenBucket]);
 	}

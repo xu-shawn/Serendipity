@@ -17,7 +17,7 @@ public class ScalarInference implements Inference
 	private static int screlu(short i)
 	{
 		int v = Math.max(0, Math.min(i, NNUE.QA));
-		return v * v;
+		return v;
 	}
 
 	@Override
@@ -34,7 +34,6 @@ public class ScalarInference implements Inference
 					+ screlu[them.values[i] - (int) Short.MIN_VALUE] * (int) weights[i + NNUE.HIDDEN_SIZE];
 		}
 
-		eval /= NNUE.QA;
 		eval += bias;
 
 		eval *= NNUE.SCALE;

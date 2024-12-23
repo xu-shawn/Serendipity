@@ -6,11 +6,6 @@ public class InferenceChooser
 {
 	public static Inference chooseInference()
 	{
-		if (ShortVector.SPECIES_PREFERRED.vectorBitSize() >= 256)
-		{
-			return new SIMDInference();
-		}
-
 		return new ScalarInference();
 	}
 }

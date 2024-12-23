@@ -208,9 +208,11 @@ public class AccumulatorStack
 			{
 				if (!board.getPiece(sq).equals(Piece.NONE))
 				{
+					System.out.print(NNUE.getIndex(sq, board.getPiece(sq), this.color) + ", ");
 					this.add(NNUE.getIndex(sq, board.getPiece(sq), this.color));
 				}
 			}
+			System.out.println();
 		}
 
 		private void makeMove(Accumulator prev, Board board, Move move)
