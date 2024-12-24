@@ -85,7 +85,7 @@ public class UCI
 	{
 		transpositionTable = new TranspositionTable(4);
 		options = new HashMap<>();
-		StringOption networkName = new NNUEOption("32.nnue", "nnuefile");
+		StringOption networkName = new NNUEOption("ciek64.nnue", "nnuefile");
 		threads = new ThreadsOption(1, 1, 1048576, "Threads");
 		HashOption hash = new HashOption(4, 1, 32768, transpositionTable, "Hash");
 

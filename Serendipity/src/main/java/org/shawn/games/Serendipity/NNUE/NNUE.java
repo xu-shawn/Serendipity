@@ -10,7 +10,7 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-	static final int HIDDEN_SIZE = 32;
+	static final int HIDDEN_SIZE = 64;
 	static final int FEATURE_SIZE = 768;
 	private static final int OUTPUT_BUCKETS = 1;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
