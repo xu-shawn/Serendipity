@@ -500,7 +500,7 @@ public class AlphaBeta implements Runnable
 
 			if (razorValue <= alpha)
 			{
-				return razorValue;
+				return (razorValue + alpha) / 2;
 			}
 		}
 
