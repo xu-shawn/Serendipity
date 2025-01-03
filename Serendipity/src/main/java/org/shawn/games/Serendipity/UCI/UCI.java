@@ -85,7 +85,7 @@ public class UCI
 	{
 		transpositionTable = new TranspositionTable(4);
 		options = new HashMap<>();
-		StringOption networkName = new NNUEOption("embedded.nnue", "nnuefile");
+		StringOption networkName = new NNUEOption("jochen.bin", "nnuefile");
 		threads = new ThreadsOption(1, 1, 1048576, "Threads");
 		HashOption hash = new HashOption(4, 1, 32768, transpositionTable, "Hash");
 
@@ -221,6 +221,10 @@ public class UCI
 					System.out.println(internalBoard);
 					System.out.println(NNUE.evaluate(network, acc, internalBoard.getSideToMove(),
 							NNUE.chooseOutputBucket(internalBoard)));
+					for (int i = 0; i < 8; i ++)
+					{
+						System.out.println("Bucket #" + i + ": " + NNUE.evaluate(network, acc, internalBoard.getSideToMove(), i));
+					}
 					break;
 				case "go":
 					Limits limits = new Limits();
