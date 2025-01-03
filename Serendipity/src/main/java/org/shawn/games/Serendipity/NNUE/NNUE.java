@@ -76,6 +76,12 @@ public class NNUE
 				L2Weights[i][j] = toLittleEndian(networkData.readShort());
 			}
 		}
+		
+		for (int i = 0; i < 16; i ++)
+		{
+			System.out.print(L2Weights[0][i] + " ");
+		}
+		System.out.println();
 
 		outputBiases = new short[OUTPUT_BUCKETS];
 
