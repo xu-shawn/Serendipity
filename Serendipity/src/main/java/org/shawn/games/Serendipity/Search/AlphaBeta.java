@@ -40,6 +40,8 @@ public class AlphaBeta implements Runnable
 	public static final int DRAW_EVAL = 0;
 	public static final int MAX_PLY = 256;
 
+	public static final int MATE_IN_MAX_PLY = MATE_EVAL - MAX_PLY;
+
 	public final int[][] reduction = new int[MAX_PLY + 1][MAX_PLY + 1];
 
 	private int nmpMinPly;
@@ -124,7 +126,7 @@ public class AlphaBeta implements Runnable
 
 		v = v * (206 + material) / 256;
 
-		v = Math.min(Math.max(-MATE_EVAL + 1024, v), MATE_EVAL - 1024);
+		v = Math.min(Math.max(-MATE_IN_MAX_PLY, v), MATE_IN_MAX_PLY);
 
 		return v;
 	}
@@ -260,7 +262,7 @@ public class AlphaBeta implements Runnable
 				continue;
 			}
 
-			if (bestScore > -MATE_EVAL + 1024 && futilityBase < alpha && !SEE.staticExchangeEvaluation(board, move, 1)
+			if (bestScore > -MATE_IN_MAX_PLY && futilityBase < alpha && !SEE.staticExchangeEvaluation(board, move, 1)
 					&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 									.getBitboard(board.getSideToMove()))
@@ -476,10 +478,10 @@ public class AlphaBeta implements Runnable
 		if (!inSingularSearch && !isPV && !inCheck && (ttMove == null || ttCapture) && depth < 7 && eval >= beta
 				&& eval - depth * 70 >= beta)
 		{
-			return beta > -MATE_EVAL + 1024 ? beta + (eval - beta) / 3 : eval;
+			return beta > -MATE_IN_MAX_PLY ? beta + (eval - beta) / 3 : eval;
 		}
 
-		if (!inSingularSearch && ply > 0 && eval >= beta && beta < MATE_EVAL - 1024 && !inCheck
+		if (!inSingularSearch && ply > 0 && eval >= beta && beta < MATE_IN_MAX_PLY && !inCheck
 				&& (ss.get(-1).move == null || !ss.get(-1).move.equals(Constants.emptyMove))
 				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
@@ -493,7 +495,7 @@ public class AlphaBeta implements Runnable
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, !cutNode);
 			board.undoMove();
 
-			if (nullEval >= beta && nullEval < MATE_EVAL - 1024)
+			if (nullEval >= beta && nullEval < MATE_IN_MAX_PLY)
 			{
 				if (this.nmpMinPly != 0 || depth < 12)
 				{
@@ -565,12 +567,12 @@ public class AlphaBeta implements Runnable
 			int lmrDepth = depth - r;
 
 			if (isQuiet && !isPV && !givesCheck && sse.moveCount > 3 + depth * depth / (improving ? 1 : 2)
-					&& alpha > -MATE_EVAL + 1024)
+					&& alpha > -MATE_IN_MAX_PLY)
 			{
 				continue;
 			}
 
-			if (bestValue > -MATE_EVAL + 1024 && ply > 0
+			if (bestValue > -MATE_IN_MAX_PLY && ply > 0
 					&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
 							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
 									.getBitboard(board.getSideToMove()))
@@ -591,7 +593,7 @@ public class AlphaBeta implements Runnable
 			int extension = 0;
 
 			if (!inSingularSearch && ply > 0 && sse.ttHit && move.equals(ttMove) && depth >= 4
-					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_EVAL - 1024
+					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_IN_MAX_PLY
 					&& (currentMoveEntry.getNodeType() == TranspositionTable.NODETYPE_EXACT
 							|| currentMoveEntry.getNodeType() == TranspositionTable.NODETYPE_LOWERBOUND)
 					&& currentMoveEntry.getDepth() > depth - 4)
