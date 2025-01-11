@@ -132,7 +132,7 @@ Serendipity depends on the following libraries:
 - [`chesslib`][chesslib_url] for move generation and board representation
 - [`JUnit`][JUnit_url] for testing critical components of the engine
 
-Serendipity's neural network is trained on open data generously provided by the [Leela Chess Zero][lc0_url] project.
+Serendipity's neural network is trained using [bullet][bullet_url] and on open data generously provided by the [Leela Chess Zero][lc0_url] project.
 
 Testing Serendipity requires thosands of hours of compute, so thanks to everyone on our [OpenBench instance][furybench_url] for their contributions, however big or small.
 The names of these people are listed below, by alphabetical order:
@@ -170,6 +170,7 @@ Finally, thanks to everyone on the [Stockfish Discord][sf_discord], [Engine Prog
 [contributors_url]: https://github.com/xu-shawn/Serendipity/graphs/contributors
 [chesslib_url]: https://github.com/bhlangonijr/chesslib
 [JUnit_url]: https://github.com/junit-team/junit5
+[bullet_url]: https://github.com/jw1912/bullet
 [lc0_url]: https://lczero.org/
 [furybench_url]: https://chess.aronpetkovski.com/
 
