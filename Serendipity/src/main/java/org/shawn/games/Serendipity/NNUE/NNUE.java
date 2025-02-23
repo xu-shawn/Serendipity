@@ -53,7 +53,6 @@ public class NNUE
 	public static final int QB = 64;
 
 	final short[][] L1Weights;
-	final short[] L1Biases;
 	private final short[][] L2Weights;
 	private final short[] outputBiases;
 
@@ -79,11 +78,18 @@ public class NNUE
 			}
 		}
 
-		L1Biases = new short[HIDDEN_SIZE];
-
 		for (int i = 0; i < HIDDEN_SIZE; i++)
 		{
-			L1Biases[i] = toLittleEndian(networkData.readShort());
+			short bias = toLittleEndian(networkData.readShort());
+
+			for (int SquareIndex = 0; SquareIndex < 64; SquareIndex ++)
+			{
+				for (int kingBucket = 0; kingBucket < INPUT_BUCKET_SIZE; kingBucket++)
+				{
+					L1Weights[NNUE.getIndex(Square.squareAt(SquareIndex), Piece.WHITE_KING, Side.WHITE)
+							+ kingBucket * NNUE.FEATURE_SIZE][i] += bias;
+				}
+			}
 		}
 
 		L2Weights = new short[OUTPUT_BUCKETS][HIDDEN_SIZE * 2];
