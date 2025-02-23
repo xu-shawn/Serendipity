@@ -224,7 +224,11 @@ public class AccumulatorStack
 
 		private void fullAccumulatorUpdate(Board board)
 		{
-			Arrays.fill(this.values, (short) 0);
+			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+			{
+				this.values[i] = 0;
+			}
+
 			for (Square sq : Square.values())
 			{
 				if (!board.getPiece(sq).equals(Piece.NONE))
