@@ -25,6 +25,8 @@ import org.shawn.games.Serendipity.Chess.move.*;
 public interface History
 {
 	int get(Board board, Move move);
+
 	void register(Board board, Move move, int value);
+
 	void fill(int x);
 }

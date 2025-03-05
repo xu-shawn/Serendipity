@@ -23,83 +23,100 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 
 /**
- * An abstract representation of a potentially large text-based file that can be read line by line.
+ * An abstract representation of a potentially large text-based file that can be
+ * read line by line.
  */
-public class LargeFile implements Iterable<String>, AutoCloseable {
+public class LargeFile implements Iterable<String>, AutoCloseable
+{
 
-    private final BufferedReader reader;
+	private final BufferedReader reader;
 
-    private String nextLine;
+	private String nextLine;
 
-    /**
-     * Constructs a new large file from its path.
-     *
-     * @param filePath the file path
-     * @throws Exception in case the file can not be accessed
-     */
-    public LargeFile(String filePath) throws Exception {
+	/**
+	 * Constructs a new large file from its path.
+	 *
+	 * @param filePath the file path
+	 * @throws Exception in case the file can not be accessed
+	 */
+	public LargeFile(String filePath) throws Exception
+	{
 
-        reader = new BufferedReader(new FileReader(filePath));
-        readNextLine();
-    }
+		reader = new BufferedReader(new FileReader(filePath));
+		readNextLine();
+	}
 
-    /**
-     * Constructs a new large file from its input stream of bytes.
-     *
-     * @param inputStream the input stream
-     */
-    public LargeFile(InputStream inputStream) {
+	/**
+	 * Constructs a new large file from its input stream of bytes.
+	 *
+	 * @param inputStream the input stream
+	 */
+	public LargeFile(InputStream inputStream)
+	{
 
-        reader = new BufferedReader(new InputStreamReader(inputStream));
-        readNextLine();
-    }
+		reader = new BufferedReader(new InputStreamReader(inputStream));
+		readNextLine();
+	}
 
-    /**
-     * Closes this large file and releases any system resources associated with it.
-     */
-    @Override
-    public void close() {
-        try {
-            reader.close();
-        } catch (Exception ex) {
-        }
-    }
+	/**
+	 * Closes this large file and releases any system resources associated with it.
+	 */
+	@Override
+	public void close()
+	{
+		try
+		{
+			reader.close();
+		}
+		catch (Exception ex)
+		{
+		}
+	}
 
-    /**
-     * Returns an iterator over the lines of the file.
-     *
-     * @return the iterator to read the lines of the file
-     */
-    @Override
-    public Iterator<String> iterator() {
-        return new FileIterator();
-    }
+	/**
+	 * Returns an iterator over the lines of the file.
+	 *
+	 * @return the iterator to read the lines of the file
+	 */
+	@Override
+	public Iterator<String> iterator()
+	{
+		return new FileIterator();
+	}
 
-    private void readNextLine() {
+	private void readNextLine()
+	{
 
-        try {
-            nextLine = reader.readLine();
-        } catch (Exception ex) {
-            nextLine = null;
-            throw new IllegalStateException("Error reading file", ex);
-        }
-    }
+		try
+		{
+			nextLine = reader.readLine();
+		}
+		catch (Exception ex)
+		{
+			nextLine = null;
+			throw new IllegalStateException("Error reading file", ex);
+		}
+	}
 
-    private class FileIterator implements Iterator<String> {
+	private class FileIterator implements Iterator<String>
+	{
 
-        public boolean hasNext() {
+		public boolean hasNext()
+		{
 
-            return nextLine != null;
-        }
+			return nextLine != null;
+		}
 
-        public String next() {
+		public String next()
+		{
 
-            String currentLine = nextLine;
-            readNextLine();
-            return currentLine;
-        }
+			String currentLine = nextLine;
+			readNextLine();
+			return currentLine;
+		}
 
-        public void remove() {
-        }
-    }
+		public void remove()
+		{
+		}
+	}
 }

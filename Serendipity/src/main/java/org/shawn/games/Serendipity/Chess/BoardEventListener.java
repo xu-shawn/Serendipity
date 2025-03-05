@@ -17,16 +17,18 @@
 package org.shawn.games.Serendipity.Chess;
 
 /**
- * An observer to board events. Events listeners can be registered to the board using the method
+ * An observer to board events. Events listeners can be registered to the board
+ * using the method
  * {@link Board#addEventListener(BoardEventType, BoardEventListener)}.
  */
-public interface BoardEventListener {
+public interface BoardEventListener
+{
 
-    /**
-     * Method invoked when a board event is emitted and notified to the observer.
-     *
-     * @param event the board event occurred
-     */
-    void onEvent(BoardEvent event);
+	/**
+	 * Method invoked when a board event is emitted and notified to the observer.
+	 *
+	 * @param event the board event occurred
+	 */
+	void onEvent(BoardEvent event);
 
 }

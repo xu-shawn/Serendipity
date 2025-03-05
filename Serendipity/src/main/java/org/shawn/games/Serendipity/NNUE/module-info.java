@@ -17,7 +17,8 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-module org.shawn.games.Serendipity.NNUE {
-    requires jdk.incubator.vector;
-    requires org.apache.commons.lang3;
+module org.shawn.games.Serendipity.NNUE
+{
+	requires jdk.incubator.vector;
+	requires org.apache.commons.lang3;
 }
