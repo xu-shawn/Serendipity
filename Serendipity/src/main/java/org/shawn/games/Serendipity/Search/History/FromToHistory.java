@@ -21,8 +21,8 @@ package org.shawn.games.Serendipity.Search.History;
 
 import java.util.Arrays;
 
-import com.github.bhlangonijr.chesslib.*;
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.*;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class FromToHistory implements History
 {

@@ -31,7 +31,7 @@ import org.shawn.games.Serendipity.NNUE.NNUE;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
 import org.shawn.games.Serendipity.UCI.UCIListener;
 
-import com.github.bhlangonijr.chesslib.Board;
+import org.shawn.games.Serendipity.Chess.Board;
 
 public class ThreadManager
 {

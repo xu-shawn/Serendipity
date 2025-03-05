@@ -24,13 +24,13 @@ import java.util.Collections;
 
 import org.shawn.games.Serendipity.Search.History.History;
 
-import com.github.bhlangonijr.chesslib.Bitboard;
-import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.Piece;
-import com.github.bhlangonijr.chesslib.PieceType;
-import com.github.bhlangonijr.chesslib.Side;
-import com.github.bhlangonijr.chesslib.Square;
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.Bitboard;
+import org.shawn.games.Serendipity.Chess.Board;
+import org.shawn.games.Serendipity.Chess.Piece;
+import org.shawn.games.Serendipity.Chess.PieceType;
+import org.shawn.games.Serendipity.Chess.Side;
+import org.shawn.games.Serendipity.Chess.Square;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class MovePicker
 {

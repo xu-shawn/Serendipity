@@ -21,7 +21,7 @@ package org.shawn.games.Serendipity.NNUE;
 
 import static jdk.incubator.vector.VectorOperators.S2I;
 
-import com.github.bhlangonijr.chesslib.Side;
+import org.shawn.games.Serendipity.Chess.Side;
 
 import jdk.incubator.vector.IntVector;
 import jdk.incubator.vector.ShortVector;

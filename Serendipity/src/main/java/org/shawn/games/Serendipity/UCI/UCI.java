@@ -28,8 +28,8 @@ import org.shawn.games.Serendipity.Search.Limits;
 import org.shawn.games.Serendipity.Search.ThreadManager;
 import org.shawn.games.Serendipity.Search.TranspositionTable;
 
-import com.github.bhlangonijr.chesslib.*;
-import com.github.bhlangonijr.chesslib.move.*;
+import org.shawn.games.Serendipity.Chess.*;
+import org.shawn.games.Serendipity.Chess.move.*;
 
 public class UCI
 {

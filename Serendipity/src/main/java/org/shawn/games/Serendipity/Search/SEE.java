@@ -19,8 +19,8 @@
 
 package org.shawn.games.Serendipity.Search;
 
-import com.github.bhlangonijr.chesslib.*;
-import com.github.bhlangonijr.chesslib.move.*;
+import org.shawn.games.Serendipity.Chess.*;
+import org.shawn.games.Serendipity.Chess.move.*;
 
 public class SEE
 {

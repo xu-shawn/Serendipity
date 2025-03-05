@@ -28,7 +28,7 @@ import org.shawn.games.Serendipity.Search.History.FromToHistory;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
 
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class ThreadData
 {

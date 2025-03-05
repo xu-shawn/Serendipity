@@ -26,8 +26,8 @@ import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import org.shawn.games.Serendipity.Search.TranspositionTable;
 
-import com.github.bhlangonijr.chesslib.*;
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.*;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class TranspositionTableTest
 {

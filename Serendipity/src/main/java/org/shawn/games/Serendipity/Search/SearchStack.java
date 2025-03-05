@@ -22,7 +22,7 @@ package org.shawn.games.Serendipity.Search;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.History.PieceToHistory;
 
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class SearchStack
 {

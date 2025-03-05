@@ -24,7 +24,7 @@ import org.shawn.games.Serendipity.Search.Limits;
 import org.shawn.games.Serendipity.Search.ThreadManager;
 import org.shawn.games.Serendipity.Search.Debug.Debugger;
 
-import com.github.bhlangonijr.chesslib.*;
+import org.shawn.games.Serendipity.Chess.*;
 
 public class Bench
 {

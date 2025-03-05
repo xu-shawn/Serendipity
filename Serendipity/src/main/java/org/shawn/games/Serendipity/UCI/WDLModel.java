@@ -19,8 +19,8 @@
 
 package org.shawn.games.Serendipity.UCI;
 
-import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.Piece;
+import org.shawn.games.Serendipity.Chess.Board;
+import org.shawn.games.Serendipity.Chess.Piece;
 
 public class WDLModel
 {

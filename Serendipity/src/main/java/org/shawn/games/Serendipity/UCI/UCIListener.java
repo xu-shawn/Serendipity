@@ -24,7 +24,7 @@ import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
 import org.shawn.games.Serendipity.Search.Listener.SearchReport;
 
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class UCIListener implements ISearchListener
 {
