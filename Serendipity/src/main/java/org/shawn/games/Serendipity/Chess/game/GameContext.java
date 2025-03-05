@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib.game;
+package org.shawn.games.Serendipity.Chess.game;
 
-import com.github.bhlangonijr.chesslib.CastleRight;
-import com.github.bhlangonijr.chesslib.Constants;
-import com.github.bhlangonijr.chesslib.Side;
-import com.github.bhlangonijr.chesslib.Square;
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.CastleRight;
+import org.shawn.games.Serendipity.Chess.Constants;
+import org.shawn.games.Serendipity.Chess.Side;
+import org.shawn.games.Serendipity.Chess.Square;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 import java.util.List;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib.game;
+package org.shawn.games.Serendipity.Chess.game;
 
 /**
  * A factory for game-related components, such as games, events, rounds, and players.

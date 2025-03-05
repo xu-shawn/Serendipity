@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib.game;
+package org.shawn.games.Serendipity.Chess.game;
 
-import com.github.bhlangonijr.chesslib.pgn.PgnHolder;
+import org.shawn.games.Serendipity.Chess.pgn.PgnHolder;
 
 import java.util.HashMap;
 import java.util.Map;

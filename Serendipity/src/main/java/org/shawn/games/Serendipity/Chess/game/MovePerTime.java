@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib.game;
+package org.shawn.games.Serendipity.Chess.game;
 
 /**
  * The representation of the time control moves-per-time, that specifies how many moves must be played within a certain
