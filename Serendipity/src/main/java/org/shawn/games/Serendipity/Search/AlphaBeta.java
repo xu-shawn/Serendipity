@@ -835,12 +835,12 @@ public class AlphaBeta implements Runnable
 					else if (newScore <= alpha)
 					{
 						beta = (alpha + beta) / 2;
-						alpha = Math.max(alpha - delta, MIN_EVAL);
+						alpha = Math.max(newScore - delta, MIN_EVAL);
 					}
 
 					else
 					{
-						beta = Math.min(beta + delta, MAX_EVAL);
+						beta = Math.min(newScore + delta, MAX_EVAL);
 					}
 
 					delta += delta * 3;
