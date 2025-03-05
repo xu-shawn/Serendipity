@@ -158,7 +158,8 @@ public class UCI
 		}
 
 		long nodes = 0;
-		List<Move> moves = board.legalMoves();
+		ArrayList<Move> moves = new ArrayList<Move>();
+		board.legalMoves(moves);
 
 		for (Move move : moves)
 		{

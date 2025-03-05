@@ -80,8 +80,8 @@ public class AlphaBeta implements Runnable
 			}
 		}
 
-		movelists.ensureCapacity(MAX_PLY);
-		for (int i = 0; i < MAX_PLY; i++)
+		movelists.ensureCapacity(MAX_PLY * 2);
+		for (int i = 0; i < MAX_PLY * 2; i++)
 		{
 			movelists.add(new ArrayList<Move>());
 		}
