@@ -239,7 +239,6 @@ public class Board implements Cloneable, BoardEvent
 	 */
 	public boolean doMove(final Move move, boolean fullValidation)
 	{
-
 		if (!isMoveLegal(move, fullValidation))
 		{
 			return false;

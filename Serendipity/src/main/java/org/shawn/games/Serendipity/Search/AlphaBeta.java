@@ -130,7 +130,7 @@ public class AlphaBeta implements Runnable
 		return chosenList;
 	}
 
-	private ArrayList<Move> getPesudoLegalCaptures(int idx, Board board)
+	private ArrayList<Move> getPseudoLegalCaptures(int idx, Board board)
 	{
 		ArrayList<Move> chosenList = movelists.get(idx);
 		chosenList.clear();
@@ -276,7 +276,7 @@ public class AlphaBeta implements Runnable
 			}
 
 			futilityBase = sse.staticEval + 205;
-			moves = getPesudoLegalCaptures(recursiveDepth, board);
+			moves = getPseudoLegalCaptures(recursiveDepth, board);
 
 			MoveSort.sortCaptures(moves, ttMove, board, threadData.captureHistory);
 		}
