@@ -29,7 +29,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-import org.shawn.games.Serendipity.Chess.game.GameContext;
 import org.shawn.games.Serendipity.Chess.move.Move;
 import org.shawn.games.Serendipity.Chess.move.MoveGenerator;
 import org.shawn.games.Serendipity.Chess.move.MoveList;

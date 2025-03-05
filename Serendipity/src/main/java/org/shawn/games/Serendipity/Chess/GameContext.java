@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package org.shawn.games.Serendipity.Chess.game;
+package org.shawn.games.Serendipity.Chess;
 
-import org.shawn.games.Serendipity.Chess.CastleRight;
-import org.shawn.games.Serendipity.Chess.Constants;
-import org.shawn.games.Serendipity.Chess.Side;
-import org.shawn.games.Serendipity.Chess.Square;
 import org.shawn.games.Serendipity.Chess.move.Move;
 
 import java.util.List;
