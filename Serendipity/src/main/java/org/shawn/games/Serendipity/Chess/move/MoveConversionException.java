@@ -17,46 +17,52 @@
 package org.shawn.games.Serendipity.Chess.move;
 
 /**
- * Thrown to indicate a failure converting a move from a textual representation, most likely because of an invalid
- * or unknown syntax.
+ * Thrown to indicate a failure converting a move from a textual representation,
+ * most likely because of an invalid or unknown syntax.
  */
-public class MoveConversionException extends RuntimeException {
+public class MoveConversionException extends RuntimeException
+{
 
-    private static final long serialVersionUID = 5523540383760826752L;
+	private static final long serialVersionUID = 5523540383760826752L;
 
-    /**
-     * Constructs a new move conversion exception.
-     */
-    public MoveConversionException() {
-        super();
-    }
+	/**
+	 * Constructs a new move conversion exception.
+	 */
+	public MoveConversionException()
+	{
+		super();
+	}
 
-    /**
-     * Constructs a new move conversion exception with the specified detail message and cause.
-     *
-     * @param message the error message
-     * @param cause   the cause
-     */
-    public MoveConversionException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	/**
+	 * Constructs a new move conversion exception with the specified detail message
+	 * and cause.
+	 *
+	 * @param message the error message
+	 * @param cause   the cause
+	 */
+	public MoveConversionException(String message, Throwable cause)
+	{
+		super(message, cause);
+	}
 
-    /**
-     * Constructs a new move conversion exception with the specified detail message.
-     *
-     * @param message the error message
-     */
-    public MoveConversionException(String message) {
-        super(message);
-    }
+	/**
+	 * Constructs a new move conversion exception with the specified detail message.
+	 *
+	 * @param message the error message
+	 */
+	public MoveConversionException(String message)
+	{
+		super(message);
+	}
 
-    /**
-     * Constructs a new move conversion exception with the specified cause.
-     *
-     * @param cause the cause
-     */
-    public MoveConversionException(Throwable cause) {
-        super(cause);
-    }
+	/**
+	 * Constructs a new move conversion exception with the specified cause.
+	 *
+	 * @param cause the cause
+	 */
+	public MoveConversionException(Throwable cause)
+	{
+		super(cause);
+	}
 
 }

@@ -98,7 +98,7 @@ public class AccumulatorStack
 		}
 
 		public void addSubSub(Accumulator prev, int featureIndexToAdd, int featureIndexToSubtract1,
-							  int featureIndexToSubtract2)
+				int featureIndexToSubtract2)
 		{
 			featureIndexToAdd = featureIndexToAdd + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract1 = featureIndexToSubtract1 + kingBucket * NNUE.FEATURE_SIZE;
@@ -112,7 +112,7 @@ public class AccumulatorStack
 		}
 
 		public void addAddSubSub(Accumulator prev, int featureIndexToAdd1, int featureIndexToAdd2,
-								 int featureIndexToSubtract1, int featureIndexToSubtract2)
+				int featureIndexToSubtract1, int featureIndexToSubtract2)
 		{
 			featureIndexToAdd1 = featureIndexToAdd1 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToAdd2 = featureIndexToAdd2 + kingBucket * NNUE.FEATURE_SIZE;
@@ -203,7 +203,7 @@ public class AccumulatorStack
 
 				this.addSub(prev, NNUE.getIndex(to, moved, this.color), NNUE.getIndex(from, moved, this.color));
 
-            }
+			}
 
 			else
 			{
@@ -217,7 +217,7 @@ public class AccumulatorStack
 
 				this.addSub(prev, NNUE.getIndex(to, promoted, this.color), NNUE.getIndex(from, moved, this.color));
 
-            }
+			}
 		}
 
 		private void fullAccumulatorUpdate(Board board)

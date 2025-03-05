@@ -17,46 +17,51 @@
 package org.shawn.games.Serendipity.Chess.move;
 
 /**
- * Thrown to indicate a failure executing a move, for instance because the move is considered illegal in the context of
- * the game it is played.
+ * Thrown to indicate a failure executing a move, for instance because the move
+ * is considered illegal in the context of the game it is played.
  */
-public class MoveException extends RuntimeException {
+public class MoveException extends RuntimeException
+{
 
-    private static final long serialVersionUID = 6523240383760826752L;
+	private static final long serialVersionUID = 6523240383760826752L;
 
-    /**
-     * Constructs a new move exception.
-     */
-    public MoveException() {
-        super();
-    }
+	/**
+	 * Constructs a new move exception.
+	 */
+	public MoveException()
+	{
+		super();
+	}
 
-    /**
-     * Constructs a new move exception with the specified detail message and cause.
-     *
-     * @param message the error message
-     * @param cause   the cause
-     */
-    public MoveException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	/**
+	 * Constructs a new move exception with the specified detail message and cause.
+	 *
+	 * @param message the error message
+	 * @param cause   the cause
+	 */
+	public MoveException(String message, Throwable cause)
+	{
+		super(message, cause);
+	}
 
-    /**
-     * Constructs a new move exception with the specified detail message.
-     *
-     * @param message the error message
-     */
-    public MoveException(String message) {
-        super(message);
-    }
+	/**
+	 * Constructs a new move exception with the specified detail message.
+	 *
+	 * @param message the error message
+	 */
+	public MoveException(String message)
+	{
+		super(message);
+	}
 
-    /**
-     * Constructs a new move exception with the specified cause.
-     *
-     * @param cause the cause
-     */
-    public MoveException(Throwable cause) {
-        super(cause);
-    }
+	/**
+	 * Constructs a new move exception with the specified cause.
+	 *
+	 * @param cause the cause
+	 */
+	public MoveException(Throwable cause)
+	{
+		super(cause);
+	}
 
 }

@@ -17,17 +17,20 @@
 package org.shawn.games.Serendipity.Chess;
 
 /**
- * An event emitted whenever a change of status happens or a move is played on the board.
+ * An event emitted whenever a change of status happens or a move is played on
+ * the board.
  * <p>
- * Board events can be listened using implementations of the {@link BoardEventListener} interface.
+ * Board events can be listened using implementations of the
+ * {@link BoardEventListener} interface.
  */
-public interface BoardEvent {
+public interface BoardEvent
+{
 
-    /**
-     * Returns the type of the board event.
-     *
-     * @return the type of the event
-     */
-    BoardEventType getType();
+	/**
+	 * Returns the type of the board event.
+	 *
+	 * @return the type of the event
+	 */
+	BoardEventType getType();
 
 }

@@ -19,43 +19,49 @@ package org.shawn.games.Serendipity.Chess.move;
 /**
  * Thrown to indicate a failure generating a move.
  */
-public class MoveGeneratorException extends RuntimeException {
+public class MoveGeneratorException extends RuntimeException
+{
 
-    private static final long serialVersionUID = 6523240383760826752L;
+	private static final long serialVersionUID = 6523240383760826752L;
 
-    /**
-     * Constructs a new move generator exception.
-     */
-    public MoveGeneratorException() {
-        super();
-    }
+	/**
+	 * Constructs a new move generator exception.
+	 */
+	public MoveGeneratorException()
+	{
+		super();
+	}
 
-    /**
-     * Constructs a new move generator exception with the specified detail message and cause.
-     *
-     * @param message the error message
-     * @param cause   the cause
-     */
-    public MoveGeneratorException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	/**
+	 * Constructs a new move generator exception with the specified detail message
+	 * and cause.
+	 *
+	 * @param message the error message
+	 * @param cause   the cause
+	 */
+	public MoveGeneratorException(String message, Throwable cause)
+	{
+		super(message, cause);
+	}
 
-    /**
-     * Constructs a new move generator exception with the specified detail message.
-     *
-     * @param message the error message
-     */
-    public MoveGeneratorException(String message) {
-        super(message);
-    }
+	/**
+	 * Constructs a new move generator exception with the specified detail message.
+	 *
+	 * @param message the error message
+	 */
+	public MoveGeneratorException(String message)
+	{
+		super(message);
+	}
 
-    /**
-     * Constructs a new move generator exception with the specified cause.
-     *
-     * @param cause the cause
-     */
-    public MoveGeneratorException(Throwable cause) {
-        super(cause);
-    }
+	/**
+	 * Constructs a new move generator exception with the specified cause.
+	 *
+	 * @param cause the cause
+	 */
+	public MoveGeneratorException(Throwable cause)
+	{
+		super(cause);
+	}
 
 }

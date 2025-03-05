@@ -31,8 +31,7 @@ public class IntegerOption implements UCIOption
 	{
 		if (lowerBound > upperBound)
 		{
-			throw new IllegalArgumentException(
-					"lowerBound must be less than or equal to upperBound");
+			throw new IllegalArgumentException("lowerBound must be less than or equal to upperBound");
 		}
 
 		this.value = this.defaultValue = value;
@@ -70,8 +69,8 @@ public class IntegerOption implements UCIOption
 
 	public String toString()
 	{
-		return "option name " + name + " type spin default " + defaultValue
-				+ " min " + lowerBound + " max " + upperBound;
+		return "option name " + name + " type spin default " + defaultValue + " min " + lowerBound + " max "
+				+ upperBound;
 	}
 
 	@Override
