@@ -21,8 +21,8 @@ package org.shawn.games.Serendipity.Search;
 
 import java.util.Arrays;
 
-import com.github.bhlangonijr.chesslib.Square;
-import com.github.bhlangonijr.chesslib.move.*;
+import org.shawn.games.Serendipity.Chess.Square;
+import org.shawn.games.Serendipity.Chess.move.*;
 
 public class TranspositionTable
 {

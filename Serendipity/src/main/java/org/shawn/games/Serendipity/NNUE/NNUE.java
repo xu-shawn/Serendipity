@@ -22,7 +22,7 @@ package org.shawn.games.Serendipity.NNUE;
 import java.io.*;
 import java.util.Objects;
 
-import com.github.bhlangonijr.chesslib.*;
+import org.shawn.games.Serendipity.Chess.*;
 
 public class NNUE
 {

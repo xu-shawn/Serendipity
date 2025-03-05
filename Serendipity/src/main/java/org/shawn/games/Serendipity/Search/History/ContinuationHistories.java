@@ -21,10 +21,10 @@ package org.shawn.games.Serendipity.Search.History;
 
 import java.util.Arrays;
 
-import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.Piece;
-import com.github.bhlangonijr.chesslib.Square;
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.Board;
+import org.shawn.games.Serendipity.Chess.Piece;
+import org.shawn.games.Serendipity.Chess.Square;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class ContinuationHistories
 {

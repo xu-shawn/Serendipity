@@ -21,8 +21,8 @@ package org.shawn.games.Serendipity;
 
 import org.shawn.games.Serendipity.NNUE.*;
 
-import com.github.bhlangonijr.chesslib.*;
-import com.github.bhlangonijr.chesslib.move.*;
+import org.shawn.games.Serendipity.Chess.*;
+import org.shawn.games.Serendipity.Chess.move.*;
 
 import static org.junit.Assert.*;
 

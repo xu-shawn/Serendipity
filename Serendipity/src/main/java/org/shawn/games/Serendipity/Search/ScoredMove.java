@@ -19,7 +19,7 @@
 
 package org.shawn.games.Serendipity.Search;
 
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class ScoredMove extends Move
 {

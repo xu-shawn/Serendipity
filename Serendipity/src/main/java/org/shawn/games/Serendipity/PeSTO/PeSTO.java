@@ -19,7 +19,7 @@
 
 package org.shawn.games.Serendipity.PeSTO;
 
-import com.github.bhlangonijr.chesslib.*;
+import org.shawn.games.Serendipity.Chess.*;
 
 public class PeSTO
 {

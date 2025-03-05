@@ -116,6 +116,15 @@ public class BoardContext {
      * The initial position of the game, as a Forsyth-Edwards Notation (FEN) string.
      */
     protected String startFEN;
+    
+    /**
+     * Constructs a new game context using the default game mode and chess variation.
+     * <p>
+     * Same as invoking {@code new GameContext(GameMode.HUMAN_VS_HUMAN, VariationType.NORMAL)}.
+     */
+    public BoardContext() {
+        loadDefaults();
+    }
 
     private static long squareListToBb(List<Square> list) {
         long r = 0L;

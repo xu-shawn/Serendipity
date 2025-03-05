@@ -1,8 +1,8 @@
 package org.shawn.games.Serendipity.Chess.unicode;
 
 import java.io.PrintStream;
-import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.Piece;
+import org.shawn.games.Serendipity.Chess.Board;
+import org.shawn.games.Serendipity.Chess.Piece;
 
 /**
  * A printer class for conveniently printing boards using Unicode chess symbols in a reliable and consistent way.

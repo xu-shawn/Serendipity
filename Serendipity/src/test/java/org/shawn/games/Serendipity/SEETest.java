@@ -24,13 +24,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.github.bhlangonijr.chesslib.Bitboard;
-import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.Piece;
-import com.github.bhlangonijr.chesslib.PieceType;
-import com.github.bhlangonijr.chesslib.Side;
-import com.github.bhlangonijr.chesslib.Square;
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.Bitboard;
+import org.shawn.games.Serendipity.Chess.Board;
+import org.shawn.games.Serendipity.Chess.Piece;
+import org.shawn.games.Serendipity.Chess.PieceType;
+import org.shawn.games.Serendipity.Chess.Side;
+import org.shawn.games.Serendipity.Chess.Square;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class SEETest
 {
@@ -108,9 +108,9 @@ public class SEETest
 
 	private class SEE
 	{
-		private int[] SEEPieceValues = new int[] { 100, 300, 300, 500, 900, 0 };
+		private static int[] SEEPieceValues = new int[] { 100, 300, 300, 500, 900, 0 };
 
-		public int moveEstimatedValue(Board board, Move move)
+		public static int moveEstimatedValue(Board board, Move move)
 		{
 			// Start with the value of the piece on the target square
 			int value = !board.getPiece(move.getTo()).equals(Piece.NONE)
@@ -130,7 +130,7 @@ public class SEETest
 			return value;
 		}
 
-		public boolean staticExchangeEvaluation(Board board, Move move, int threshold)
+		public static boolean staticExchangeEvaluation(Board board, Move move, int threshold)
 		{
 			Square from, to;
 			PieceType nextVictim;
@@ -266,29 +266,29 @@ public class SEETest
 			// Side to move after the loop loses
 			return !board.getSideToMove().equals(colour);
 		}
+	}
 
-		@Test
-		public void testSEE()
+	@Test
+	public void testSEE()
+	{
+		Board board = new Board();
+
+		for (String s : rawTestString.split("\n"))
 		{
-			Board board = new Board();
+			String[] data = s.split("\\s\\|\\s");
 
-			for (String s : rawTestString.split("\n"))
+			board.loadFromFen(data[0]);
+			Move move = new Move(data[1], board.getSideToMove());
+
+			int expectedValue = Integer.parseInt(data[2]);
+
+			if (!SEE.staticExchangeEvaluation(board, move, expectedValue))
 			{
-				String[] data = s.split("\\s\\|\\s");
-
-				board.loadFromFen(data[0]);
-				Move move = new Move(data[1], board.getSideToMove());
-
-				int expectedValue = Integer.parseInt(data[2]);
-
-				if (!this.staticExchangeEvaluation(board, move, expectedValue))
-				{
-					System.out.println(s);
-				}
-
-				assertFalse(this.staticExchangeEvaluation(board, move, expectedValue + 1));
-//			assertTrue(SEE.staticExchangeEvaluation(board, move, expectedValue));
+				System.out.println(s);
 			}
+
+			assertFalse(SEE.staticExchangeEvaluation(board, move, expectedValue + 1));
+			assertTrue(SEE.staticExchangeEvaluation(board, move, expectedValue));
 		}
 	}
 }

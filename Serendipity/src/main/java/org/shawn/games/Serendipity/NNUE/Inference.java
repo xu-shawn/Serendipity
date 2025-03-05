@@ -19,7 +19,7 @@
 
 package org.shawn.games.Serendipity.NNUE;
 
-import com.github.bhlangonijr.chesslib.Side;
+import org.shawn.games.Serendipity.Chess.Side;
 
 public interface Inference
 {
