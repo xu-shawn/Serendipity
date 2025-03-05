@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib.move;
+package org.shawn.games.Serendipity.Chess.move;
 
-import com.github.bhlangonijr.chesslib.*;
+import org.shawn.games.Serendipity.Chess.*;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.github.bhlangonijr.chesslib.Bitboard.bitScanForward;
-import static com.github.bhlangonijr.chesslib.Bitboard.extractLsb;
+import static org.shawn.games.Serendipity.Chess.Bitboard.bitScanForward;
+import static org.shawn.games.Serendipity.Chess.Bitboard.extractLsb;
 
 /**
  * A handy collection of static utility methods for generating moves from a chess position.

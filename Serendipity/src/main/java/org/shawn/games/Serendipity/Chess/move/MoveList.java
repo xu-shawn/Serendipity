@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib.move;
+package org.shawn.games.Serendipity.Chess.move;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
-import com.github.bhlangonijr.chesslib.Bitboard;
-import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.Constants;
-import com.github.bhlangonijr.chesslib.File;
-import com.github.bhlangonijr.chesslib.Piece;
-import com.github.bhlangonijr.chesslib.PieceType;
-import com.github.bhlangonijr.chesslib.Rank;
-import com.github.bhlangonijr.chesslib.Side;
-import com.github.bhlangonijr.chesslib.Square;
-import com.github.bhlangonijr.chesslib.util.StringUtil;
+import org.shawn.games.Serendipity.Chess.Bitboard;
+import org.shawn.games.Serendipity.Chess.Board;
+import org.shawn.games.Serendipity.Chess.Constants;
+import org.shawn.games.Serendipity.Chess.File;
+import org.shawn.games.Serendipity.Chess.Piece;
+import org.shawn.games.Serendipity.Chess.PieceType;
+import org.shawn.games.Serendipity.Chess.Rank;
+import org.shawn.games.Serendipity.Chess.Side;
+import org.shawn.games.Serendipity.Chess.Square;
+import org.shawn.games.Serendipity.Chess.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 
 /**

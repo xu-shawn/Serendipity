@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib;
+package org.shawn.games.Serendipity.Chess;
 
 /**
  * The representation of all possible <i>right-pointing</i> diagonals in a board. A diagonal is identified by two edge

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib.move;
+package org.shawn.games.Serendipity.Chess.move;
 
 /**
  * Thrown to indicate a failure generating a move.

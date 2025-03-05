@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib.util;
+package org.shawn.games.Serendipity.Chess.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

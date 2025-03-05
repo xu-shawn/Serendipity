@@ -1,4 +1,4 @@
-package com.github.bhlangonijr.chesslib.util;
+package org.shawn.games.Serendipity.Chess.util;
 
 /**
  * A utility class that is used to generate pseudorandom numbers bases on XOR and bit shifts operations.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib;
+package org.shawn.games.Serendipity.Chess;
 
 /**
  * One of the two sides in a chess game, {@link Side#WHITE} or {@link Side#BLACK}.

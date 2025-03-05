@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib;
+package org.shawn.games.Serendipity.Chess;
 
 /**
  * The different combinations of castle rights for a side in a chess game. A side can castle only king-side (short

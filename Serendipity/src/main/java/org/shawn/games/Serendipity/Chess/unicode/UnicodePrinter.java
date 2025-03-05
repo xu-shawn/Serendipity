@@ -1,4 +1,4 @@
-package com.github.bhlangonijr.chesslib.unicode;
+package org.shawn.games.Serendipity.Chess.unicode;
 
 import java.io.PrintStream;
 import com.github.bhlangonijr.chesslib.Board;

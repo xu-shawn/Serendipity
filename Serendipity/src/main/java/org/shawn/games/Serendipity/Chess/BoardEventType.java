@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib;
+package org.shawn.games.Serendipity.Chess;
 
 /**
  * All possible types of a {@link BoardEvent}.

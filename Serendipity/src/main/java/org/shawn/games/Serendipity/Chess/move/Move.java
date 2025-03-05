@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib.move;
+package org.shawn.games.Serendipity.Chess.move;
 
-import com.github.bhlangonijr.chesslib.BoardEvent;
-import com.github.bhlangonijr.chesslib.BoardEventType;
-import com.github.bhlangonijr.chesslib.Piece;
-import com.github.bhlangonijr.chesslib.Side;
-import com.github.bhlangonijr.chesslib.Square;
+import org.shawn.games.Serendipity.Chess.BoardEvent;
+import org.shawn.games.Serendipity.Chess.BoardEventType;
+import org.shawn.games.Serendipity.Chess.Piece;
+import org.shawn.games.Serendipity.Chess.Side;
+import org.shawn.games.Serendipity.Chess.Square;
 import org.apache.commons.lang3.StringUtils;
 
 /**

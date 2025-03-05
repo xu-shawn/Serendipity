@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib;
+package org.shawn.games.Serendipity.Chess;
 
-import static com.github.bhlangonijr.chesslib.Bitboard.extractLsb;
-import static com.github.bhlangonijr.chesslib.Constants.emptyMove;
+import static org.shawn.games.Serendipity.Chess.Bitboard.extractLsb;
+import static org.shawn.games.Serendipity.Chess.Constants.emptyMove;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,11 +29,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-import com.github.bhlangonijr.chesslib.game.GameContext;
-import com.github.bhlangonijr.chesslib.move.Move;
-import com.github.bhlangonijr.chesslib.move.MoveGenerator;
-import com.github.bhlangonijr.chesslib.move.MoveList;
-import com.github.bhlangonijr.chesslib.util.XorShiftRandom;
+import org.shawn.games.Serendipity.Chess.game.GameContext;
+import org.shawn.games.Serendipity.Chess.move.Move;
+import org.shawn.games.Serendipity.Chess.move.MoveGenerator;
+import org.shawn.games.Serendipity.Chess.move.MoveList;
+import org.shawn.games.Serendipity.Chess.util.XorShiftRandom;
 import org.apache.commons.lang3.StringUtils;
 
 /**

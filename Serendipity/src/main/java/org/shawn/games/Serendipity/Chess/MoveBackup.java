@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib;
+package org.shawn.games.Serendipity.Chess;
 
-import static com.github.bhlangonijr.chesslib.Constants.emptyMove;
+import static org.shawn.games.Serendipity.Chess.Constants.emptyMove;
 
 import java.util.EnumMap;
 
-import com.github.bhlangonijr.chesslib.move.Move;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 /**
  * A structure that can be used to cancel the effects of a move and to restore the board to a previous status. The

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.bhlangonijr.chesslib;
+package org.shawn.games.Serendipity.Chess;
 
-import static com.github.bhlangonijr.chesslib.DiagonalA1H8.*;
-import static com.github.bhlangonijr.chesslib.DiagonalH1A8.*;
-import static com.github.bhlangonijr.chesslib.Square.*;
+import static org.shawn.games.Serendipity.Chess.DiagonalA1H8.*;
+import static org.shawn.games.Serendipity.Chess.DiagonalH1A8.*;
+import static org.shawn.games.Serendipity.Chess.Square.*;
 
 import java.util.LinkedList;
 import java.util.List;
