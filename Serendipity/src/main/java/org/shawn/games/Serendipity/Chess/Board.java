@@ -76,7 +76,7 @@ public class Board implements Cloneable, BoardEvent {
     private Square enPassant;
     private Integer moveCounter;
     private Integer halfMoveCounter;
-    private GameContext context;
+    private BoardContext context;
     private boolean enableEvents;
     private final boolean updateHistory;
     private long incrementalHashKey;
@@ -85,10 +85,10 @@ public class Board implements Cloneable, BoardEvent {
      * Constructs a new board using a default game context. The board will keep its history updated, that is, will store
      * a hash value for each position encountered.
      *
-     * @see Board#Board(GameContext, boolean)
+     * @see Board#Board(BoardContext, boolean)
      */
     public Board() {
-        this(new GameContext(), true);
+        this(new BoardContext(), true);
     }
 
     /**
@@ -98,7 +98,7 @@ public class Board implements Cloneable, BoardEvent {
      * @param gameContext   the game context to use for this board
      * @param updateHistory whether to keep the history updated or not
      */
-    public Board(GameContext gameContext, boolean updateHistory) {
+    public Board(BoardContext gameContext, boolean updateHistory) {
 
         bitboard = new long[Piece.allPieces.length];
         bbSide = new long[Side.allSides.length];
@@ -686,7 +686,7 @@ public class Board implements Cloneable, BoardEvent {
      *
      * @return the game context
      */
-    public GameContext getContext() {
+    public BoardContext getContext() {
         return context;
     }
 
@@ -695,7 +695,7 @@ public class Board implements Cloneable, BoardEvent {
      *
      * @param context the game context to set
      */
-    public void setContext(GameContext context) {
+    public void setContext(BoardContext context) {
         this.context = context;
     }
 

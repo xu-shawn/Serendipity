@@ -25,7 +25,7 @@ import java.util.List;
  * most importantly to validate special moves in a uniform and consistent way according to the chess variation (e.g.
  * castle moves).
  */
-public class GameContext {
+public class BoardContext {
 
     /**
      * The definition of the white king shift in the default short castle move.
@@ -581,7 +581,7 @@ public class GameContext {
      * @param whiteooAllSquaresBb the bitboard to set
      * @return this game context instance
      */
-    public GameContext setWhiteooAllSquaresBb(long whiteooAllSquaresBb) {
+    public BoardContext setWhiteooAllSquaresBb(long whiteooAllSquaresBb) {
         this.whiteooAllSquaresBb = whiteooAllSquaresBb;
         return this;
     }
@@ -601,7 +601,7 @@ public class GameContext {
      * @param whiteoooAllSquaresBb the bitboard to set
      * @return this game context instance
      */
-    public GameContext setWhiteoooAllSquaresBb(long whiteoooAllSquaresBb) {
+    public BoardContext setWhiteoooAllSquaresBb(long whiteoooAllSquaresBb) {
         this.whiteoooAllSquaresBb = whiteoooAllSquaresBb;
         return this;
     }
@@ -621,7 +621,7 @@ public class GameContext {
      * @param blackooAllSquaresBb the bitboard to set
      * @return this game context instance
      */
-    public GameContext setBlackooAllSquaresBb(long blackooAllSquaresBb) {
+    public BoardContext setBlackooAllSquaresBb(long blackooAllSquaresBb) {
         this.blackooAllSquaresBb = blackooAllSquaresBb;
         return this;
     }
@@ -641,7 +641,7 @@ public class GameContext {
      * @param blackoooAllSquaresBb the bitboard to set
      * @return this game context instance
      */
-    public GameContext setBlackoooAllSquaresBb(long blackoooAllSquaresBb) {
+    public BoardContext setBlackoooAllSquaresBb(long blackoooAllSquaresBb) {
         this.blackoooAllSquaresBb = blackoooAllSquaresBb;
         return this;
     }
