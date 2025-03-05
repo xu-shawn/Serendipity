@@ -121,6 +121,5 @@ public class MoveSort
 		}
 
 		moves.sort((m1, m2) -> ((ScoredMove) m2).getScore() - ((ScoredMove) m1).getScore());
-
 	}
 }

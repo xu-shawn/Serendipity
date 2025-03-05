@@ -57,9 +57,12 @@ public class AlphaBeta implements Runnable
 
 	private Move bestMove;
 
+	private ArrayList<ArrayList<Move>> movelists;
+
 	public AlphaBeta(SharedThreadData sharedThreadData, ThreadData threadData)
 	{
 		this.ss = new SearchStack(MAX_PLY);
+		this.movelists = new ArrayList<ArrayList<Move>>();
 
 		this.sharedThreadData = sharedThreadData;
 		this.threadData = threadData;
@@ -75,6 +78,12 @@ public class AlphaBeta implements Runnable
 			{
 				reduction[i][j] = (int) (1.60 + Math.log(i) * Math.log(j) / 2.17);
 			}
+		}
+
+		movelists.ensureCapacity(MAX_PLY);
+		for (int i = 0; i < MAX_PLY; i++)
+		{
+			movelists.add(new ArrayList<Move>());
 		}
 	}
 
@@ -111,6 +120,22 @@ public class AlphaBeta implements Runnable
 		return (this.threadData.id == 0 && this.threadData.mainThreadData.limits.getNodes() > 0
 				&& this.threadData.nodes.get() > threadData.mainThreadData.limits.getNodes())
 				|| sharedThreadData.stopped.get() || (this.threadData.id == 0 && this.timeManager.shouldStop());
+	}
+
+	private ArrayList<Move> getPseudoLegalMoves(int idx, Board board)
+	{
+		ArrayList<Move> chosenList = movelists.get(idx);
+		chosenList.clear();
+		board.pseudoLegalMoves(chosenList);
+		return chosenList;
+	}
+
+	private ArrayList<Move> getPesudoLegalCaptures(int idx, Board board)
+	{
+		ArrayList<Move> chosenList = movelists.get(idx);
+		chosenList.clear();
+		board.pseudoLegalCaptures(chosenList);
+		return chosenList;
 	}
 
 	public int evaluate(Board board)
@@ -150,7 +175,7 @@ public class AlphaBeta implements Runnable
 		}
 	}
 
-	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
+	private int quiesce(Board board, int alpha, int beta, int ply, int recursiveDepth) throws TimeOutException
 	{
 		this.threadData.nodes.incrementAndGet();
 
@@ -213,12 +238,12 @@ public class AlphaBeta implements Runnable
 
 		int futilityBase;
 		boolean inCheck = sse.inCheck = board.isKingAttacked();
-		final List<Move> moves;
+		final ArrayList<Move> moves;
 
 		if (inCheck)
 		{
 			bestScore = futilityBase = MIN_EVAL;
-			moves = board.legalMoves();
+			moves = getPseudoLegalMoves(recursiveDepth, board);
 
 			History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 					ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
@@ -251,13 +276,14 @@ public class AlphaBeta implements Runnable
 			}
 
 			futilityBase = sse.staticEval + 205;
-			moves = board.pseudoLegalCaptures();
+			moves = getPesudoLegalCaptures(recursiveDepth, board);
+
 			MoveSort.sortCaptures(moves, ttMove, board, threadData.captureHistory);
 		}
 
 		for (Move move : moves)
 		{
-			if (!inCheck && !board.isMoveLegal(move, false))
+			if (!board.isMoveLegal(move, false))
 			{
 				continue;
 			}
@@ -281,7 +307,7 @@ public class AlphaBeta implements Runnable
 			sse.move = move;
 			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
 
-			int score = -quiesce(board, -beta, -alpha, ply + 1);
+			int score = -quiesce(board, -beta, -alpha, ply + 1, recursiveDepth + 1);
 
 			board.undoMove();
 			accumulators.pop();
@@ -317,7 +343,7 @@ public class AlphaBeta implements Runnable
 		return bestScore;
 	}
 
-	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean cutNode)
+	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean cutNode, int recursiveDepth)
 			throws TimeOutException
 	{
 		this.threadData.nodes.incrementAndGet();
@@ -372,7 +398,7 @@ public class AlphaBeta implements Runnable
 		if (depth <= 0 || ply >= MAX_PLY)
 		{
 			this.threadData.nodes.decrementAndGet();
-			return quiesce(board, alpha, beta, ply);
+			return quiesce(board, alpha, beta, ply, recursiveDepth + 1);
 		}
 
 		if (depth >= MAX_PLY)
@@ -492,7 +518,7 @@ public class AlphaBeta implements Runnable
 			board.doNullMove();
 			sse.move = Constants.emptyMove;
 			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
-			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, !cutNode);
+			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, !cutNode, recursiveDepth + 1);
 			board.undoMove();
 
 			if (nullEval >= beta && nullEval < MATE_IN_MAX_PLY)
@@ -504,7 +530,7 @@ public class AlphaBeta implements Runnable
 
 				this.nmpMinPly = ply + 3 * (depth - r) / 4;
 
-				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply, false);
+				int v = mainSearch(board, depth - r, -beta, -beta + 1, ply, false, recursiveDepth + 1);
 
 				this.nmpMinPly = 0;
 
@@ -517,7 +543,7 @@ public class AlphaBeta implements Runnable
 
 		if (!inCheck && depth <= 5 && eval + 256 * depth < alpha)
 		{
-			int razorValue = quiesce(board, alpha, alpha + 1, ply);
+			int razorValue = quiesce(board, alpha, alpha + 1, ply, recursiveDepth + 1);
 
 			if (razorValue <= alpha)
 			{
@@ -539,8 +565,10 @@ public class AlphaBeta implements Runnable
 			depth -= 2;
 		}
 
-		MovePicker movePicker = new MovePicker(board, ttMove, sse.killer, threadData.history, threadData.captureHistory,
-				currentContinuationHistories);
+		final ArrayList<Move> moves = getPseudoLegalMoves(recursiveDepth, board);
+
+		MovePicker movePicker = new MovePicker(moves, board, ttMove, sse.killer, threadData.history,
+				threadData.captureHistory, currentContinuationHistories);
 
 		Move move;
 
@@ -603,7 +631,8 @@ public class AlphaBeta implements Runnable
 				int moveCountBackup = sse.moveCount;
 
 				sse.excludedMove = move;
-				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, cutNode);
+				int singularValue = mainSearch(board, singularDepth, singularBeta - 1, singularBeta, ply, cutNode,
+						recursiveDepth + 1);
 				sse.excludedMove = null;
 				sse.moveCount = moveCountBackup;
 
@@ -652,22 +681,24 @@ public class AlphaBeta implements Runnable
 
 				int d = Math.min(newdepth, newdepth - r);
 
-				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
+				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true, recursiveDepth + 1);
 
 				if (thisMoveEval > alpha)
 				{
-					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, !cutNode);
+					thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, !cutNode,
+							recursiveDepth + 1);
 				}
 			}
 
 			else if (!isPV || sse.moveCount > 1)
 			{
-				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, !cutNode);
+				thisMoveEval = -mainSearch(board, newdepth, -(alpha + 1), -alpha, ply + 1, !cutNode,
+						recursiveDepth + 1);
 			}
 
 			if (isPV && (sse.moveCount == 1 || thisMoveEval > alpha))
 			{
-				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, false);
+				thisMoveEval = -mainSearch(board, newdepth, -beta, -alpha, ply + 1, false, recursiveDepth + 1);
 			}
 
 			board.undoMove();
@@ -803,7 +834,7 @@ public class AlphaBeta implements Runnable
 
 				while (true)
 				{
-					int newScore = mainSearch(this.internalBoard, i, alpha, beta, 0, false);
+					int newScore = mainSearch(this.internalBoard, i, alpha, beta, 0, false, 0);
 
 					if (newScore > alpha && newScore < beta)
 					{
@@ -885,7 +916,9 @@ public class AlphaBeta implements Runnable
 
 	private Move getEmergencyBestMove()
 	{
-		return this.internalBoard.legalMoves().get(0);
+		final List<Move> moves = new ArrayList<Move>();
+		this.internalBoard.legalMoves(moves);
+		return moves.get(0);
 	}
 
 	public long getNodesCount()

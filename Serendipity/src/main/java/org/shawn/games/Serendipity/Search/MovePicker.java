@@ -49,24 +49,26 @@ public class MovePicker
 	private int moveIndex;
 
 	private static final int STAGE_TT_MOVE = 0;
-	private static final int STAGE_NORMAL = 1;
+	private static final int STAGE_GENERATE_NORMAL = 1;
+	private static final int STAGE_NORMAL = 2;
 	private static final int[] promoValue = { -2000000001, 2000000000, -2000000001, -2000000001, 2000000001 };
 
-	public MovePicker(Board board, Move ttMove)
+	public MovePicker(ArrayList<Move> moves, Board board, Move ttMove)
 	{
-		this(board, ttMove, null, null, null, null);
+		this(moves, board, ttMove, null, null, null, null);
 	}
 
-	public MovePicker(Board board, Move ttMove, Move killer, History history, History captureHistory,
-			History[] continuationHistories)
+	public MovePicker(ArrayList<Move> moves, Board board, Move ttMove, Move killer, History history,
+			History captureHistory, History[] continuationHistories)
 	{
+		this.moves = moves;
 		this.board = board;
 		this.ttMove = ttMove;
 
 		if (ttMove == null || !isPseudoLegal(board, ttMove))
 		{
 			this.ttMove = null;
-			this.stage = STAGE_NORMAL;
+			this.stage = STAGE_GENERATE_NORMAL;
 		}
 		else
 		{
@@ -202,7 +204,6 @@ public class MovePicker
 
 	public void initMoves()
 	{
-		this.moves = new ArrayList<Move>(board.pseudoLegalMoves());
 		this.moveScore = new int[this.moves.size()];
 
 		for (int i = 0; i < this.moves.size(); i++)
@@ -244,13 +245,12 @@ public class MovePicker
 			case STAGE_TT_MOVE:
 				stage++;
 				return this.ttMove;
+				
+			case STAGE_GENERATE_NORMAL:
+				stage++;
+				initMoves();
 
 			case STAGE_NORMAL:
-				if (this.moves == null)
-				{
-					initMoves();
-				}
-
 				Move ret = selectMove();
 
 				if (ret != null && ret.equals(ttMove))

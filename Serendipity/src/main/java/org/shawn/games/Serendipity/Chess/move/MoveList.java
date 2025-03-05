@@ -230,7 +230,6 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 
 	private static void addCheckFlag(Board board, StringBuilder san)
 	{
-
 		if (board.isKingAttacked())
 		{
 			if (board.isMated())

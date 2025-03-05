@@ -143,7 +143,6 @@ public class Board implements Cloneable, BoardEvent
 		}
 		else
 			return side.equals(Side.BLACK) && move.getTo().getRank().equals(Rank.RANK_1);
-
 	}
 
 	private static Square findEnPassantTarget(Square sq, Side side)
@@ -196,7 +195,6 @@ public class Board implements Cloneable, BoardEvent
 	 */
 	public boolean doMove(final String move)
 	{
-
 		MoveList moves = new MoveList(this.getFen());
 		moves.addSanMove(move, true, true);
 		return doMove(moves.removeLast(), true);
@@ -1586,7 +1584,9 @@ public class Board implements Cloneable, BoardEvent
 		{
 			if (isKingAttacked())
 			{
-				final List<Move> l = MoveGenerator.generateLegalMoves(this);
+				List<Move> l = new ArrayList<Move>();
+				MoveGenerator.generateLegalMoves(this, l);
+
 				if (l.size() == 0)
 				{
 					return true;
@@ -1602,12 +1602,11 @@ public class Board implements Cloneable, BoardEvent
 
 	/**
 	 * Verifies if the current position is a forced draw because any of the standard
-	 * chess rules. Specifically, the method checks for:
+	 * chess rules (except for Stalemate). Specifically, the method checks for:
 	 * <ul>
 	 * <li>threefold repetition;</li>
 	 * <li>insufficient material;</li>
 	 * <li>fifty-move rule;</li>
-	 * <li>stalemate.</li>
 	 * </ul>
 	 *
 	 * @return {@code true} if the position is a draw
@@ -1626,8 +1625,8 @@ public class Board implements Cloneable, BoardEvent
 		{
 			return true;
 		}
-		return isStaleMate();
 
+		return false;
 	}
 
 	/**
@@ -1640,7 +1639,6 @@ public class Board implements Cloneable, BoardEvent
 	 */
 	public boolean isRepetition(int n)
 	{
-
 		final int i = Math.min(getHistory().size() - 1, getHalfMoveCounter());
 		if (getHistory().size() >= 4)
 		{
@@ -1740,32 +1738,6 @@ public class Board implements Cloneable, BoardEvent
 	}
 
 	/**
-	 * Verifies in the current position if the king of the side to move is
-	 * stalemated, and thus if the position must be considered a forced draw.
-	 *
-	 * @return {@code true} if the king of the side to move is stalemated
-	 */
-	public boolean isStaleMate()
-	{
-		try
-		{
-			if (!isKingAttacked())
-			{
-				List<Move> l = MoveGenerator.generateLegalMoves(this);
-				if (l.size() == 0)
-				{
-					return true;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		return false;
-	}
-
-	/**
 	 * Returns whether the notifications of board events are enabled or not.
 	 *
 	 * @return {@code true} if board events are notified to observers
@@ -1813,10 +1785,9 @@ public class Board implements Cloneable, BoardEvent
 	 *
 	 * @return the list of legal moves available in the current position
 	 */
-	public List<Move> legalMoves()
+	public void legalMoves(List<Move> moves)
 	{
-
-		return MoveGenerator.generateLegalMoves(this);
+		MoveGenerator.generateLegalMoves(this, moves);
 	}
 
 	/**
@@ -1828,10 +1799,9 @@ public class Board implements Cloneable, BoardEvent
 	 *
 	 * @return the list of pseudo-legal moves available in the current position
 	 */
-	public List<Move> pseudoLegalMoves()
+	public void pseudoLegalMoves(List<Move> moves)
 	{
-
-		return MoveGenerator.generatePseudoLegalMoves(this);
+		MoveGenerator.generatePseudoLegalMoves(this, moves);
 	}
 
 	/**
@@ -1845,10 +1815,9 @@ public class Board implements Cloneable, BoardEvent
 	 *
 	 * @return the list of pseudo-legal captures available in the current position
 	 */
-	public List<Move> pseudoLegalCaptures()
+	public void pseudoLegalCaptures(List<Move> moves)
 	{
-
-		return MoveGenerator.generatePseudoLegalCaptures(this);
+		MoveGenerator.generatePseudoLegalCaptures(this, moves);
 	}
 
 	/**

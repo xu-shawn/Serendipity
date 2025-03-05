@@ -331,7 +331,6 @@ public class MoveGenerator
 	 */
 	public static void generateQueenMoves(Board board, List<Move> moves)
 	{
-
 		generateQueenMoves(board, moves, ~board.getBitboard(board.getSideToMove()));
 	}
 
@@ -434,11 +433,11 @@ public class MoveGenerator
 	 * because of other rules (e.g. checks to the king).
 	 *
 	 * @param board the board from which to generate the pseudo-legal moves
+	 * @param moves the list to append new moves to
 	 * @return the list of pseudo-legal moves available in the position
 	 */
-	public static List<Move> generatePseudoLegalMoves(Board board)
+	public static void generatePseudoLegalMoves(Board board, List<Move> moves)
 	{
-		List<Move> moves = new LinkedList<>();
 		generatePawnCaptures(board, moves);
 		generatePawnMoves(board, moves);
 		generateKnightMoves(board, moves);
@@ -447,7 +446,6 @@ public class MoveGenerator
 		generateQueenMoves(board, moves);
 		generateKingMoves(board, moves);
 		generateCastleMoves(board, moves);
-		return moves;
 	}
 
 	/**
@@ -460,11 +458,10 @@ public class MoveGenerator
 	 * the king).
 	 *
 	 * @param board the board from which to generate the pseudo-legal captures
-	 * @return the list of pseudo-legal captures available in the position
+	 * @param moves the list to append new moves to
 	 */
-	public static List<Move> generatePseudoLegalCaptures(Board board)
+	public static void generatePseudoLegalCaptures(Board board, List<Move> moves)
 	{
-		List<Move> moves = new LinkedList<>();
 		Side other = board.getSideToMove().flip();
 		generatePawnCaptures(board, moves);
 		generateKnightMoves(board, moves, board.getBitboard(other));
@@ -472,7 +469,6 @@ public class MoveGenerator
 		generateRookMoves(board, moves, board.getBitboard(other));
 		generateQueenMoves(board, moves, board.getBitboard(other));
 		generateKingMoves(board, moves, board.getBitboard(other));
-		return moves;
 	}
 
 	/**
@@ -480,16 +476,15 @@ public class MoveGenerator
 	 * the standard rules of chess.
 	 *
 	 * @param board the board from which to generate the legal moves
-	 * @return the list of legal moves available in the position
+	 * @param moves the list to append new moves to
 	 * @throws MoveGeneratorException if it is not possible to generate the moves
 	 */
-	public static List<Move> generateLegalMoves(Board board) throws MoveGeneratorException
+	public static void generateLegalMoves(Board board, List<Move> moves) throws MoveGeneratorException
 	{
 		try
 		{
-			List<Move> moves = generatePseudoLegalMoves(board);
+			generatePseudoLegalMoves(board, moves);
 			moves.removeIf(move -> !board.isMoveLegal(move, false));
-			return moves;
 		}
 		catch (Exception e)
 		{
