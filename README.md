@@ -120,7 +120,7 @@ Alternatively, if you are on Linux/MacOS, you can also opt to run the Serendipit
 ### Evaluation
 
 Serendipity relies on a side-relative and efficiently updatable neural network for evaluation.
-This allows the network to be efficently updated between moves, which helps the engine obtain good evaluation with reasonable speed.
+This avoids full network refreshes between moves, which helps the engine obtain good evaluation with reasonable speed.
 
 The description of the network architecture, as well as the training procedure, is beyond the scope of this document.
 
