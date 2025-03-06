@@ -1,7 +1,7 @@
 <div align="center">
-
-  # Serendipity
-
+  <h1>
+    Serendipity
+  </h1>
 </div>
 
 Serendipity is a UCI chess engine written in the Java programming language. With a CCRL rating of more than 3500 elo, it is the strongest Java chess engine in the world.
