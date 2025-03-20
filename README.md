@@ -150,7 +150,7 @@ The names of these people are listed below, by alphabetical order:
 
 Thanks to engine testers such as CCRL and Silvian Rucsandescu for running and testing the engine.
 
-Finally, thanks to everyone on the [Stockfish Discord][sf_discord], [Engine Programming Discord][ep_discord], and the unofficial [CPW Discord][cpw_discord] for being kind, knowledgable, and collaborative.
+Finally, thanks to everyone on the [Stockfish Discord][sf_discord], [Engine Programming Discord][ep_discord], and the unofficial [CPW Discord][cpw_discord] for being kind, knowledgeable, and collaborative.
 
 [elo_world]: https://www.youtube.com/watch?v=DpXy041BIlA
 [chess_arena]: https://github.com/xu-shawn/SimplerChessEngine
