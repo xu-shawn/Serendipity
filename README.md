@@ -41,7 +41,8 @@ As of November 2024, Serendipity is the strongest Java engine in the world and a
 |  v0.1   |             -            |          3227           |
 |  v0.2   |           3411           |            -            |
 |  v0.3   |             -            |          3390           |
-|  v0.4   |           3518           |          3446           |
+|  v0.4   |           3516           |          3446           |
+|  v1.0   |           3559           |          3487           |
 
 </div>
 
