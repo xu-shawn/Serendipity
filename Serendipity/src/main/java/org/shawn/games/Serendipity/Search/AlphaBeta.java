@@ -777,7 +777,7 @@ public class AlphaBeta implements Runnable
 		Move[] lastCompletePV = null;
 		alpha = MIN_EVAL;
 		beta = MAX_EVAL;
-		delta = 25;
+		delta = 15;
 		clearPV();
 
 		try
@@ -835,15 +835,15 @@ public class AlphaBeta implements Runnable
 					else if (newScore <= alpha)
 					{
 						beta = (alpha + beta) / 2;
-						alpha = Math.max(alpha - delta, MIN_EVAL);
+						alpha = Math.max(newScore - delta, MIN_EVAL);
 					}
 
 					else
 					{
-						beta = Math.min(beta + delta, MAX_EVAL);
+						beta = Math.min(newScore + delta, MAX_EVAL);
 					}
 
-					delta += delta * 3;
+					delta += delta;
 				}
 			}
 		}
