@@ -584,7 +584,7 @@ public class AlphaBeta implements Runnable
 				}
 
 				if (depth < 9
-						&& !SEE.staticExchangeEvaluation(board, move, isQuiet ? -65 * depth : -38 * depth * depth))
+						&& !SEE.staticExchangeEvaluation(board, move, isQuiet && !givesCheck ? -65 * depth : -38 * depth * depth))
 				{
 					continue;
 				}
