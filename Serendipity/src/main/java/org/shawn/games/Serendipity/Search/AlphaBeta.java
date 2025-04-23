@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
 import org.shawn.games.Serendipity.NNUE.*;
+import org.shawn.games.Serendipity.Search.Debug.Debugger;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -633,6 +634,13 @@ public class AlphaBeta implements Runnable
 						+ currentContinuationHistories[3].get(board, move) + 6628;
 
 				r -= history / 10000;
+			}
+
+			else
+			{
+				final int history = threadData.captureHistory.get(board, move) - 6284;
+
+				r -= history / 9000;
 			}
 
 			accumulators.push(board, move);
