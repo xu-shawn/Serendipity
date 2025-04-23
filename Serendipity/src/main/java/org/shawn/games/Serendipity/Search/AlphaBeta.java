@@ -324,7 +324,7 @@ public class AlphaBeta implements Runnable
 		this.ss.get(ply + 2).killer = null;
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
-		boolean improving, isPV, inCheck, givesCheck, inSingularSearch, ttCapture;
+		boolean improving, isPV, inCheck, inSingularSearch, ttCapture;
 		Move bestMove, ttMove;
 		int bestValue;
 		int eval;
@@ -558,10 +558,9 @@ public class AlphaBeta implements Runnable
 
 			sse.moveCount++;
 			int newdepth = depth - 1;
-			board.doMove(move);
-			givesCheck = board.isKingAttacked();
-			board.undoMove();
+
 			boolean isQuiet = isQuiet(move, board);
+			boolean givesCheck = board.attacksKing(move);
 
 			int r = reduction[depth][sse.moveCount];
 			int lmrDepth = depth - r;
@@ -583,8 +582,8 @@ public class AlphaBeta implements Runnable
 					continue;
 				}
 
-				if (depth < 9
-						&& !SEE.staticExchangeEvaluation(board, move, isQuiet && !givesCheck ? -65 * depth : -38 * depth * depth))
+				if (depth < 9 && !SEE.staticExchangeEvaluation(board, move,
+						isQuiet && !givesCheck ? -65 * depth : -38 * depth * depth))
 				{
 					continue;
 				}

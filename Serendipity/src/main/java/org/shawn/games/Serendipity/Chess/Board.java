@@ -614,6 +614,19 @@ public class Board implements Cloneable, BoardEvent
 	}
 
 	/**
+	 * Returns the bitboard that represents all the pieces of a given type present
+	 * on the board.
+	 *
+	 * @param pieceType the piece type for which the bitboard must be returned
+	 * @return the bitboard of the given piece definition
+	 */
+	public long getBitboard(PieceType pieceType)
+	{
+		return bitboard[Piece.make(Side.WHITE, pieceType).ordinal()]
+				| bitboard[Piece.make(Side.BLACK, pieceType).ordinal()];
+	}
+
+	/**
 	 * Returns the bitboard that represents all the pieces of a given side present
 	 * on the board.
 	 *
@@ -1303,6 +1316,9 @@ public class Board implements Cloneable, BoardEvent
 	/**
 	 * Returns the bitboard representing the pieces of a specific side and type that
 	 * can attack the given square.
+	 * <p>
+	 * Same as invoking
+	 * {@code squareAttackedByPieceType(square, side, type, getBitboard())}.
 	 *
 	 * @param square the target square
 	 * @param side   the attacking side
@@ -1312,8 +1328,23 @@ public class Board implements Cloneable, BoardEvent
 	 */
 	public long squareAttackedByPieceType(Square square, Side side, PieceType type)
 	{
+		return squareAttackedByPieceType(square, side, type, getBitboard());
+	}
+
+	/**
+	 * Returns the bitboard representing the pieces of a specific side and type that
+	 * can attack the given square.
+	 *
+	 * @param square the target square
+	 * @param side   the attacking side
+	 * @param type   the type of the attacking pieces
+	 * @param occ    a mask of occupied squares
+	 * @return the bitboard of all the pieces of the given side and type that can
+	 *         attack the square
+	 */
+	public long squareAttackedByPieceType(Square square, Side side, PieceType type, long occ)
+	{
 		long result = 0L;
-		long occ = getBitboard();
 		switch (type)
 		{
 			case PAWN:
@@ -1366,6 +1397,93 @@ public class Board implements Cloneable, BoardEvent
 	public boolean isKingAttacked()
 	{
 		return squareAttackedBy(getKingSquare(getSideToMove()), getSideToMove().flip()) != 0;
+	}
+
+	private boolean isAttackedByPiece(Square from, long to, PieceType pt, long occ)
+	{
+		switch (pt)
+		{
+			case PAWN:
+				return 0L != (to & Bitboard.getPawnAttacks(getSideToMove(), from));
+			case KNIGHT:
+				return 0L != (to & Bitboard.getKnightAttacks(from, occ));
+			case BISHOP:
+				return 0L != (to & Bitboard.getBishopAttacks(occ, from));
+			case ROOK:
+				return 0L != (to & Bitboard.getRookAttacks(occ, from));
+			case QUEEN:
+				return 0L != (to & Bitboard.getQueenAttacks(occ, from));
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Checks if the move attacks the king of the other side.
+	 *
+	 * @return {@code true} if the move attacks the king of the other wide
+	 */
+	public boolean attacksKing(Move move)
+	{
+		PieceType moved = getPiece(move.getFrom()).getPieceType();
+
+		long occ = getBitboard();
+		long king = getBitboard(Piece.make(getSideToMove().flip(), PieceType.KING));
+
+		if (isAttackedByPiece(move.getTo(), king, moved, getBitboard()))
+		{
+			return true;
+		}
+
+		Square kingSquare = Square.squareAt(Bitboard.bitScanForward(king));
+
+		long newOcc = (occ ^ move.getFrom().getBitboard()) | move.getTo().getBitboard();
+		long newBishopAttacks = Bitboard.getBishopAttacks(newOcc, kingSquare);
+		long newRookAttacks = Bitboard.getRookAttacks(newOcc, kingSquare);
+
+		long bishops = getBitboard(Piece.make(getSideToMove(), PieceType.BISHOP));
+		long rooks = getBitboard(Piece.make(getSideToMove(), PieceType.ROOK));
+		long queens = getBitboard(Piece.make(getSideToMove(), PieceType.QUEEN));
+
+		if (0L != ((bishops | queens) & newBishopAttacks))
+		{
+			return true;
+		}
+
+		if (0L != ((rooks | queens) & newRookAttacks))
+		{
+			return true;
+		}
+
+		if (!move.getPromotion().equals(Piece.NONE))
+		{
+			return isAttackedByPiece(move.getTo(), king, move.getPromotion().getPieceType(), newOcc);
+		}
+
+		if (PieceType.KING.equals(moved))
+		{
+			if (move.equals(context.getWhiteoo()))
+			{
+				return 0L != (newRookAttacks & context.getWhiteRookoo().getTo().getBitboard());
+			}
+
+			if (move.equals(context.getWhiteooo()))
+			{
+				return 0L != (newRookAttacks & context.getWhiteRookooo().getTo().getBitboard());
+			}
+
+			if (move.equals(context.getBlackoo()))
+			{
+				return 0L != (newRookAttacks & context.getBlackRookoo().getTo().getBitboard());
+			}
+
+			if (move.equals(context.getBlackooo()))
+			{
+				return 0L != (newRookAttacks & context.getBlackRookooo().getTo().getBitboard());
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1525,7 +1643,6 @@ public class Board implements Cloneable, BoardEvent
 	 */
 	public boolean isAttackedBy(Move move)
 	{
-
 		PieceType pieceType = getPiece(move.getFrom()).getPieceType();
 		assert (!PieceType.NONE.equals(pieceType));
 		Side side = getSideToMove();
