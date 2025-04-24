@@ -67,6 +67,11 @@ public class CaptureHistory implements History
 		{
 			return get(movedPiece, board.getEnPassant(), PieceType.PAWN);
 		}
+		
+		if (Piece.NONE.equals(board.getPiece(move.getTo())))
+		{
+			return get(movedPiece, move.getTo(), PieceType.NONE);
+		}
 
 		return get(movedPiece, move.getTo(), board.getPiece(move.getTo()).getPieceType());
 	}
