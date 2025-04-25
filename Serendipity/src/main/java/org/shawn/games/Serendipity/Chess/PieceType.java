@@ -29,7 +29,6 @@ import java.util.Map;
  */
 public enum PieceType
 {
-
 	/**
 	 * The pawn piece type.
 	 */

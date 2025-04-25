@@ -180,7 +180,7 @@ public class MovePicker
 
 		if (!AlphaBeta.isQuiet(move, board))
 		{
-			int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;
+			int score = board.staticExchangeEvaluation(move, -20) ? 900000000 : -1000000;
 			score += captureValue(move);
 			return score;
 		}
@@ -202,7 +202,9 @@ public class MovePicker
 
 	public void initMoves()
 	{
-		this.moves = new ArrayList<Move>(board.pseudoLegalMoves());
+		this.moves = new ArrayList<Move>();
+		board.generatePseudoLegalMoves(moves);
+		
 		this.moveScore = new int[this.moves.size()];
 
 		for (int i = 0; i < this.moves.size(); i++)

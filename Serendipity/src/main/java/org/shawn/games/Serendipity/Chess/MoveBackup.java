@@ -32,9 +32,8 @@ import org.shawn.games.Serendipity.Chess.move.Move;
  * the observers of the {@link BoardEventType#ON_UNDO_MOVE} events, emitted when
  * a move is reverted on a board.
  */
-public class MoveBackup implements BoardEvent
+public class MoveBackup
 {
-
 	private final EnumMap<Side, CastleRight> castleRight;
 	private Side sideToMove;
 	private Square enPassantTarget;
@@ -357,18 +356,6 @@ public class MoveBackup implements BoardEvent
 	public void setCapturedSquare(Square capturedSquare)
 	{
 		this.capturedSquare = capturedSquare;
-	}
-
-	/**
-	 * The type of board events this data structure represents when notified to its
-	 * observers.
-	 *
-	 * @return the board event type {@link BoardEventType#ON_UNDO_MOVE}
-	 */
-	@Override
-	public BoardEventType getType()
-	{
-		return BoardEventType.ON_UNDO_MOVE;
 	}
 
 	/**

@@ -102,7 +102,6 @@ public class MoveGenerator
 
 	private static void addPromotions(List<Move> moves, Side side, Square sqTarget, Square sqSource)
 	{
-
 		if (Side.WHITE.equals(side) && Rank.RANK_8.equals(sqTarget.getRank()))
 		{
 			moves.add(new Move(sqSource, sqTarget, Piece.WHITE_QUEEN));
@@ -110,6 +109,7 @@ public class MoveGenerator
 			moves.add(new Move(sqSource, sqTarget, Piece.WHITE_BISHOP));
 			moves.add(new Move(sqSource, sqTarget, Piece.WHITE_KNIGHT));
 		}
+
 		else if (Side.BLACK.equals(side) && Rank.RANK_1.equals(sqTarget.getRank()))
 		{
 			moves.add(new Move(sqSource, sqTarget, Piece.BLACK_QUEEN));
@@ -117,6 +117,7 @@ public class MoveGenerator
 			moves.add(new Move(sqSource, sqTarget, Piece.BLACK_BISHOP));
 			moves.add(new Move(sqSource, sqTarget, Piece.BLACK_KNIGHT));
 		}
+
 		else
 		{
 			moves.add(new Move(sqSource, sqTarget, Piece.NONE));
@@ -141,12 +142,14 @@ public class MoveGenerator
 	{
 		Side side = board.getSideToMove();
 		long pieces = board.getBitboard(Piece.make(side, PieceType.KNIGHT));
+
 		while (pieces != 0L)
 		{
 			int knightIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(knightIndex);
 			long attacks = Bitboard.getKnightAttacks(sqSource, mask);
+
 			while (attacks != 0L)
 			{
 				int attackIndex = bitScanForward(attacks);
@@ -225,7 +228,6 @@ public class MoveGenerator
 	 */
 	public static void generateBishopMoves(Board board, List<Move> moves)
 	{
-
 		generateBishopMoves(board, moves, ~board.getBitboard(board.getSideToMove()));
 	}
 
@@ -278,7 +280,6 @@ public class MoveGenerator
 	 */
 	public static void generateRookMoves(Board board, List<Move> moves)
 	{
-
 		generateRookMoves(board, moves, ~board.getBitboard(board.getSideToMove()));
 	}
 
@@ -300,12 +301,14 @@ public class MoveGenerator
 	{
 		Side side = board.getSideToMove();
 		long pieces = board.getBitboard(Piece.make(side, PieceType.QUEEN));
+
 		while (pieces != 0L)
 		{
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
 			long attacks = Bitboard.getQueenAttacks(board.getBitboard(), sqSource) & mask;
+
 			while (attacks != 0L)
 			{
 				int attackIndex = bitScanForward(attacks);
@@ -331,7 +334,6 @@ public class MoveGenerator
 	 */
 	public static void generateQueenMoves(Board board, List<Move> moves)
 	{
-
 		generateQueenMoves(board, moves, ~board.getBitboard(board.getSideToMove()));
 	}
 
@@ -353,12 +355,14 @@ public class MoveGenerator
 	{
 		Side side = board.getSideToMove();
 		long pieces = board.getBitboard(Piece.make(side, PieceType.KING));
+
 		while (pieces != 0L)
 		{
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
 			long attacks = Bitboard.getKingAttacks(sqSource, mask);
+
 			while (attacks != 0L)
 			{
 				int attackIndex = bitScanForward(attacks);
@@ -427,18 +431,17 @@ public class MoveGenerator
 	}
 
 	/**
-	 * Returns the list of all possible pseudo-legal moves for the given position.
+	 * Generates all possible pseudo-legal moves for the given position.
 	 * <p>
 	 * A move is considered pseudo-legal when it is legal according to the standard
 	 * rules of chess piece movements, but the resulting position might not be legal
 	 * because of other rules (e.g. checks to the king).
 	 *
 	 * @param board the board from which to generate the pseudo-legal moves
-	 * @return the list of pseudo-legal moves available in the position
+	 * @param moves the list to write generated moves to
 	 */
-	public static List<Move> generatePseudoLegalMoves(Board board)
+	public static void generatePseudoLegalMoves(Board board, List<Move> moves)
 	{
-		List<Move> moves = new LinkedList<>();
 		generatePawnCaptures(board, moves);
 		generatePawnMoves(board, moves);
 		generateKnightMoves(board, moves);
@@ -447,11 +450,10 @@ public class MoveGenerator
 		generateQueenMoves(board, moves);
 		generateKingMoves(board, moves);
 		generateCastleMoves(board, moves);
-		return moves;
 	}
 
 	/**
-	 * Returns the list of all possible pseudo-legal captures for the given
+	 * Generates all possible pseudo-legal captures for the given
 	 * position.
 	 * <p>
 	 * A move is considered a pseudo-legal capture when it takes an enemy piece and
@@ -460,11 +462,10 @@ public class MoveGenerator
 	 * the king).
 	 *
 	 * @param board the board from which to generate the pseudo-legal captures
-	 * @return the list of pseudo-legal captures available in the position
+	 * @param moves the list to write generated moves to
 	 */
-	public static List<Move> generatePseudoLegalCaptures(Board board)
+	public static void generatePseudoLegalCaptures(Board board, List<Move> moves)
 	{
-		List<Move> moves = new LinkedList<>();
 		Side other = board.getSideToMove().flip();
 		generatePawnCaptures(board, moves);
 		generateKnightMoves(board, moves, board.getBitboard(other));
@@ -472,24 +473,22 @@ public class MoveGenerator
 		generateRookMoves(board, moves, board.getBitboard(other));
 		generateQueenMoves(board, moves, board.getBitboard(other));
 		generateKingMoves(board, moves, board.getBitboard(other));
-		return moves;
 	}
 
 	/**
-	 * Returns the list of all possible legal moves for the position according to
+	 * Generates all possible legal moves for the position according to
 	 * the standard rules of chess.
 	 *
 	 * @param board the board from which to generate the legal moves
-	 * @return the list of legal moves available in the position
+	 * @param moves the list to write generated moves to
 	 * @throws MoveGeneratorException if it is not possible to generate the moves
 	 */
-	public static List<Move> generateLegalMoves(Board board) throws MoveGeneratorException
+	public static void generateLegalMoves(Board board, List<Move> moves) throws MoveGeneratorException
 	{
 		try
 		{
-			List<Move> moves = generatePseudoLegalMoves(board);
+			generatePseudoLegalMoves(board, moves);
 			moves.removeIf(move -> !board.isMoveLegal(move, false));
-			return moves;
 		}
 		catch (Exception e)
 		{

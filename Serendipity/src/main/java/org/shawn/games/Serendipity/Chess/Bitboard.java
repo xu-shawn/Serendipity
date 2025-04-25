@@ -610,7 +610,6 @@ public class Bitboard
 	 */
 	public static long getPawnMoves(Side side, Square square, long occupied)
 	{
-
 		long pawnMoves = (side.equals(Side.WHITE) ? whitePawnMoves[square.ordinal()]
 				: blackPawnMoves[square.ordinal()]);
 		long occ = occupied;

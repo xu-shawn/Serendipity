@@ -22,7 +22,6 @@ package org.shawn.games.Serendipity.Chess;
  */
 public enum Side
 {
-
 	/**
 	 * The white side.
 	 */

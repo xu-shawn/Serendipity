@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -54,7 +53,7 @@ import org.apache.commons.lang3.StringUtils;
  * {@link BoardEventType#ON_LOAD} events, emitted when a new chess position is
  * loaded from an external source (e.g. a FEN string).
  */
-public class Board implements Cloneable, BoardEvent
+public class Board implements Cloneable
 {
 
 	private static final List<Long> keys = new ArrayList<>();
@@ -72,7 +71,6 @@ public class Board implements Cloneable, BoardEvent
 	}
 
 	private final LinkedList<MoveBackup> backup;
-	private final EnumMap<BoardEventType, List<BoardEventListener>> eventListener;
 	private final long[] bitboard;
 	private final long[] bbSide;
 	private final Piece[] occupation;
@@ -110,24 +108,18 @@ public class Board implements Cloneable, BoardEvent
 	 */
 	public Board(BoardContext gameContext, boolean updateHistory)
 	{
-
 		bitboard = new long[Piece.allPieces.length];
 		bbSide = new long[Side.allSides.length];
 		occupation = new Piece[Square.values().length];
 		castleRight = new EnumMap<>(Side.class);
 		backup = new LinkedList<>();
 		context = gameContext;
-		eventListener = new EnumMap<>(BoardEventType.class);
 		this.updateHistory = updateHistory;
 		setSideToMove(Side.WHITE);
 		setEnPassantTarget(Square.NONE);
 		setEnPassant(Square.NONE);
 		setMoveCounter(1);
 		setHalfMoveCounter(0);
-		for (BoardEventType evt : BoardEventType.values())
-		{
-			eventListener.put(evt, new CopyOnWriteArrayList<>());
-		}
 		loadFromFen(gameContext.getStartFEN());
 		setEnableEvents(true);
 	}
@@ -393,14 +385,7 @@ public class Board implements Cloneable, BoardEvent
 		}
 
 		backup.add(backupMove);
-		// call listeners
-		if (isEnableEvents() && eventListener.get(BoardEventType.ON_MOVE).size() > 0)
-		{
-			for (BoardEventListener evl : eventListener.get(BoardEventType.ON_MOVE))
-			{
-				evl.onEvent(move);
-			}
-		}
+
 		return true;
 	}
 
@@ -447,23 +432,18 @@ public class Board implements Cloneable, BoardEvent
 	{
 		Move move = null;
 		final MoveBackup b = backup.removeLast();
+
 		if (updateHistory)
 		{
 			getHistory().removeLast();
 		}
+
 		if (b != null)
 		{
 			move = b.getMove();
 			b.restore(this);
 		}
-		// call listeners
-		if (isEnableEvents() && eventListener.get(BoardEventType.ON_UNDO_MOVE).size() > 0)
-		{
-			for (BoardEventListener evl : eventListener.get(BoardEventType.ON_UNDO_MOVE))
-			{
-				evl.onEvent(b);
-			}
-		}
+
 		return move;
 	}
 
@@ -884,6 +864,7 @@ public class Board implements Cloneable, BoardEvent
 		bitboard[piece.ordinal()] |= sq.getBitboard();
 		bbSide[piece.getPieceSide().ordinal()] |= sq.getBitboard();
 		occupation[sq.ordinal()] = piece;
+
 		if (piece != Piece.NONE && sq != Square.NONE)
 		{
 			incrementalHashKey ^= getPieceSquareKey(piece, sq);
@@ -901,6 +882,7 @@ public class Board implements Cloneable, BoardEvent
 		bitboard[piece.ordinal()] ^= sq.getBitboard();
 		bbSide[piece.getPieceSide().ordinal()] ^= sq.getBitboard();
 		occupation[sq.ordinal()] = Piece.NONE;
+
 		if (piece != Piece.NONE && sq != Square.NONE)
 		{
 			incrementalHashKey ^= getPieceSquareKey(piece, sq);
@@ -923,16 +905,19 @@ public class Board implements Cloneable, BoardEvent
 		String[] ranks = squares.split("/");
 		int file;
 		int rank = 7;
+
 		for (String r : ranks)
 		{
 			file = 0;
 			for (int i = 0; i < r.length(); i++)
 			{
 				char c = r.charAt(i);
+
 				if (Character.isDigit(c))
 				{
 					file += Character.digit(c, 10);
 				}
+
 				else
 				{
 					Square sq = Square.encode(Rank.allRanks[rank], File.allFiles[file]);
@@ -949,14 +934,17 @@ public class Board implements Cloneable, BoardEvent
 		{
 			castleRight.put(Side.WHITE, CastleRight.KING_AND_QUEEN_SIDE);
 		}
+
 		else if (state.contains("K"))
 		{
 			castleRight.put(Side.WHITE, CastleRight.KING_SIDE);
 		}
+
 		else if (state.contains("Q"))
 		{
 			castleRight.put(Side.WHITE, CastleRight.QUEEN_SIDE);
 		}
+
 		else
 		{
 			castleRight.put(Side.WHITE, CastleRight.NONE);
@@ -966,14 +954,17 @@ public class Board implements Cloneable, BoardEvent
 		{
 			castleRight.put(Side.BLACK, CastleRight.KING_AND_QUEEN_SIDE);
 		}
+
 		else if (state.contains("k"))
 		{
 			castleRight.put(Side.BLACK, CastleRight.KING_SIDE);
 		}
+
 		else if (state.contains("q"))
 		{
 			castleRight.put(Side.BLACK, CastleRight.QUEEN_SIDE);
 		}
+
 		else
 		{
 			castleRight.put(Side.BLACK, CastleRight.NONE);
@@ -984,6 +975,7 @@ public class Board implements Cloneable, BoardEvent
 		if (flags.length >= 3)
 		{
 			String s = flags[2].toUpperCase().trim();
+
 			if (!s.equals("-"))
 			{
 				Square ep = Square.valueOf(s);
@@ -994,11 +986,13 @@ public class Board implements Cloneable, BoardEvent
 					setEnPassantTarget(Square.NONE);
 				}
 			}
+
 			else
 			{
 				setEnPassant(Square.NONE);
 				setEnPassantTarget(Square.NONE);
 			}
+
 			if (flags.length >= 4)
 			{
 				halfMoveCounter = Integer.parseInt(flags[3]);
@@ -1010,17 +1004,10 @@ public class Board implements Cloneable, BoardEvent
 		}
 
 		incrementalHashKey = getZobristKey();
+
 		if (updateHistory)
 		{
 			getHistory().addLast(this.getZobristKey());
-		}
-		// call listeners
-		if (isEnableEvents() && eventListener.get(BoardEventType.ON_LOAD).size() > 0)
-		{
-			for (BoardEventListener evl : eventListener.get(BoardEventType.ON_LOAD))
-			{
-				evl.onEvent(Board.this);
-			}
 		}
 	}
 
@@ -1214,65 +1201,6 @@ public class Board implements Cloneable, BoardEvent
 	}
 
 	/**
-	 * The type of board events this data structure represents when notified to its
-	 * observers.
-	 *
-	 * @return the board event type {@link BoardEventType#ON_LOAD}
-	 */
-	@Override
-	public BoardEventType getType()
-	{
-		return BoardEventType.ON_LOAD;
-	}
-
-	/**
-	 * Returns an {@link EnumMap} of the event listeners registered to this board.
-	 * Each entry of the map contains the list of observers for a particular type of
-	 * events.
-	 *
-	 * @return the event listeners registered to this board
-	 */
-	public EnumMap<BoardEventType, List<BoardEventListener>> getEventListener()
-	{
-		return eventListener;
-	}
-
-	/**
-	 * Registers to the board a new listener for a specified event type.
-	 * <p>
-	 * It returns a reference to this board to fluently chain other calls for
-	 * registering (or deregistering) other listeners.
-	 *
-	 * @param eventType the board event type observed by the listener
-	 * @param listener  the listener to register
-	 * @return this board
-	 */
-	public Board addEventListener(BoardEventType eventType, BoardEventListener listener)
-	{
-		getEventListener().get(eventType).add(listener);
-		return this;
-	}
-
-	/**
-	 * Deregisters from the board a listener for a specified event type.
-	 * <p>
-	 * It returns a reference to this board to fluently chain other calls for
-	 * deregistering (or registering) other listeners.
-	 *
-	 * @param eventType the board event type observed by the listener
-	 * @param listener  the listener to deregister
-	 * @return this board
-	 */
-	public Board removeEventListener(BoardEventType eventType, BoardEventListener listener)
-	{
-		if (getEventListener() != null && getEventListener().get(eventType) != null)
-		{
-			getEventListener().get(eventType).remove(listener);
-		}
-		return this;
-	}
-
-	/**
 	 * Returns the bitboard representing the pieces of a specific side that can
 	 * attack the given square.
 	 * <p>
@@ -1399,6 +1327,16 @@ public class Board implements Cloneable, BoardEvent
 		return squareAttackedBy(getKingSquare(getSideToMove()), getSideToMove().flip()) != 0;
 	}
 
+	/**
+	 * Checks whether a piece from a given square attacks any member of a set of
+	 * squares
+	 * 
+	 * @param from the square the piece attacks from
+	 * @param to   the bitboard of squares to be checked
+	 * @param pt   the type of the attacking piece
+	 * @param occ  a mask of occupied squares
+	 * @return {@code true} if the move attacks any member of the given square set
+	 */
 	private boolean isAttackedByPiece(Square from, long to, PieceType pt, long occ)
 	{
 		switch (pt)
@@ -1421,7 +1359,7 @@ public class Board implements Cloneable, BoardEvent
 	/**
 	 * Checks if the move attacks the king of the other side.
 	 *
-	 * @return {@code true} if the move attacks the king of the other wide
+	 * @return {@code true} if the move attacks the king of the other side
 	 */
 	public boolean attacksKing(Move move)
 	{
@@ -1703,7 +1641,9 @@ public class Board implements Cloneable, BoardEvent
 		{
 			if (isKingAttacked())
 			{
-				final List<Move> l = MoveGenerator.generateLegalMoves(this);
+				List<Move> l = new LinkedList<Move>();
+				MoveGenerator.generateLegalMoves(this, l);
+
 				if (l.size() == 0)
 				{
 					return true;
@@ -1868,7 +1808,8 @@ public class Board implements Cloneable, BoardEvent
 		{
 			if (!isKingAttacked())
 			{
-				List<Move> l = MoveGenerator.generateLegalMoves(this);
+				List<Move> l = new LinkedList<Move>();
+				MoveGenerator.generateLegalMoves(this, l);
 				if (l.size() == 0)
 				{
 					return true;
@@ -1928,12 +1869,55 @@ public class Board implements Cloneable, BoardEvent
 	 * according to the standard rules of chess. If such moves are played, it is
 	 * guaranteed the resulting position will also be legal.
 	 *
+	 * @param moves the list to write generated moves to
+	 */
+	public void generateLegalMoves(List<Move> moves)
+	{
+		MoveGenerator.generateLegalMoves(this, moves);
+	}
+
+	/**
+	 * Returns the list of all possible pseudo-legal moves for the current position.
+	 * <p>
+	 * A move is considered pseudo-legal when it is legal according to the standard
+	 * rules of chess piece movements, but the resulting position might not be legal
+	 * because of other rules (e.g. checks to the king).
+	 *
+	 * @param moves the list to write generated moves to
+	 */
+	public void generatePseudoLegalMoves(List<Move> moves)
+	{
+		MoveGenerator.generatePseudoLegalMoves(this, moves);
+	}
+
+	/**
+	 * Returns the list of all possible pseudo-legal captures for the current
+	 * position.
+	 * <p>
+	 * A move is considered a pseudo-legal capture when it takes an enemy piece and
+	 * it is legal according to the standard rules of chess piece movements, but the
+	 * resulting position might not be legal because of other rules (e.g. checks to
+	 * the king).
+	 *
+	 * @param moves the list to write generated moves to
+	 */
+	public void generatePseudoLegalCaptures(List<Move> moves)
+	{
+		MoveGenerator.generatePseudoLegalCaptures(this, moves);
+	}
+	
+	/**
+	 * Returns the list of all possible legal moves for the current position
+	 * according to the standard rules of chess. If such moves are played, it is
+	 * guaranteed the resulting position will also be legal.
+	 *
 	 * @return the list of legal moves available in the current position
 	 */
 	public List<Move> legalMoves()
 	{
-
-		return MoveGenerator.generateLegalMoves(this);
+		List<Move> moves = new LinkedList<Move>();
+		generateLegalMoves(moves);
+		return moves;
 	}
 
 	/**
@@ -1947,8 +1931,9 @@ public class Board implements Cloneable, BoardEvent
 	 */
 	public List<Move> pseudoLegalMoves()
 	{
-
-		return MoveGenerator.generatePseudoLegalMoves(this);
+		List<Move> moves = new LinkedList<Move>();
+		generatePseudoLegalMoves(moves);
+		return moves;
 	}
 
 	/**
@@ -1964,8 +1949,9 @@ public class Board implements Cloneable, BoardEvent
 	 */
 	public List<Move> pseudoLegalCaptures()
 	{
-
-		return MoveGenerator.generatePseudoLegalCaptures(this);
+		List<Move> moves = new LinkedList<Move>();
+		generatePseudoLegalCaptures(moves);
+		return moves;
 	}
 
 	/**
@@ -1986,7 +1972,6 @@ public class Board implements Cloneable, BoardEvent
 	@Override
 	public boolean equals(Object obj)
 	{
-
 		if (obj instanceof Board)
 		{
 			Board board = (Board) obj;
@@ -2219,6 +2204,213 @@ public class Board implements Cloneable, BoardEvent
 		incrementalHashKey = hashKey;
 	}
 
+	/**
+	 * Returns whether the given side has material other than pawns
+	 * 
+	 * @param side the side to check
+	 * @return {@code true} if the side has non-pawn material
+	 */
+	public boolean hasNonPawnMaterial(Side side)
+	{
+		return (getBitboard(Piece.make(side, PieceType.KING))
+				| getBitboard(Piece.make(side, PieceType.PAWN))) != getBitboard(side);
+	}
+
+	/**
+	 * Returns whether the side to move has material other than pawns
+	 * <p>
+	 * Same as invoking {@code hasNonPawnMaterial(getSideToMove())}.
+	 * 
+	 * @return {@code true} if the side to move has non-pawn material
+	 */
+	public boolean hasNonPawnMaterial()
+	{
+		return hasNonPawnMaterial(getSideToMove());
+	}
+
+	private static final int[] SEEPieceValues = new int[] { 103, 422, 437, 694, 1313, 0 };
+
+	/**
+	 * Returns the estimated value of a given move, assuming no recaptures
+	 * 
+	 * @param move the move to make
+	 * @return the estimate value of the move
+	 */
+	public int moveEstimatedValue(Move move)
+	{
+		// Start with the value of the piece on the target square
+		int value = !getPiece(move.getTo()).equals(Piece.NONE)
+				? SEEPieceValues[getPiece(move.getTo()).getPieceType().ordinal()]
+				: 0;
+
+		// Factor in the new piece's value and remove our promoted pawn
+		if (!Piece.NONE.equals(move.getPromotion()))
+			value += SEEPieceValues[move.getPromotion().getPieceType().ordinal()]
+					- SEEPieceValues[PieceType.PAWN.ordinal()];
+
+		// Target square is encoded as empty for enpass moves
+		else if (PieceType.PAWN.equals(getPiece(move.getFrom()).getPieceType()) && getEnPassant().equals(move.getTo()))
+			value = SEEPieceValues[PieceType.PAWN.ordinal()];
+
+		return value;
+	}
+
+	/**
+	 * Returns whether the static exchange evaluation (SEE) of a move beats a given
+	 * threshold. The static exchange evaluation is the estimated material gain
+	 * after a series of exchanges.
+	 * 
+	 * @param move      the move to make
+	 * @param threshold the SEE threshold
+	 * @return {@code true} if the exchange beats the given threshold
+	 */
+	public boolean staticExchangeEvaluation(Move move, int threshold)
+	{
+		Square from, to;
+		PieceType nextVictim;
+		Side color;
+		int balance;
+		long bishops, rooks, occupied, attackers, myAttackers;
+		boolean isPromotion, isEnPassant;
+
+		// Unpack move information
+		from = move.getFrom();
+		to = move.getTo();
+
+		isPromotion = !Piece.NONE.equals(move.getPromotion());
+		isEnPassant = PieceType.PAWN.equals(getPiece(from).getPieceType()) && getEnPassant().equals(to);
+
+		// Next victim is moved piece or promotion type
+		nextVictim = !isPromotion ? getPiece(from).getPieceType() : move.getPromotion().getPieceType();
+
+		// Balance is the value of the move minus threshold. Function
+		// call takes care for Enpass, Promotion and Castling moves.
+		balance = moveEstimatedValue(move) - threshold;
+
+		// Best case still fails to beat the threshold
+		if (balance < 0)
+			return false;
+
+		// Worst case is losing the moved piece
+		balance -= SEEPieceValues[nextVictim.ordinal()];
+
+		// If the balance is positive even if losing the moved piece,
+		// the exchange is guaranteed to beat the threshold.
+		if (balance >= 0)
+			return true;
+
+		// Grab sliders for updating revealed attackers
+		bishops = getBitboard(PieceType.BISHOP) | getBitboard(PieceType.QUEEN);
+		rooks = getBitboard(PieceType.ROOK) | getBitboard(PieceType.QUEEN);
+
+		// Let occupied suppose that the move was actually made
+		occupied = getBitboard();
+		occupied = (occupied ^ from.getBitboard()) | to.getBitboard();
+		if (isEnPassant)
+			occupied ^= getEnPassant().getBitboard();
+
+		// Get all pieces which attack the target square. And with occupied
+		// so that we do not let the same piece attack twice
+		attackers = squareAttackedBy(to, getSideToMove(), occupied)
+				| squareAttackedBy(to, getSideToMove().flip(), occupied) & occupied;
+
+		// Now our opponents turn to recapture
+		color = getSideToMove().flip();
+
+		while (true)
+		{
+			// If we have no more attackers left we lose
+			myAttackers = attackers & getBitboard(color);
+
+			if (myAttackers == 0)
+				break;
+
+			if (0L != (myAttackers & getBitboard(Piece.make(color, PieceType.PAWN))))
+			{
+				nextVictim = PieceType.PAWN;
+			}
+
+			else if (0L != (myAttackers & getBitboard(Piece.make(color, PieceType.KNIGHT))))
+			{
+				nextVictim = PieceType.KNIGHT;
+			}
+
+			else if (0L != (myAttackers & getBitboard(Piece.make(color, PieceType.BISHOP))))
+			{
+				nextVictim = PieceType.BISHOP;
+			}
+
+			else if (0L != (myAttackers & getBitboard(Piece.make(color, PieceType.ROOK))))
+			{
+				nextVictim = PieceType.ROOK;
+			}
+
+			else if (0L != (myAttackers & getBitboard(Piece.make(color, PieceType.QUEEN))))
+			{
+				nextVictim = PieceType.QUEEN;
+			}
+
+			else if (0L != (myAttackers & getBitboard(Piece.make(color, PieceType.KING))))
+			{
+				nextVictim = PieceType.KING;
+			}
+
+			else
+			{
+				assert (false);
+			}
+
+			// Remove this attacker from the occupied
+			occupied ^= (1L << Bitboard.bitScanForward(myAttackers & getBitboard(Piece.make(color, nextVictim))));
+
+			// A diagonal move may reveal bishop or queen attackers
+			if (nextVictim.equals(PieceType.PAWN) || nextVictim.equals(PieceType.BISHOP)
+					|| nextVictim.equals(PieceType.QUEEN))
+				attackers |= Bitboard.getBishopAttacks(occupied, to) & bishops;
+
+			// A vertical or horizontal move may reveal rook or queen attackers
+			if (nextVictim.equals(PieceType.ROOK) || nextVictim.equals(PieceType.QUEEN))
+				attackers |= Bitboard.getRookAttacks(occupied, to) & rooks;
+
+			// Make sure we did not add any already used attacks
+			attackers &= occupied;
+
+			// Swap the turn
+			color = color.flip();
+
+			// Negamax the balance and add the value of the next victim
+			balance = -balance - 1 - SEEPieceValues[nextVictim.ordinal()];
+
+			// If the balance is non-negative after giving away our piece then we win
+			if (balance >= 0)
+			{
+				// As a slide speed up for move legality checking, if our last attacking
+				// piece is a king, and our opponent still has attackers, then we've
+				// lost as the move we followed would be illegal
+				if (nextVictim.equals(PieceType.KING) && (attackers & getBitboard(color)) != 0)
+					color = color.flip();
+
+				break;
+			}
+		}
+
+		// Side to move after the loop loses
+		return !getSideToMove().equals(color);
+	}
+
+	/**
+	 * Returns whether a move is quiet. A move is quiet if it is neither a promotion
+	 * or a capture
+	 * 
+	 * @param move the move
+	 * @return {@code true} if the move is quiet
+	 */
+	public boolean isQuiet(Move move)
+	{
+		return Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(getPiece(move.getTo()))
+				&& !(PieceType.PAWN.equals(getPiece(move.getFrom()).getPieceType()) && move.getTo() == getEnPassant());
+	}
+
 	private boolean pawnCanBeCapturedEnPassant()
 	{
 		return squareAttackedByPieceType(getEnPassant(), getSideToMove(), PieceType.PAWN) != 0
@@ -2252,7 +2444,6 @@ public class Board implements Cloneable, BoardEvent
 
 	private long removePieces(Square enPassant, Square target, long pieces)
 	{
-
 		return (getBitboard() ^ pieces ^ target.getBitboard()) | enPassant.getBitboard();
 	}
 }

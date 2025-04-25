@@ -65,7 +65,7 @@ public class MoveSort
 
 		if (!AlphaBeta.isQuiet(move, board))
 		{
-			int score = SEE.staticExchangeEvaluation(board, move, -20) ? 900000000 : -1000000;
+			int score = board.staticExchangeEvaluation(move, -20) ? 900000000 : -1000000;
 			score += captureValue(move, board, captureHistory);
 			return score;
 		}
@@ -93,16 +93,16 @@ public class MoveSort
 		{
 			Move move = moves.get(i);
 			int value = moveValue(move, ttMove, killer, history, captureHistory, continuationHistories, board);
-			moves.set(i, new ScoredMove(move, value));
+			moves.get(i).setScore(value);
 		}
 
 		moves.sort((m1, m2) -> {
-			if (((ScoredMove) m2).getScore() > ((ScoredMove) m1).getScore())
+			if (m2.getScore() > m1.getScore())
 			{
 				return 1;
 			}
 
-			else if (((ScoredMove) m2).getScore() == ((ScoredMove) m1).getScore())
+			else if (m2.getScore() == m1.getScore())
 			{
 				return 0;
 			}
@@ -117,10 +117,9 @@ public class MoveSort
 		{
 			Move move = moves.get(i);
 			int value = (move.equals(ttMove)) ? 2000000000 : qSearchValue(move, board, captureHistory);
-			moves.set(i, new ScoredMove(move, value));
+			moves.get(i).setScore(value);
 		}
 
-		moves.sort((m1, m2) -> ((ScoredMove) m2).getScore() - ((ScoredMove) m1).getScore());
-
+		moves.sort((m1, m2) -> (m2.getScore() - m1.getScore()));
 	}
 }

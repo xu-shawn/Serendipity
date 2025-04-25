@@ -23,7 +23,6 @@ import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
 import org.shawn.games.Serendipity.NNUE.*;
-import org.shawn.games.Serendipity.Search.Debug.Debugger;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -214,12 +213,12 @@ public class AlphaBeta implements Runnable
 
 		int futilityBase;
 		boolean inCheck = sse.inCheck = board.isKingAttacked();
-		final List<Move> moves;
+		final List<Move> moves = new ArrayList<Move>();
 
 		if (inCheck)
 		{
 			bestScore = futilityBase = MIN_EVAL;
-			moves = board.legalMoves();
+			board.generateLegalMoves(moves);
 
 			History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 					ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
@@ -252,7 +251,7 @@ public class AlphaBeta implements Runnable
 			}
 
 			futilityBase = sse.staticEval + 205;
-			moves = board.pseudoLegalCaptures();
+			board.generatePseudoLegalCaptures(moves);
 			MoveSort.sortCaptures(moves, ttMove, board, threadData.captureHistory);
 		}
 
@@ -263,16 +262,14 @@ public class AlphaBeta implements Runnable
 				continue;
 			}
 
-			if (bestScore > -MATE_IN_MAX_PLY && futilityBase < alpha && !SEE.staticExchangeEvaluation(board, move, 1)
-					&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
-							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
-									.getBitboard(board.getSideToMove()))
+			if (bestScore > -MATE_IN_MAX_PLY && futilityBase < alpha && !board.staticExchangeEvaluation(move, 1)
+					&& board.hasNonPawnMaterial())
 			{
 				bestScore = Math.max(bestScore, futilityBase);
 				continue;
 			}
 
-			if (!inCheck && !SEE.staticExchangeEvaluation(board, move, -20))
+			if (!inCheck && !board.staticExchangeEvaluation(move, -20))
 			{
 				continue;
 			}
@@ -484,9 +481,7 @@ public class AlphaBeta implements Runnable
 
 		if (!inSingularSearch && ply > 0 && eval >= beta && beta < MATE_IN_MAX_PLY && !inCheck
 				&& (ss.get(-1).move == null || !ss.get(-1).move.equals(Constants.emptyMove))
-				&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
-						| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
-								.getBitboard(board.getSideToMove()))
+				&& board.hasNonPawnMaterial())
 		{
 			int r = depth / 3 + 4 + Math.min((eval - beta) / 200, 3);
 
@@ -558,12 +553,11 @@ public class AlphaBeta implements Runnable
 			}
 
 			sse.moveCount++;
-			int newdepth = depth - 1;
-
-			boolean isQuiet = isQuiet(move, board);
-			boolean givesCheck = board.attacksKing(move);
+			final boolean isQuiet = isQuiet(move, board);
+			final boolean givesCheck = board.attacksKing(move);
 
 			int r = reduction[depth][sse.moveCount];
+			int newdepth = depth - 1;
 			int lmrDepth = depth - r;
 
 			if (isQuiet && !isPV && !givesCheck && sse.moveCount > 3 + depth * depth / (improving ? 1 : 2)
@@ -572,10 +566,7 @@ public class AlphaBeta implements Runnable
 				continue;
 			}
 
-			if (bestValue > -MATE_IN_MAX_PLY && ply > 0
-					&& (board.getBitboard(Piece.make(board.getSideToMove(), PieceType.KING))
-							| board.getBitboard(Piece.make(board.getSideToMove(), PieceType.PAWN))) != board
-									.getBitboard(board.getSideToMove()))
+			if (bestValue > -MATE_IN_MAX_PLY && ply > 0 && board.hasNonPawnMaterial())
 			{
 				if (!inCheck && !givesCheck && isQuiet && lmrDepth <= 8
 						&& sse.staticEval + lmrDepth * 150 + 150 <= alpha)
@@ -583,7 +574,7 @@ public class AlphaBeta implements Runnable
 					continue;
 				}
 
-				if (depth < 9 && !SEE.staticExchangeEvaluation(board, move,
+				if (depth < 9 && !board.staticExchangeEvaluation(move,
 						isQuiet && !givesCheck ? -65 * depth : -38 * depth * depth))
 				{
 					continue;

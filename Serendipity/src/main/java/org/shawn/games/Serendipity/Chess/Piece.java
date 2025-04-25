@@ -28,7 +28,6 @@ import java.util.Map;
  */
 public enum Piece
 {
-
 	/**
 	 * A white pawn.
 	 */
