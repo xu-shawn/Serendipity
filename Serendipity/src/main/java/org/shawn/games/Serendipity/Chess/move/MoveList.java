@@ -48,7 +48,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class MoveList extends LinkedList<Move> implements List<Move>
 {
-
 	private static final long serialVersionUID = -6204280556340150806L;
 	private static final ThreadLocal<Board> boardHolder = ThreadLocal.withInitial(Board::new);
 	private static final Move nullMove = new Move(Square.NONE, Square.NONE);
@@ -627,6 +626,7 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 	public void addSanMove(String san, boolean replay, boolean fullValidation) throws MoveConversionException
 	{
 		final Board b = getBoard();
+
 		if (replay)
 		{
 			if (!b.getFen().equals(getStartFen()))
@@ -642,17 +642,20 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 				}
 			}
 		}
+
 		Move move = decodeSan(b, san, b.getSideToMove());
+
 		if (move == nullMove)
 		{
 			return;
 		}
-		move.setSan(san);
+
 		if (!b.doMove(move, fullValidation))
 		{
 			throw new MoveConversionException(
 					"Couldn't parse SAN to MoveList: Illegal move: " + move + " [" + san + "] on " + b.getFen());
 		}
+
 		add(this.size(), move);
 	}
 

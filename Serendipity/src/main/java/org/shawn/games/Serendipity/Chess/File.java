@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 public enum File
 {
-
 	/**
 	 * The {@code A} file.
 	 */

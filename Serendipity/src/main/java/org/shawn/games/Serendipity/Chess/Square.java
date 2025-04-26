@@ -26,7 +26,6 @@ import java.util.EnumMap;
  */
 public enum Square
 {
-
 	/**
 	 * The {@code A1} square.
 	 */
@@ -443,5 +442,4 @@ public enum Square
 	{
 		return (getBitboard() & Bitboard.lightSquares) != 0L;
 	}
-
 }

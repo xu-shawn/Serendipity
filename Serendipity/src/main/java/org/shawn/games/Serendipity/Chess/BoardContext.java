@@ -197,28 +197,33 @@ public class BoardContext
 	public Move getKingCastleMove(Side side, CastleRight castleRight)
 	{
 		Move move = null;
+
 		if (Side.WHITE.equals(side))
 		{
 			if (CastleRight.KING_SIDE.equals(castleRight))
 			{
 				move = getWhiteoo();
 			}
+
 			else if (CastleRight.QUEEN_SIDE.equals(castleRight))
 			{
 				move = getWhiteooo();
 			}
 		}
+
 		else
 		{
 			if (CastleRight.KING_SIDE.equals(castleRight))
 			{
 				move = getBlackoo();
 			}
+
 			else if (CastleRight.QUEEN_SIDE.equals(castleRight))
 			{
 				move = getBlackooo();
 			}
 		}
+
 		return move;
 	}
 
@@ -235,23 +240,27 @@ public class BoardContext
 	public Move getRookCastleMove(Side side, CastleRight castleRight)
 	{
 		Move move = null;
+
 		if (Side.WHITE.equals(side))
 		{
 			if (CastleRight.KING_SIDE.equals(castleRight))
 			{
 				move = getWhiteRookoo();
 			}
+
 			else if (CastleRight.QUEEN_SIDE.equals(castleRight))
 			{
 				move = getWhiteRookooo();
 			}
 		}
+
 		else
 		{
 			if (CastleRight.KING_SIDE.equals(castleRight))
 			{
 				move = getBlackRookoo();
 			}
+
 			else if (CastleRight.QUEEN_SIDE.equals(castleRight))
 			{
 				move = getBlackRookooo();

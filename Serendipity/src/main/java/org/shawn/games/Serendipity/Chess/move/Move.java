@@ -16,8 +16,6 @@
 
 package org.shawn.games.Serendipity.Chess.move;
 
-import org.shawn.games.Serendipity.Chess.BoardEvent;
-import org.shawn.games.Serendipity.Chess.BoardEventType;
 import org.shawn.games.Serendipity.Chess.Piece;
 import org.shawn.games.Serendipity.Chess.Side;
 import org.shawn.games.Serendipity.Chess.Square;
@@ -32,13 +30,12 @@ import org.apache.commons.lang3.StringUtils;
  * observers of the {@link BoardEventType#ON_MOVE} events, emitted when a move
  * is executed on a board.
  */
-public class Move implements BoardEvent
+public class Move
 {
-
 	private final Square from;
 	private final Square to;
 	private final Piece promotion;
-	private String san;
+	private int score;
 
 	/**
 	 * Creates a new move, using its origin and destination squares.
@@ -66,6 +63,7 @@ public class Move implements BoardEvent
 		this.promotion = promotion;
 		this.from = from;
 		this.to = to;
+		this.score = 0;
 	}
 
 	/**
@@ -162,43 +160,24 @@ public class Move implements BoardEvent
 		}
 		return from.toString().toLowerCase() + to.toString().toLowerCase() + promo.toLowerCase();
 	}
-
+	
 	/**
-	 * The type of board events this data structure represents when notified to its
-	 * observers.
-	 *
-	 * @return the board event type {@link BoardEventType#ON_MOVE}
+	 * Returns the score of the move
+	 * 
+	 * @return the score of the move
 	 */
-	@Override
-	public BoardEventType getType()
+	public int getScore()
 	{
-		return BoardEventType.ON_MOVE;
+		return score;
 	}
-
+	
 	/**
-	 * Returns the Short Algebraic Notation (SAN) of the move, if previously set.
-	 *
-	 * @return the representation of the move in SAN notation, or null if not
-	 *         present
-	 * @see Move#setSan(String)
+	 * Sets the score of the move
+	 * 
+	 * @param the new score of the move
 	 */
-	public String getSan()
+	public void setScore(int score)
 	{
-		return san;
+		this.score = score;
 	}
-
-	/**
-	 * Sets the Short Algebraic Notation (SAN) of the move.
-	 * <p>
-	 * The SAN notation should be set explicitly after the instantiation of the move
-	 * because it can not be inferred without the full context of the specific
-	 * position.
-	 *
-	 * @param san the representation of the move in SAN notation
-	 */
-	public void setSan(String san)
-	{
-		this.san = san;
-	}
-
 }

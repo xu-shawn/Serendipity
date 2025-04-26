@@ -27,7 +27,6 @@ import java.util.Map;
  */
 public class StringUtil
 {
-
 	/**
 	 * Extracts the last char sequence from a string, that is, the last {@code size}
 	 * chars.
