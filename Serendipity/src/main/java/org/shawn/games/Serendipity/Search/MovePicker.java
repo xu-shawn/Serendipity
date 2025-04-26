@@ -24,12 +24,8 @@ import java.util.Collections;
 
 import org.shawn.games.Serendipity.Search.History.History;
 
-import org.shawn.games.Serendipity.Chess.Bitboard;
 import org.shawn.games.Serendipity.Chess.Board;
 import org.shawn.games.Serendipity.Chess.Piece;
-import org.shawn.games.Serendipity.Chess.PieceType;
-import org.shawn.games.Serendipity.Chess.Side;
-import org.shawn.games.Serendipity.Chess.Square;
 import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class MovePicker
@@ -48,8 +44,11 @@ public class MovePicker
 	private int stage;
 	private int moveIndex;
 
-	private static final int STAGE_TT_MOVE = 0;
+	private static final int STAGE_NORMAL_TT = 0;
 	private static final int STAGE_NORMAL = 1;
+	private static final int STAGE_QSEARCH_TT = 2;
+	private static final int STAGE_QSEARCH_CAPTURE = 3;
+
 	private static final int[] promoValue = { -2000000001, 2000000000, -2000000001, -2000000001, 2000000001 };
 
 	public MovePicker(Board board, Move ttMove)
@@ -63,14 +62,14 @@ public class MovePicker
 		this.board = board;
 		this.ttMove = ttMove;
 
-		if (ttMove == null || !isPseudoLegal(board, ttMove))
+		if (ttMove == null || !board.isMovePseudoLegal(ttMove))
 		{
 			this.ttMove = null;
 			this.stage = STAGE_NORMAL;
 		}
 		else
 		{
-			this.stage = STAGE_TT_MOVE;
+			this.stage = STAGE_NORMAL_TT;
 		}
 
 		this.killer = killer;
@@ -79,81 +78,26 @@ public class MovePicker
 		this.continuationHistories = continuationHistories;
 	}
 
-	public static boolean isPseudoLegal(Board board, Move move)
+	public MovePicker(Board board, Move ttMove, History captureHistory)
 	{
-		if (Piece.NONE.equals(board.getPiece(move.getFrom())) || !board.isMoveLegal(move, true))
+		this.board = board;
+		this.ttMove = ttMove;
+
+		if (ttMove == null || !board.isMovePseudoLegal(ttMove) || !board.isCapture(ttMove))
 		{
-			return false;
+			this.ttMove = null;
+			this.stage = STAGE_QSEARCH_CAPTURE;
 		}
 
-		Square from = move.getFrom();
-		Square to = move.getTo();
-		Piece movedPiece = board.getPiece(move.getFrom());
-		Side side = movedPiece.getPieceSide();
-		PieceType movedPieceType = movedPiece.getPieceType();
-
-		long occupied = board.getBitboard();
-
-		if (movedPiece.getPieceType().equals(PieceType.KING) && board.getContext().isCastleMove(move))
+		else
 		{
-			return !board.isKingAttacked();
+			this.stage = STAGE_QSEARCH_TT;
 		}
 
-		if ((board.getBbSide()[side.ordinal()] & to.getBitboard()) != 0)
-		{
-			return false;
-		}
-
-		if (PieceType.PAWN.equals(movedPieceType))
-		{
-			long pawnThreats = Bitboard.getPawnCaptures(side, from,
-					to.getBitboard() & (board.getBbSide()[1 - side.ordinal()] | board.getEnPassant().getBitboard()),
-					board.getEnPassant()) & to.getBitboard();
-			pawnThreats |= Bitboard.getPawnMoves(side, from, occupied) & to.getBitboard();
-			if (pawnThreats == 0L)
-			{
-				return false;
-			}
-		}
-
-		else if (PieceType.KNIGHT.equals(movedPieceType))
-		{
-			if (Bitboard.getKnightAttacks(from, to.getBitboard()) == 0L)
-			{
-				return false;
-			}
-		}
-
-		else if (PieceType.BISHOP.equals(movedPieceType))
-		{
-			if ((Bitboard.getBishopAttacks(occupied, from) & to.getBitboard()) == 0L)
-			{
-				return false;
-			}
-		}
-
-		else if (PieceType.ROOK.equals(movedPieceType))
-		{
-			if ((Bitboard.getRookAttacks(occupied, from) & to.getBitboard()) == 0L)
-			{
-				return false;
-			}
-		}
-
-		else if (PieceType.QUEEN.equals(movedPieceType))
-		{
-			if ((Bitboard.getQueenAttacks(occupied, from) & to.getBitboard()) == 0L)
-			{
-				return false;
-			}
-		}
-
-		else if (Bitboard.getKingAttacks(from, to.getBitboard()) == 0L)
-		{
-			return false;
-		}
-
-		return true;
+		this.killer = null;
+		this.history = null;
+		this.captureHistory = captureHistory;
+		this.continuationHistories = null;
 	}
 
 	private static int pieceValue(Piece p)
@@ -178,7 +122,7 @@ public class MovePicker
 			return promoValue[move.getPromotion().getPieceType().ordinal()];
 		}
 
-		if (!AlphaBeta.isQuiet(move, board))
+		if (!board.isQuiet(move))
 		{
 			int score = board.staticExchangeEvaluation(move, -20) ? 900000000 : -1000000;
 			score += captureValue(move);
@@ -204,12 +148,25 @@ public class MovePicker
 	{
 		this.moves = new ArrayList<Move>();
 		board.generatePseudoLegalMoves(moves);
-		
+
 		this.moveScore = new int[this.moves.size()];
 
 		for (int i = 0; i < this.moves.size(); i++)
 		{
 			this.moveScore[i] = scoreMove(this.moves.get(i));
+		}
+	}
+
+	public void initCaptures()
+	{
+		this.moves = new ArrayList<Move>();
+		board.generatePseudoLegalCaptures(moves);
+
+		this.moveScore = new int[this.moves.size()];
+
+		for (int i = 0; i < this.moves.size(); i++)
+		{
+			this.moveScore[i] = captureValue(this.moves.get(i));
 		}
 	}
 
@@ -243,7 +200,7 @@ public class MovePicker
 	{
 		switch (stage)
 		{
-			case STAGE_TT_MOVE:
+			case STAGE_NORMAL_TT:
 				stage++;
 				return this.ttMove;
 
@@ -253,6 +210,7 @@ public class MovePicker
 					initMoves();
 				}
 
+			{
 				Move ret = selectMove();
 
 				if (ret != null && ret.equals(ttMove))
@@ -261,6 +219,28 @@ public class MovePicker
 				}
 
 				return ret;
+			}
+
+			case STAGE_QSEARCH_TT:
+				stage++;
+				return this.ttMove;
+
+			case STAGE_QSEARCH_CAPTURE:
+				if (this.moves == null)
+				{
+					initCaptures();
+				}
+
+			{
+				Move ret = selectMove();
+
+				if (ret != null && ret.equals(ttMove))
+				{
+					ret = selectMove();
+				}
+
+				return ret;
+			}
 		}
 
 		return null;

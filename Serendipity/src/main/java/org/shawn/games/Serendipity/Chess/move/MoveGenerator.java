@@ -18,7 +18,6 @@ package org.shawn.games.Serendipity.Chess.move;
 
 import org.shawn.games.Serendipity.Chess.*;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.shawn.games.Serendipity.Chess.Bitboard.bitScanForward;

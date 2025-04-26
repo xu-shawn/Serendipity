@@ -25,10 +25,6 @@ import org.apache.commons.lang3.StringUtils;
  * The definition of a chess move, that is, a piece movement from its starting
  * square (the origin square) to a destination square. Optionally, the move
  * could specify a promotion piece used to replace a pawn in case of promotion.
- * <p>
- * The move is also a {@link BoardEvent}, and hence it can be passed to the
- * observers of the {@link BoardEventType#ON_MOVE} events, emitted when a move
- * is executed on a board.
  */
 public class Move
 {
@@ -116,6 +112,16 @@ public class Move
 	}
 
 	/**
+	 * Returns whether the move is a promotion.
+	 *
+	 * @return {@code true} if the move is a promotion
+	 */
+	public boolean isPromotion()
+	{
+		return !Piece.NONE.equals(getPromotion());
+	}
+
+	/**
 	 * Checks if this move is equivalent to another, according to its definition.
 	 *
 	 * @param obj the other object reference to compare to this move
@@ -160,7 +166,7 @@ public class Move
 		}
 		return from.toString().toLowerCase() + to.toString().toLowerCase() + promo.toLowerCase();
 	}
-	
+
 	/**
 	 * Returns the score of the move
 	 * 
@@ -170,7 +176,7 @@ public class Move
 	{
 		return score;
 	}
-	
+
 	/**
 	 * Sets the score of the move
 	 * 
