@@ -22,7 +22,6 @@ package org.shawn.games.Serendipity.Chess.move;
  */
 public class MoveConversionException extends RuntimeException
 {
-
 	private static final long serialVersionUID = 5523540383760826752L;
 
 	/**
@@ -64,5 +63,4 @@ public class MoveConversionException extends RuntimeException
 	{
 		super(cause);
 	}
-
 }

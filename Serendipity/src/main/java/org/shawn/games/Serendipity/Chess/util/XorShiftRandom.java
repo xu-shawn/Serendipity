@@ -9,7 +9,6 @@ package org.shawn.games.Serendipity.Chess.util;
  */
 public class XorShiftRandom
 {
-
 	private long seed;
 
 	/**

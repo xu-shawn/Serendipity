@@ -28,7 +28,6 @@ import java.util.List;
  */
 public class BoardContext
 {
-
 	/**
 	 * The definition of the white king shift in the default short castle move.
 	 */
