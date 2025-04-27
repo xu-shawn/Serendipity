@@ -99,13 +99,6 @@ public class AlphaBeta implements Runnable
 		return -stat_bonus(depth);
 	}
 
-	public static boolean isQuiet(Move move, Board board)
-	{
-		return Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(board.getPiece(move.getTo()))
-				&& !(PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
-						&& move.getTo() == board.getEnPassant());
-	}
-
 	private boolean shouldStop()
 	{
 		return (this.threadData.id == 0 && this.threadData.mainThreadData.limits.getNodes() > 0
@@ -213,19 +206,19 @@ public class AlphaBeta implements Runnable
 
 		int futilityBase;
 		boolean inCheck = sse.inCheck = board.isKingAttacked();
-		final List<Move> moves = new ArrayList<Move>();
+
+		MovePicker movePicker;
 
 		if (inCheck)
 		{
 			bestScore = futilityBase = MIN_EVAL;
-			board.generateLegalMoves(moves);
 
 			History[] currentContinuationHistories = new History[] { ss.get(ply - 1).continuationHistory,
 					ss.get(ply - 2).continuationHistory, null, ss.get(ply - 4).continuationHistory, null,
 					ss.get(ply - 6).continuationHistory };
 
-			MoveSort.sortMoves(moves, ttMove, null, threadData.history, threadData.captureHistory,
-					currentContinuationHistories, board);
+			movePicker = new MovePicker(board, ttMove, null, threadData.history, threadData.captureHistory,
+					currentContinuationHistories);
 		}
 
 		else
@@ -251,13 +244,14 @@ public class AlphaBeta implements Runnable
 			}
 
 			futilityBase = sse.staticEval + 205;
-			board.generatePseudoLegalCaptures(moves);
-			MoveSort.sortCaptures(moves, ttMove, board, threadData.captureHistory);
+			movePicker = new MovePicker(board, ttMove, threadData.captureHistory);
 		}
 
-		for (Move move : moves)
+		Move move;
+
+		while ((move = movePicker.next()) != null)
 		{
-			if (!inCheck && !board.isMoveLegal(move, false))
+			if (!board.isMoveLegal(move, false))
 			{
 				continue;
 			}
@@ -407,7 +401,7 @@ public class AlphaBeta implements Runnable
 		}
 
 		ttMove = sse.ttHit ? currentMoveEntry.getMove() : null;
-		ttCapture = ttMove != null && !isQuiet(ttMove, board);
+		ttCapture = ttMove != null && !board.isQuiet(ttMove);
 
 		if (inCheck)
 		{
@@ -553,7 +547,7 @@ public class AlphaBeta implements Runnable
 			}
 
 			sse.moveCount++;
-			final boolean isQuiet = isQuiet(move, board);
+			final boolean isQuiet = board.isQuiet(move);
 			final boolean givesCheck = board.attacksKing(move);
 
 			int r = reduction[depth][sse.moveCount];

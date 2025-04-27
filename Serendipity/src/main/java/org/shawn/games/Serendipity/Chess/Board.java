@@ -188,7 +188,6 @@ public class Board implements Cloneable
 	 */
 	public boolean doMove(final String move)
 	{
-
 		MoveList moves = new MoveList(this.getFen());
 		moves.addSanMove(move, true, true);
 		return doMove(moves.removeLast(), true);
@@ -233,7 +232,6 @@ public class Board implements Cloneable
 	 */
 	public boolean doMove(final Move move, boolean fullValidation)
 	{
-
 		if (!isMoveLegal(move, fullValidation))
 		{
 			return false;
@@ -1445,6 +1443,91 @@ public class Board implements Cloneable
 	}
 
 	/**
+	 * Verifies if the move still to be executed can be performed. This checks if it
+	 * is possible to move the piece at from square to the piece at to square. This
+	 * does not check if a move leaves the king in check
+	 * 
+	 * @param move the move to validate
+	 * @return {@code true} if the move is considered pseudo-legal
+	 */
+	public boolean isMovePseudoLegal(Move move)
+	{
+		if (Piece.NONE.equals(getPiece(move.getFrom())) || !isMoveLegal(move, true))
+		{
+			return false;
+		}
+
+		Square from = move.getFrom();
+		Square to = move.getTo();
+		Piece movedPiece = getPiece(move.getFrom());
+		Side side = movedPiece.getPieceSide();
+		PieceType movedPieceType = movedPiece.getPieceType();
+
+		long occupied = getBitboard();
+
+		if (movedPiece.getPieceType().equals(PieceType.KING) && getContext().isCastleMove(move))
+		{
+			return !isKingAttacked();
+		}
+
+		if ((getBbSide()[side.ordinal()] & to.getBitboard()) != 0)
+		{
+			return false;
+		}
+
+		if (PieceType.PAWN.equals(movedPieceType))
+		{
+			long pawnThreats = Bitboard.getPawnCaptures(side, from,
+					to.getBitboard() & (getBbSide()[1 - side.ordinal()] | getEnPassant().getBitboard()), getEnPassant())
+					& to.getBitboard();
+			pawnThreats |= Bitboard.getPawnMoves(side, from, occupied) & to.getBitboard();
+			if (pawnThreats == 0L)
+			{
+				return false;
+			}
+		}
+
+		else if (PieceType.KNIGHT.equals(movedPieceType))
+		{
+			if (Bitboard.getKnightAttacks(from, to.getBitboard()) == 0L)
+			{
+				return false;
+			}
+		}
+
+		else if (PieceType.BISHOP.equals(movedPieceType))
+		{
+			if ((Bitboard.getBishopAttacks(occupied, from) & to.getBitboard()) == 0L)
+			{
+				return false;
+			}
+		}
+
+		else if (PieceType.ROOK.equals(movedPieceType))
+		{
+			if ((Bitboard.getRookAttacks(occupied, from) & to.getBitboard()) == 0L)
+			{
+				return false;
+			}
+		}
+
+		else if (PieceType.QUEEN.equals(movedPieceType))
+		{
+			if ((Bitboard.getQueenAttacks(occupied, from) & to.getBitboard()) == 0L)
+			{
+				return false;
+			}
+		}
+
+		else if (Bitboard.getKingAttacks(from, to.getBitboard()) == 0L)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Verifies if the move still to be executed will leave the resulting board in a
 	 * valid (legal) position. Optionally, it can perform a full validation, a
 	 * stricter check to assess if the final board configuration could be considered
@@ -1471,7 +1554,6 @@ public class Board implements Cloneable
 	 */
 	public boolean isMoveLegal(Move move, boolean fullValidation)
 	{
-
 		final Piece fromPiece = getPiece(move.getFrom());
 		final Side side = getSideToMove();
 		final PieceType fromType = fromPiece.getPieceType();
@@ -1905,7 +1987,7 @@ public class Board implements Cloneable
 	{
 		MoveGenerator.generatePseudoLegalCaptures(this, moves);
 	}
-	
+
 	/**
 	 * Returns the list of all possible legal moves for the current position
 	 * according to the standard rules of chess. If such moves are played, it is
@@ -2231,7 +2313,7 @@ public class Board implements Cloneable
 	private static final int[] SEEPieceValues = new int[] { 103, 422, 437, 694, 1313, 0 };
 
 	/**
-	 * Returns the estimated value of a given move, assuming no recaptures
+	 * Returns the estimated value of a given move, assuming no recaptures.
 	 * 
 	 * @param move the move to make
 	 * @return the estimate value of the move
@@ -2400,15 +2482,37 @@ public class Board implements Cloneable
 
 	/**
 	 * Returns whether a move is quiet. A move is quiet if it is neither a promotion
-	 * or a capture
+	 * or a capture.
 	 * 
 	 * @param move the move
 	 * @return {@code true} if the move is quiet
 	 */
 	public boolean isQuiet(Move move)
 	{
-		return Piece.NONE.equals(move.getPromotion()) && Piece.NONE.equals(getPiece(move.getTo()))
-				&& !(PieceType.PAWN.equals(getPiece(move.getFrom()).getPieceType()) && move.getTo() == getEnPassant());
+		return !isPromotion(move) && !isCapture(move);
+	}
+
+	/**
+	 * Returns whether a move is a capture.
+	 * 
+	 * @param move the move
+	 * @return {@code true} if the move is a capture
+	 */
+	public boolean isCapture(Move move)
+	{
+		return !Piece.NONE.equals(getPiece(move.getTo()))
+				|| (PieceType.PAWN.equals(getPiece(move.getFrom()).getPieceType()) && move.getTo() == getEnPassant());
+	}
+
+	/**
+	 * Returns whether a move is a promotion.
+	 * 
+	 * @param move the move
+	 * @return {@code true} if the move is a promotion
+	 */
+	public boolean isPromotion(Move move)
+	{
+		return move.isPromotion();
 	}
 
 	private boolean pawnCanBeCapturedEnPassant()
