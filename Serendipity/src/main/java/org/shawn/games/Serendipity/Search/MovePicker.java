@@ -38,7 +38,6 @@ public class MovePicker
 	private History captureHistory;
 	private History[] continuationHistories;
 
-	private int[] moveScore;
 	private ArrayList<Move> moves;
 
 	private int stage;
@@ -149,11 +148,10 @@ public class MovePicker
 		this.moves = new ArrayList<Move>();
 		board.generatePseudoLegalMoves(moves);
 
-		this.moveScore = new int[this.moves.size()];
-
 		for (int i = 0; i < this.moves.size(); i++)
 		{
-			this.moveScore[i] = scoreMove(this.moves.get(i));
+			Move currentMove = this.moves.get(i);
+			currentMove.setScore(scoreMove(currentMove));
 		}
 	}
 
@@ -162,11 +160,10 @@ public class MovePicker
 		this.moves = new ArrayList<Move>();
 		board.generatePseudoLegalCaptures(moves);
 
-		this.moveScore = new int[this.moves.size()];
-
 		for (int i = 0; i < this.moves.size(); i++)
 		{
-			this.moveScore[i] = captureValue(this.moves.get(i));
+			Move currentMove = this.moves.get(i);
+			currentMove.setScore(captureValue(currentMove));
 		}
 	}
 
@@ -177,19 +174,21 @@ public class MovePicker
 			return null;
 		}
 
-		int tempScore;
+		int swapIndex = this.moveIndex;
+		int maxScore = this.moves.get(this.moveIndex).getScore();
 
-		for (int i = moves.size() - 1; i > this.moveIndex; i--)
+		for (int i = this.moveIndex + 1; i < this.moves.size(); i++)
 		{
-			if (moveScore[i] > moveScore[i - 1])
-			{
-				Collections.swap(moves, i, i - 1);
+			int currScore = this.moves.get(i).getScore();
 
-				tempScore = moveScore[i];
-				moveScore[i] = moveScore[i - 1];
-				moveScore[i - 1] = tempScore;
+			if (maxScore < currScore)
+			{
+				swapIndex = i;
+				maxScore = currScore;
 			}
 		}
+
+		Collections.swap(moves, swapIndex, this.moveIndex);
 
 		this.moveIndex++;
 
