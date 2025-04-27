@@ -40,6 +40,7 @@ public class UCI
 	private static NNUE network;
 
 	private static ThreadsOption threads;
+	private static HashOption hash;
 
 	public static class NNUEOption extends StringOption
 	{
@@ -106,7 +107,7 @@ public class UCI
 		options = new HashMap<>();
 		StringOption networkName = new NNUEOption("embedded.nnue", "nnuefile");
 		threads = new ThreadsOption(1, 1, 1048576, "Threads");
-		HashOption hash = new HashOption(4, 1, 32768, transpositionTable, "Hash");
+		hash = new HashOption(4, 1, 32768, transpositionTable, "Hash");
 
 		try
 		{
