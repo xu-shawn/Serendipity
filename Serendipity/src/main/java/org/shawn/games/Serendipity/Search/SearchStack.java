@@ -31,11 +31,16 @@ public class SearchStack
 		public boolean inCheck;
 		public boolean ttHit;
 		public int moveCount;
-		public int staticEval = AlphaBeta.VALUE_NONE;
+		public int staticEval;
 		public Move killer;
 		public Move move;
 		public Move excludedMove;
 		public History continuationHistory;
+
+		public SearchState()
+		{
+			this.staticEval = AlphaBeta.VALUE_NONE;
+		}
 	}
 
 	private final SearchState[] stack;
