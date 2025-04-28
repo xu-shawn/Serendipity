@@ -583,7 +583,7 @@ public class AlphaBeta implements Runnable
 							|| currentMoveEntry.getNodeType() == TranspositionTable.NODETYPE_LOWERBOUND)
 					&& currentMoveEntry.getDepth() > depth - 4)
 			{
-				int singularBeta = currentMoveEntry.getEvaluation() - 2 * depth;
+				int singularBeta = currentMoveEntry.getEvaluation() - depth * 3 / 2;
 				int singularDepth = depth / 2;
 				int moveCountBackup = sse.moveCount;
 
