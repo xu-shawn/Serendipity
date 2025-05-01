@@ -19,10 +19,14 @@
 
 package org.shawn.games.Serendipity.Search;
 
-import java.util.Arrays;
+import java.nio.ByteOrder;
+import jdk.incubator.foreign.MemoryAccess;
+import jdk.incubator.foreign.MemorySegment;
+import jdk.incubator.foreign.MemoryLayout;
+import jdk.incubator.foreign.ResourceScope;
 
 import org.shawn.games.Serendipity.Chess.Square;
-import org.shawn.games.Serendipity.Chess.move.*;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class TranspositionTable
 {
@@ -103,13 +107,14 @@ public class TranspositionTable
 		}
 	}
 
-	private int size;
-	private int mask;
+	private long size;
+	private long mask;
 
 	// depth: (0-255) 8 bits
 	// NodeType: 2 bits
 
-	private short[] data1;
+	private MemoryLayout data1_layout;
+	private MemorySegment data1;
 
 	// evaluation: 16 bits
 	// staticEval: 16 bits
@@ -118,24 +123,35 @@ public class TranspositionTable
 	// Square: 6 bits
 	// Signature: 16 bits
 
-	private long[] data2;
+	private MemoryLayout data2_layout;
+	private MemorySegment data2;
+
+	private ResourceScope scope;
 
 	private static final int ENTRY_SIZE = 10;
 
-	public TranspositionTable(int size)
+	public TranspositionTable(long size)
 	{
 		size *= 1048576 / ENTRY_SIZE;
 
-		this.size = Integer.highestOneBit(size);
+		this.size = Long.highestOneBit(size);
 		this.mask = this.size - 1;
-		this.data1 = new short[this.size];
-		this.data2 = new long[this.size];
+
+		this.scope = ResourceScope.newSharedScope();
+
+		this.data1_layout = MemoryLayout.sequenceLayout(this.size,
+				MemoryLayout.valueLayout(16, ByteOrder.nativeOrder()));
+		this.data1 = MemorySegment.allocateNative(data1_layout, this.scope);
+
+		this.data2_layout = MemoryLayout.sequenceLayout(this.size,
+				MemoryLayout.valueLayout(64, ByteOrder.nativeOrder()));
+		this.data2 = MemorySegment.allocateNative(data2_layout, this.scope);
 	}
 
 	public Entry probe(long hash)
 	{
-		final short fragment1 = data1[(int) (hash & mask)];
-		final long fragment2 = data2[(int) (hash & mask)];
+		final short fragment1 = MemoryAccess.getShortAtIndex(data1, hash & mask);
+		final long fragment2 = MemoryAccess.getLongAtIndex(data2, hash & mask);
 
 		return new Entry(fragment1, fragment2);
 	}
@@ -150,15 +166,15 @@ public class TranspositionTable
 					| (((move == null) ? 0 : ((move.getFrom().ordinal() << 6) | move.getTo().ordinal())) << 16)
 					| ((staticEval & 0xFFFFL) << 28) | ((long) evaluation << 44));
 
-			data1[(int) hash & mask] = fragment1;
-			data2[(int) hash & mask] = fragment2;
+			MemoryAccess.setShortAtIndex(data1, hash & mask, fragment1);
+			MemoryAccess.setLongAtIndex(data2, hash & mask, fragment2);
 		}
 	}
 
 	public void clear()
 	{
-		Arrays.fill(data1, (short) 0);
-		Arrays.fill(data2, 0);
+		data1.fill((byte) 0);
+		data2.fill((byte) 0);
 	}
 
 	public void resize(int size)
@@ -166,8 +182,17 @@ public class TranspositionTable
 		size *= 1048576 / ENTRY_SIZE;
 		this.size = Integer.highestOneBit(size);
 		this.mask = this.size - 1;
-		this.data1 = new short[this.size];
-		this.data2 = new long[this.size];
+
+		this.scope.close();
+		this.scope = ResourceScope.newSharedScope();
+
+		this.data1_layout = MemoryLayout.sequenceLayout(this.size,
+				MemoryLayout.valueLayout(16, ByteOrder.nativeOrder()));
+		this.data1 = MemorySegment.allocateNative(data1_layout, this.scope);
+
+		this.data2_layout = MemoryLayout.sequenceLayout(this.size,
+				MemoryLayout.valueLayout(64, ByteOrder.nativeOrder()));
+		this.data2 = MemorySegment.allocateNative(data2_layout, this.scope);
 	}
 
 	public int hashfull()
@@ -176,7 +201,7 @@ public class TranspositionTable
 
 		for (int i = 0; i < 1000; i++)
 		{
-			if (this.data2[i] != 0)
+			if (MemoryAccess.getLongAtIndex(data2, i) != 0)
 			{
 				hashfull++;
 			}
@@ -192,7 +217,7 @@ public class TranspositionTable
 
 		for (int i = 0; i < minimum_hash; i++)
 		{
-			if (this.data2[i] != 0)
+			if (MemoryAccess.getLongAtIndex(data2, i) != 0)
 			{
 				hashfull++;
 			}
@@ -201,7 +226,7 @@ public class TranspositionTable
 		return hashfull * 1000 / minimum_hash;
 	}
 
-	public int getSize()
+	public long getSize()
 	{
 		return this.size * ENTRY_SIZE / 1048576;
 	}
