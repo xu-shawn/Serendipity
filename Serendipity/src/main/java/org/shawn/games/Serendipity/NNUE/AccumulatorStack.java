@@ -34,7 +34,9 @@ public class AccumulatorStack
 	NNUE network;
 
 	private final AccumulatorPair[] stack;
-	private short top;
+	private int top;
+
+	private static final Inference INFERENCE = InferenceChooser.chooseInference();
 
 	public class Accumulator
 	{
@@ -71,30 +73,24 @@ public class AccumulatorStack
 		public void add(int featureIndex)
 		{
 			featureIndex = featureIndex + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
-			{
-				values[i] += network.L1Weights[featureIndex][i];
-			}
+
+			INFERENCE.add(values, values, network.L1Weights[featureIndex]);
 		}
 
 		public void add(Accumulator prev, int featureIndex)
 		{
 			featureIndex = featureIndex + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
-			{
-				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndex][i]);
-			}
+
+			INFERENCE.add(values, prev.values, network.L1Weights[featureIndex]);
 		}
 
 		public void addSub(Accumulator prev, int featureIndexToAdd, int featureIndexToSubtract)
 		{
 			featureIndexToAdd = featureIndexToAdd + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract = featureIndexToSubtract + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
-			{
-				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndexToAdd][i]
-						- network.L1Weights[featureIndexToSubtract][i]);
-			}
+
+			INFERENCE.addSub(values, prev.values, network.L1Weights[featureIndexToAdd],
+					network.L1Weights[featureIndexToSubtract]);
 		}
 
 		public void addSubSub(Accumulator prev, int featureIndexToAdd, int featureIndexToSubtract1,
@@ -103,12 +99,9 @@ public class AccumulatorStack
 			featureIndexToAdd = featureIndexToAdd + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract1 = featureIndexToSubtract1 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract2 = featureIndexToSubtract2 + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
-			{
-				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndexToAdd][i]
-						- network.L1Weights[featureIndexToSubtract1][i]
-						- network.L1Weights[featureIndexToSubtract2][i]);
-			}
+
+			INFERENCE.addSubSub(values, prev.values, network.L1Weights[featureIndexToAdd],
+					network.L1Weights[featureIndexToSubtract1], network.L1Weights[featureIndexToSubtract2]);
 		}
 
 		public void addAddSubSub(Accumulator prev, int featureIndexToAdd1, int featureIndexToAdd2,
@@ -118,12 +111,10 @@ public class AccumulatorStack
 			featureIndexToAdd2 = featureIndexToAdd2 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract1 = featureIndexToSubtract1 + kingBucket * NNUE.FEATURE_SIZE;
 			featureIndexToSubtract2 = featureIndexToSubtract2 + kingBucket * NNUE.FEATURE_SIZE;
-			for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
-			{
-				values[i] = (short) (prev.values[i] + network.L1Weights[featureIndexToAdd1][i]
-						+ network.L1Weights[featureIndexToAdd2][i] - network.L1Weights[featureIndexToSubtract1][i]
-						- network.L1Weights[featureIndexToSubtract2][i]);
-			}
+
+			INFERENCE.addAddSubSub(values, prev.values, network.L1Weights[featureIndexToAdd1],
+					network.L1Weights[featureIndexToAdd2], network.L1Weights[featureIndexToSubtract1],
+					network.L1Weights[featureIndexToSubtract2]);
 		}
 
 		private void efficientlyUpdate(Accumulator prev, Board board, Move move)

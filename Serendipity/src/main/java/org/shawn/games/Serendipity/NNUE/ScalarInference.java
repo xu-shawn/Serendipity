@@ -61,4 +61,42 @@ public class ScalarInference implements Inference
 
 		return eval;
 	}
+
+	@Override
+	public void add(short[] to, final short[] from, final short[] added)
+	{
+		for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+		{
+			to[i] = (short) (from[i] + added[i]);
+		}
+	}
+
+	@Override
+	public void addSub(short[] to, final short[] from, final short[] added, final short[] subtracted)
+	{
+		for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+		{
+			to[i] = (short) (from[i] + added[i] - subtracted[i]);
+		}
+	}
+
+	@Override
+	public void addSubSub(short[] to, final short[] from, final short[] added, final short[] subtracted1,
+			final short[] subtracted2)
+	{
+		for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+		{
+			to[i] = (short) (from[i] + added[i] - subtracted1[i] - subtracted2[i]);
+		}
+	}
+
+	@Override
+	public void addAddSubSub(short[] to, final short[] from, final short[] added1, final short[] added2,
+			final short[] subtracted1, final short[] subtracted2)
+	{
+		for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+		{
+			to[i] = (short) (from[i] + added1[i] + added2[i] - subtracted1[i] - subtracted2[i]);
+		}
+	}
 }
