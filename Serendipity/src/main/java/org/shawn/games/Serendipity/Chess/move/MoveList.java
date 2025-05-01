@@ -786,7 +786,6 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 		}
 		else
 		{
-
 			String strFrom = (san.contains("x") ? StringUtil.beforeSequence(san, "x")
 					: san.substring(0, san.length() - 2));
 

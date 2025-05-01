@@ -769,8 +769,7 @@ public class AlphaBeta implements Runnable
 		Move[] lastCompletePV = null;
 		alpha = MIN_EVAL;
 		beta = MAX_EVAL;
-		delta = 25;
-		clearPV();
+		delta = VALUE_NONE;
 
 		try
 		{
@@ -789,8 +788,8 @@ public class AlphaBeta implements Runnable
 				if (i > 3)
 				{
 					delta = 25;
-					alpha = currentScore - delta;
-					beta = currentScore + delta;
+					alpha = Math.max(currentScore - delta, MIN_EVAL);
+					beta = Math.min(currentScore + delta, MAX_EVAL);
 				}
 
 				while (true)
@@ -945,6 +944,8 @@ public class AlphaBeta implements Runnable
 		this.sharedThreadData.stopped.set(false);
 		this.accumulators = new AccumulatorStack(sharedThreadData.network);
 		this.accumulators.init(this.internalBoard);
+		this.bestMove = null;
+		clearPV();
 
 		iterativeDeepening(false);
 	}
