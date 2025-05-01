@@ -85,6 +85,7 @@ public class Board implements Cloneable
 	private boolean enableEvents;
 	private final boolean updateHistory;
 	private long incrementalHashKey;
+	private long pawnHashKey;
 
 	/**
 	 * Constructs a new board using a default game context. The board will keep its
@@ -253,12 +254,14 @@ public class Board implements Cloneable
 					getCastleRight().put(side, CastleRight.QUEEN_SIDE);
 					incrementalHashKey ^= getCastleRightKey(side);
 				}
+
 				else if (CastleRight.KING_SIDE == getCastleRight(side))
 				{
 					incrementalHashKey ^= getCastleRightKey(side);
 					getCastleRight().put(side, CastleRight.NONE);
 				}
 			}
+
 			else if (move.getFrom() == ooo.getFrom())
 			{
 				if (CastleRight.KING_AND_QUEEN_SIDE == getCastleRight(side))
@@ -267,6 +270,7 @@ public class Board implements Cloneable
 					getCastleRight().put(side, CastleRight.KING_SIDE);
 					incrementalHashKey ^= getCastleRightKey(side);
 				}
+
 				else if (CastleRight.QUEEN_SIDE == getCastleRight(side))
 				{
 					incrementalHashKey ^= getCastleRightKey(side);
@@ -2259,6 +2263,27 @@ public class Board implements Cloneable
 	public void setIncrementalHashKey(long hashKey)
 	{
 		incrementalHashKey = hashKey;
+	}
+
+	/**
+	 * Returns the current pawn hash key. This hash value changes every time the
+	 * pawn structure changes.
+	 *
+	 * @return the current pawn hash key
+	 */
+	public long getPawnHashKey()
+	{
+		return pawnHashKey;
+	}
+
+	/**
+	 * Sets the current pawn hash key, replacing the previous one.
+	 *
+	 * @param hashKey the pawn hash key to set
+	 */
+	public void setPawnHashKey(long hashKey)
+	{
+		pawnHashKey = hashKey;
 	}
 
 	/**
