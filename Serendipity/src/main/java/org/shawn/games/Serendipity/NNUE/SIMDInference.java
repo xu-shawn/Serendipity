@@ -81,4 +81,59 @@ public class SIMDInference implements Inference
 		return eval;
 	}
 
+	@Override
+	public void add(short[] to, final short[] from, final short[] added)
+	{
+		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
+		{
+			final ShortVector fromVector = ShortVector.fromArray(SHORT_SPECIES, from, i);
+			final ShortVector addVector = ShortVector.fromArray(SHORT_SPECIES, added, i);
+
+			fromVector.add(addVector).intoArray(to, i);
+		}
+	}
+
+	@Override
+	public void addSub(short[] to, final short[] from, final short[] added, final short[] subtracted)
+	{
+		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
+		{
+			final ShortVector fromVector = ShortVector.fromArray(SHORT_SPECIES, from, i);
+			final ShortVector addVector = ShortVector.fromArray(SHORT_SPECIES, added, i);
+			final ShortVector subVector = ShortVector.fromArray(SHORT_SPECIES, subtracted, i);
+
+			fromVector.add(addVector).sub(subVector).intoArray(to, i);
+		}
+	}
+
+	@Override
+	public void addSubSub(short[] to, final short[] from, final short[] added, final short[] subtracted1,
+			final short[] subtracted2)
+	{
+		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
+		{
+			final ShortVector fromVector = ShortVector.fromArray(SHORT_SPECIES, from, i);
+			final ShortVector addVector = ShortVector.fromArray(SHORT_SPECIES, added, i);
+			final ShortVector subVector1 = ShortVector.fromArray(SHORT_SPECIES, subtracted1, i);
+			final ShortVector subVector2 = ShortVector.fromArray(SHORT_SPECIES, subtracted2, i);
+
+			fromVector.add(addVector).sub(subVector1).sub(subVector2).intoArray(to, i);
+		}
+	}
+
+	@Override
+	public void addAddSubSub(short[] to, final short[] from, final short[] added1, final short[] added2,
+			final short[] subtracted1, final short[] subtracted2)
+	{
+		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
+		{
+			final ShortVector fromVector = ShortVector.fromArray(SHORT_SPECIES, from, i);
+			final ShortVector addVector1 = ShortVector.fromArray(SHORT_SPECIES, added1, i);
+			final ShortVector addVector2 = ShortVector.fromArray(SHORT_SPECIES, added2, i);
+			final ShortVector subVector1 = ShortVector.fromArray(SHORT_SPECIES, subtracted1, i);
+			final ShortVector subVector2 = ShortVector.fromArray(SHORT_SPECIES, subtracted2, i);
+
+			fromVector.add(addVector1).add(addVector2).sub(subVector1).sub(subVector2).intoArray(to, i);
+		}
+	}
 }
