@@ -115,7 +115,7 @@ public class SIMDInference implements Inference
 			final ShortVector fromVector = ShortVector.fromArray(SHORT_SPECIES, from, i);
 			final ShortVector addVector = ShortVector.fromArray(SHORT_SPECIES, added, i);
 			final ShortVector subVector1 = ShortVector.fromArray(SHORT_SPECIES, subtracted1, i);
-			final ShortVector subVector2 = ShortVector.fromArray(SHORT_SPECIES, subtracted1, i);
+			final ShortVector subVector2 = ShortVector.fromArray(SHORT_SPECIES, subtracted2, i);
 
 			fromVector.add(addVector).sub(subVector1).sub(subVector2).intoArray(to, i);
 		}
@@ -131,7 +131,7 @@ public class SIMDInference implements Inference
 			final ShortVector addVector1 = ShortVector.fromArray(SHORT_SPECIES, added1, i);
 			final ShortVector addVector2 = ShortVector.fromArray(SHORT_SPECIES, added2, i);
 			final ShortVector subVector1 = ShortVector.fromArray(SHORT_SPECIES, subtracted1, i);
-			final ShortVector subVector2 = ShortVector.fromArray(SHORT_SPECIES, subtracted1, i);
+			final ShortVector subVector2 = ShortVector.fromArray(SHORT_SPECIES, subtracted2, i);
 
 			fromVector.add(addVector1).add(addVector2).sub(subVector1).sub(subVector2).intoArray(to, i);
 		}
