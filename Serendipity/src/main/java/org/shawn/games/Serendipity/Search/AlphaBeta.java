@@ -129,7 +129,7 @@ public class AlphaBeta implements Runnable
 
 	private int correctStaticEval(int eval, int correction)
 	{
-		return eval + correction / 1024;
+		return clamp(eval + correction / 1024, -MATE_IN_MAX_PLY, MATE_IN_MAX_PLY);
 	}
 
 	public int evaluate(Board board)
@@ -145,7 +145,7 @@ public class AlphaBeta implements Runnable
 
 		v = v * (206 + material) / 256;
 
-		v = Math.min(Math.max(-MATE_IN_MAX_PLY, v), MATE_IN_MAX_PLY);
+		v = clamp(v, -MATE_IN_MAX_PLY, MATE_IN_MAX_PLY);
 
 		return v;
 	}
@@ -431,8 +431,8 @@ public class AlphaBeta implements Runnable
 
 		if (inCheck)
 		{
-			eval = sse.staticEval = unadjustedStaticEval = VALUE_NONE;
 			correctionValue = 0;
+			eval = sse.staticEval = unadjustedStaticEval = VALUE_NONE;
 		}
 
 		else
@@ -937,6 +937,7 @@ public class AlphaBeta implements Runnable
 		this.threadData.history.fill(0);
 		this.threadData.captureHistory.fill(0);
 		this.threadData.continuationHistories.fill(0);
+		this.threadData.pawnCorrectionTable.fill(0);
 		this.threadData.pv = new Move[MAX_PLY + 1][MAX_PLY + 1];
 
 		for (int i = 0; i < reduction.length; i++)
