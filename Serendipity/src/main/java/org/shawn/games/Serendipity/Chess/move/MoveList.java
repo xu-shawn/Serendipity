@@ -154,11 +154,7 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 			int delta = move.getTo().getFile().ordinal() - move.getFrom().getFile().ordinal();
 			if (Math.abs(delta) >= 2)
 			{ // is castle
-				if (!board.doMove(move, true))
-				{
-					throw new MoveConversionException(
-							"Invalid move [" + move + "] for current setup: " + board.getFen());
-				}
+				board.doMove(move);
 				san.append(delta > 0 ? "O-O" : "O-O-O");
 				addCheckFlag(board, san);
 				return san.toString();
@@ -202,10 +198,7 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 			}
 		}
 
-		if (!board.doMove(move, true))
-		{
-			throw new MoveConversionException("Invalid move [" + move + "] for current setup: " + board.getFen());
-		}
+		board.doMove(move);
 
 		Piece captured = board.getBackup().getLast().getCapturedPiece();
 		boolean isCapture = !captured.equals(Piece.NONE);
@@ -288,11 +281,9 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 		for (Move move : startMoves)
 		{
 			i++;
-			if (!b.doMove(move, false))
-			{
-				throw new MoveConversionException("Couldn't parse SAN to MoveList: Illegal move: " + move + " ["
-						+ move.toString() + "] on " + b.getFen());
-			}
+
+			b.doMove(move);
+
 			if (i >= finalIndex)
 			{
 				fen = b.getFen();
@@ -633,13 +624,10 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 			{
 				b.loadFromFen(getStartFen());
 			}
+
 			for (Move move : this)
 			{
-				if (!b.doMove(move, false))
-				{
-					throw new MoveConversionException("Couldn't parse SAN to MoveList: Illegal move: " + move + " ["
-							+ move.toString() + "] on " + b.getFen());
-				}
+				b.doMove(move);
 			}
 		}
 
@@ -650,11 +638,7 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 			return;
 		}
 
-		if (!b.doMove(move, fullValidation))
-		{
-			throw new MoveConversionException(
-					"Couldn't parse SAN to MoveList: Illegal move: " + move + " [" + san + "] on " + b.getFen());
-		}
+		b.doMove(move);
 
 		add(this.size(), move);
 	}
@@ -919,11 +903,8 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 		for (Move move : this)
 		{
 			i++;
-			if (!b.doMove(move, false))
-			{
-				throw new IllegalArgumentException("Couldn't parse SAN to MoveList: Illegal move: " + move + " ["
-						+ move.toString() + "] on " + b.getFen(includeCounters));
-			}
+			b.doMove(move);
+
 			if (i >= atMoveIndex)
 			{
 				return b.getFen(includeCounters);

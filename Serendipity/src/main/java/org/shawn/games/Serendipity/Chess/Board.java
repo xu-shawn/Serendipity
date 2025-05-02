@@ -171,43 +171,15 @@ public class Board implements Cloneable
 	}
 
 	/**
-	 * Executes a move on the board, specified in Short Algebraic Notation (SAN). It
-	 * returns {@code true} if the operation has been successful and the position
-	 * changed after the move. It performs a full validation of the board status to
-	 * assess the outcome of the operation.
-	 * <p>
-	 * <b>N.B.</b>: the method does not check whether the move is legal or not
-	 * according to the standard chess rules, but rather if the resulting
-	 * configuration is valid. For instance, it is totally fine to move the king by
-	 * two or more squares, or a rook beyond its friendly pieces, as long as the
-	 * position obtained after the move does not violate any chess constraint.
+	 * Executes a move on the board, specified in Short Algebraic Notation (SAN).
 	 *
 	 * @param move the move to execute in SAN notation, such as {@code Nc3}
-	 * @return {@code true} if the move was successful and the resulting position is
-	 *         valid
 	 */
-	public boolean doMove(final String move)
+	public void doMove(final String move)
 	{
 		MoveList moves = new MoveList(this.getFen());
 		moves.addSanMove(move, true, true);
-		return doMove(moves.removeLast(), true);
-	}
-
-	/**
-	 * Executes a move on the board without performing a full validation of the
-	 * position. It returns {@code true} if the operation has been successful and
-	 * the position changed after the move.
-	 * <p>
-	 * Same as invoking {@code doMove(move, false)}.
-	 *
-	 * @param move the move to execute
-	 * @return {@code true} if the move was successful and the resulting position is
-	 *         valid
-	 * @see #doMove(Move, boolean)
-	 */
-	public boolean doMove(final Move move)
-	{
-		return doMove(move, false);
+		doMove(moves.removeLast());
 	}
 
 	/**
@@ -224,18 +196,12 @@ public class Board implements Cloneable
 	 * two or more squares, or a rook beyond its friendly pieces, as long as the
 	 * position obtained after the move does not violate any chess constraint.
 	 *
-	 * @param move           the move to execute
-	 * @param fullValidation whether to perform a full validation of the position or
-	 *                       not
-	 * @return {@code true} if the move was successful and the resulting position is
-	 *         valid
+	 * @param move the move to execute
 	 */
-	public boolean doMove(final Move move, boolean fullValidation)
+	public void doMove(final Move move)
 	{
-		if (!isMoveLegal(move, fullValidation))
-		{
-			return false;
-		}
+		assert isMoveLegal(move, true);
+		assert isMovePseudoLegal(move);
 
 		Piece movingPiece = getPiece(move.getFrom());
 		Side side = getSideToMove();
@@ -244,6 +210,7 @@ public class Board implements Cloneable
 		final boolean isCastle = context.isCastleMove(move);
 
 		incrementalHashKey ^= getSideKey(getSideToMove());
+
 		if (getEnPassantTarget() != Square.NONE)
 		{
 			incrementalHashKey ^= getEnPassantKey(getEnPassantTarget());
@@ -259,17 +226,20 @@ public class Board implements Cloneable
 					Move rookMove = context.getRookCastleMove(side, c);
 					movePiece(rookMove, backupMove);
 				}
+
 				else
 				{
-					return false;
+					assert false;
 				}
 			}
+
 			if (getCastleRight(side) != CastleRight.NONE)
 			{
 				incrementalHashKey ^= getCastleRightKey(side);
 				getCastleRight().put(side, CastleRight.NONE);
 			}
 		}
+
 		else if (PieceType.ROOK == movingPiece.getPieceType() && CastleRight.NONE != getCastleRight(side))
 		{
 			final Move oo = context.getRookoo(side);
@@ -311,6 +281,7 @@ public class Board implements Cloneable
 		{
 			final Move oo = context.getRookoo(side.flip());
 			final Move ooo = context.getRookooo(side.flip());
+
 			if (move.getTo() == oo.getFrom())
 			{
 				if (CastleRight.KING_AND_QUEEN_SIDE == getCastleRight(side.flip()))
@@ -319,12 +290,14 @@ public class Board implements Cloneable
 					getCastleRight().put(side.flip(), CastleRight.QUEEN_SIDE);
 					incrementalHashKey ^= getCastleRightKey(side.flip());
 				}
+
 				else if (CastleRight.KING_SIDE == getCastleRight(side.flip()))
 				{
 					incrementalHashKey ^= getCastleRightKey(side.flip());
 					getCastleRight().put(side.flip(), CastleRight.NONE);
 				}
 			}
+
 			else if (move.getTo() == ooo.getFrom())
 			{
 				if (CastleRight.KING_AND_QUEEN_SIDE == getCastleRight(side.flip()))
@@ -333,6 +306,7 @@ public class Board implements Cloneable
 					getCastleRight().put(side.flip(), CastleRight.KING_SIDE);
 					incrementalHashKey ^= getCastleRightKey(side.flip());
 				}
+
 				else if (CastleRight.QUEEN_SIDE == getCastleRight(side.flip()))
 				{
 					incrementalHashKey ^= getCastleRightKey(side.flip());
@@ -345,6 +319,7 @@ public class Board implements Cloneable
 		{
 			setHalfMoveCounter(getHalfMoveCounter() + 1);
 		}
+
 		else
 		{
 			setHalfMoveCounter(0);
@@ -359,6 +334,7 @@ public class Board implements Cloneable
 			{
 				Piece otherPawn = Piece.make(side.flip(), PieceType.PAWN);
 				setEnPassant(findEnPassant(move.getTo(), side));
+
 				if (hasPiece(otherPawn, move.getTo().getSideSquares())
 						&& verifyNotPinnedPiece(side, getEnPassant(), move.getTo()))
 				{
@@ -366,6 +342,7 @@ public class Board implements Cloneable
 					incrementalHashKey ^= getEnPassantKey(getEnPassantTarget());
 				}
 			}
+
 			setHalfMoveCounter(0);
 		}
 
@@ -383,8 +360,6 @@ public class Board implements Cloneable
 		}
 
 		backup.add(backupMove);
-
-		return true;
 	}
 
 	/**
@@ -400,7 +375,6 @@ public class Board implements Cloneable
 	 */
 	public boolean doNullMove()
 	{
-
 		Side side = getSideToMove();
 		MoveBackup backupMove = new MoveBackup(this, emptyMove);
 
@@ -412,10 +386,12 @@ public class Board implements Cloneable
 		incrementalHashKey ^= getSideKey(getSideToMove());
 		setSideToMove(side.flip());
 		incrementalHashKey ^= getSideKey(getSideToMove());
+
 		if (updateHistory)
 		{
 			getHistory().addLast(getIncrementalHashKey());
 		}
+
 		backup.add(backupMove);
 		return true;
 	}
@@ -482,14 +458,17 @@ public class Board implements Cloneable
 		Piece capturedPiece = getPiece(to);
 
 		unsetPiece(movingPiece, from);
+
 		if (!Piece.NONE.equals(capturedPiece))
 		{
 			unsetPiece(capturedPiece, to);
 		}
+
 		if (!Piece.NONE.equals(promotion))
 		{
 			setPiece(promotion, to);
 		}
+
 		else
 		{
 			setPiece(movingPiece, to);
@@ -1061,28 +1040,32 @@ public class Board implements Cloneable
 	 */
 	public String getFen(boolean includeCounters, boolean onlyOutputEnPassantIfCapturable)
 	{
-
 		StringBuffer fen = new StringBuffer();
 		int emptySquares = 0;
 		for (int i = 7; i >= 0; i--)
 		{
 			Rank r = Rank.allRanks[i];
+
 			if (r == Rank.NONE)
 			{
 				continue;
 			}
+
 			for (File f : File.allFiles)
 			{
 				if (f == File.NONE)
 				{
 					continue;
 				}
+
 				Square sq = Square.encode(r, f);
 				Piece piece = getPiece(sq);
+
 				if (Piece.NONE.equals(piece))
 				{
 					emptySquares++;
 				}
+
 				else
 				{
 					if (emptySquares > 0)
@@ -1090,17 +1073,21 @@ public class Board implements Cloneable
 						fen.append(emptySquares);
 						emptySquares = 0;
 					}
+
 					fen.append(piece.getFenSymbol());
 				}
+
 				if (f != File.FILE_H)
 				{
 					continue;
 				}
+
 				if (emptySquares > 0)
 				{
 					fen.append(emptySquares);
 					emptySquares = 0;
 				}
+
 				if (r != Rank.RANK_1)
 				{
 					fen.append("/");
@@ -1183,7 +1170,6 @@ public class Board implements Cloneable
 	 */
 	public Piece[] boardToArray()
 	{
-
 		final Piece[] pieces = new Piece[65];
 		pieces[64] = Piece.NONE;
 
@@ -1439,6 +1425,7 @@ public class Board implements Cloneable
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -1470,61 +1457,32 @@ public class Board implements Cloneable
 			return !isKingAttacked();
 		}
 
-		if ((getBbSide()[side.ordinal()] & to.getBitboard()) != 0)
+		if (0L != (getBitboard(side) & to.getBitboard()))
 		{
 			return false;
 		}
 
-		if (PieceType.PAWN.equals(movedPieceType))
+		switch (movedPieceType)
 		{
-			long pawnThreats = Bitboard.getPawnCaptures(side, from,
-					to.getBitboard() & (getBbSide()[1 - side.ordinal()] | getEnPassant().getBitboard()), getEnPassant())
-					& to.getBitboard();
-			pawnThreats |= Bitboard.getPawnMoves(side, from, occupied) & to.getBitboard();
-			if (pawnThreats == 0L)
-			{
+			case PAWN:
+				long pawnThreats = Bitboard.getPawnCaptures(side, from,
+						to.getBitboard() & (getBitboard(side.flip()) | getEnPassant().getBitboard()), getEnPassant())
+						& to.getBitboard();
+				pawnThreats |= Bitboard.getPawnMoves(side, from, occupied) & to.getBitboard();
+				return 0L != pawnThreats;
+			case KNIGHT:
+				return 0L != Bitboard.getKnightAttacks(from, to.getBitboard());
+			case BISHOP:
+				return 0L != (Bitboard.getBishopAttacks(occupied, from) & to.getBitboard());
+			case ROOK:
+				return 0L != (Bitboard.getRookAttacks(occupied, from) & to.getBitboard());
+			case QUEEN:
+				return 0L != (Bitboard.getQueenAttacks(occupied, from) & to.getBitboard());
+			case KING:
+				return 0L != Bitboard.getKingAttacks(from, to.getBitboard());
+			default:
 				return false;
-			}
 		}
-
-		else if (PieceType.KNIGHT.equals(movedPieceType))
-		{
-			if (Bitboard.getKnightAttacks(from, to.getBitboard()) == 0L)
-			{
-				return false;
-			}
-		}
-
-		else if (PieceType.BISHOP.equals(movedPieceType))
-		{
-			if ((Bitboard.getBishopAttacks(occupied, from) & to.getBitboard()) == 0L)
-			{
-				return false;
-			}
-		}
-
-		else if (PieceType.ROOK.equals(movedPieceType))
-		{
-			if ((Bitboard.getRookAttacks(occupied, from) & to.getBitboard()) == 0L)
-			{
-				return false;
-			}
-		}
-
-		else if (PieceType.QUEEN.equals(movedPieceType))
-		{
-			if ((Bitboard.getQueenAttacks(occupied, from) & to.getBitboard()) == 0L)
-			{
-				return false;
-			}
-		}
-
-		else if (Bitboard.getKingAttacks(from, to.getBitboard()) == 0L)
-		{
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
@@ -1583,6 +1541,7 @@ public class Board implements Cloneable
 			{
 				return false;
 			}
+
 			if (fromType.equals(PieceType.KING))
 			{
 				if (getContext().isKingSideCastle(move))
@@ -1597,6 +1556,7 @@ public class Board implements Cloneable
 					}
 					return false;
 				}
+
 				if (getContext().isQueenSideCastle(move))
 				{
 					if (getCastleRight(side).equals(CastleRight.KING_AND_QUEEN_SIDE)
@@ -1607,10 +1567,12 @@ public class Board implements Cloneable
 							return !isSquareAttackedBy(getContext().getoooSquares(side), side.flip());
 						}
 					}
+
 					return false;
 				}
 			}
 		}
+
 		if (fromType.equals(PieceType.KING))
 		{
 			if (squareAttackedBy(move.getTo(), side.flip()) != 0L)
@@ -1618,6 +1580,7 @@ public class Board implements Cloneable
 				return false;
 			}
 		}
+
 		Square kingSq = (fromType.equals(PieceType.KING) ? move.getTo() : getKingSquare(side));
 		Side other = side.flip();
 		long moveTo = move.getTo().getBitboard();
@@ -1736,6 +1699,7 @@ public class Board implements Cloneable
 		{
 			throw new RuntimeException(e);
 		}
+
 		return false;
 	}
 
@@ -1757,16 +1721,18 @@ public class Board implements Cloneable
 		{
 			return true;
 		}
+
 		if (isInsufficientMaterial())
 		{
 			return true;
 		}
+
 		if (getHalfMoveCounter() >= 100)
 		{
 			return true;
 		}
-		return isStaleMate();
 
+		return isStaleMate();
 	}
 
 	/**
@@ -1820,7 +1786,6 @@ public class Board implements Cloneable
 	 */
 	public boolean isInsufficientMaterial()
 	{
-
 		if ((getBitboard(Piece.WHITE_QUEEN) + getBitboard(Piece.BLACK_QUEEN) + getBitboard(Piece.WHITE_ROOK)
 				+ getBitboard(Piece.BLACK_ROOK)) != 0L)
 		{
@@ -1833,16 +1798,19 @@ public class Board implements Cloneable
 			long count = Long.bitCount(getBitboard());
 			int whiteCount = Long.bitCount(getBitboard(Side.WHITE));
 			int blackCount = Long.bitCount(getBitboard(Side.BLACK));
+
 			if (count == 4)
 			{
 				int whiteBishopCount = Long.bitCount(getBitboard(Piece.WHITE_BISHOP));
 				int blackBishopCount = Long.bitCount(getBitboard(Piece.BLACK_BISHOP));
+
 				if (whiteCount > 1 && blackCount > 1)
 				{
 					return !((whiteBishopCount == 1 && blackBishopCount == 1)
 							&& getFistPieceLocation(Piece.WHITE_BISHOP)
 									.isLightSquare() != getFistPieceLocation(Piece.BLACK_BISHOP).isLightSquare());
 				}
+
 				if (whiteCount == 3 || blackCount == 3)
 				{
 					if (whiteBishopCount == 2 && ((Bitboard.lightSquares & getBitboard(Piece.WHITE_BISHOP)) == 0L
@@ -1850,16 +1818,19 @@ public class Board implements Cloneable
 					{
 						return true;
 					}
+
 					else
 						return blackBishopCount == 2 && ((Bitboard.lightSquares & getBitboard(Piece.BLACK_BISHOP)) == 0L
 								|| (Bitboard.darkSquares & getBitboard(Piece.BLACK_BISHOP)) == 0L);
 				}
+
 				else
 				{
 					return Long.bitCount(getBitboard(Piece.WHITE_KNIGHT)) == 2
 							|| Long.bitCount(getBitboard(Piece.BLACK_KNIGHT)) == 2;
 				}
 			}
+
 			else
 			{
 				if ((getBitboard(Piece.WHITE_KING) | getBitboard(Piece.WHITE_BISHOP)) == getBitboard(Side.WHITE)
@@ -1892,6 +1863,7 @@ public class Board implements Cloneable
 			{
 				List<Move> l = new LinkedList<Move>();
 				MoveGenerator.generateLegalMoves(this, l);
+
 				if (l.size() == 0)
 				{
 					return true;
@@ -1902,6 +1874,7 @@ public class Board implements Cloneable
 		{
 			throw new RuntimeException(e);
 		}
+
 		return false;
 	}
 
@@ -2258,10 +2231,12 @@ public class Board implements Cloneable
 		copy.loadFromFen(this.getFen());
 		copy.setEnPassantTarget(this.getEnPassantTarget());
 		copy.getHistory().clear();
+
 		for (long key : getHistory())
 		{
 			copy.getHistory().add(key);
 		}
+
 		return copy;
 	}
 
@@ -2523,14 +2498,12 @@ public class Board implements Cloneable
 
 	private boolean verifyNotPinnedPiece(Side side, Square enPassant, Square target)
 	{
-
 		long pawns = Bitboard.getPawnAttacks(side, enPassant) & getBitboard(Piece.make(side.flip(), PieceType.PAWN));
 		return pawns != 0 && verifyAllPins(pawns, side, enPassant, target);
 	}
 
 	private boolean verifyAllPins(long pawns, Side side, Square enPassant, Square target)
 	{
-
 		long onePawn = extractLsb(pawns);
 		long otherPawn = pawns ^ onePawn;
 		if (onePawn != 0L && verifyKingIsNotAttackedWithoutPin(side, enPassant, target, onePawn))
@@ -2542,7 +2515,6 @@ public class Board implements Cloneable
 
 	private boolean verifyKingIsNotAttackedWithoutPin(Side side, Square enPassant, Square target, long pawns)
 	{
-
 		return squareAttackedBy(getKingSquare(side.flip()), side, removePieces(enPassant, target, pawns)) == 0L;
 	}
 
