@@ -124,7 +124,7 @@ public class AlphaBeta implements Runnable
 
 	private int getCorrectionValue(Board board)
 	{
-		return threadData.pawnCorrectionTable.get(board) * 25;
+		return threadData.pawnCorrectionTable.get(board) * 40;
 	}
 
 	private int correctStaticEval(int eval, int correction)
