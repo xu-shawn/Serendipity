@@ -22,6 +22,8 @@ package org.shawn.games.Serendipity.Search;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.shawn.games.Serendipity.Search.Correction.CorrectionTable;
+import org.shawn.games.Serendipity.Search.Correction.PawnCorrectionTable;
 import org.shawn.games.Serendipity.Search.History.CaptureHistory;
 import org.shawn.games.Serendipity.Search.History.ContinuationHistories;
 import org.shawn.games.Serendipity.Search.History.FromToHistory;
@@ -36,6 +38,9 @@ public class ThreadData
 	final History captureHistory;
 	final ContinuationHistories continuationHistories;
 	final MainThreadData mainThreadData;
+
+	final CorrectionTable pawnCorrectionTable;
+
 	Move[][] pv;
 
 	int rootDepth;
@@ -64,6 +69,7 @@ public class ThreadData
 		this.history = new FromToHistory();
 		this.captureHistory = new CaptureHistory();
 		this.continuationHistories = new ContinuationHistories();
+		this.pawnCorrectionTable = new PawnCorrectionTable();
 
 		this.rootDepth = 0;
 		this.selDepth = 0;

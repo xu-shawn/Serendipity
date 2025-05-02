@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
 import org.shawn.games.Serendipity.NNUE.*;
+import org.shawn.games.Serendipity.Search.Correction.CorrectionTable;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -99,11 +100,36 @@ public class AlphaBeta implements Runnable
 		return -stat_bonus(depth);
 	}
 
+	private static int clamp(int v, int lo, int hi)
+	{
+		if (v <= lo)
+		{
+			return lo;
+		}
+
+		if (v >= hi)
+		{
+			return hi;
+		}
+
+		return v;
+	}
+
 	private boolean shouldStop()
 	{
 		return (this.threadData.id == 0 && this.threadData.mainThreadData.limits.getNodes() > 0
 				&& this.threadData.nodes.get() > threadData.mainThreadData.limits.getNodes())
 				|| sharedThreadData.stopped.get() || (this.threadData.id == 0 && this.timeManager.shouldStop());
+	}
+
+	private int getCorrectionValue(Board board)
+	{
+		return threadData.pawnCorrectionTable.get(board) * 25;
+	}
+
+	private int correctStaticEval(int eval, int correction)
+	{
+		return eval + correction / 1024;
 	}
 
 	public int evaluate(Board board)
@@ -319,7 +345,7 @@ public class AlphaBeta implements Runnable
 		boolean improving, isPV, inCheck, inSingularSearch, ttCapture;
 		Move bestMove, ttMove;
 		int bestValue;
-		int eval;
+		int eval, unadjustedStaticEval, correctionValue;
 
 		SearchStack.SearchState sse = ss.get(ply);
 
@@ -405,13 +431,18 @@ public class AlphaBeta implements Runnable
 
 		if (inCheck)
 		{
-			eval = sse.staticEval = VALUE_NONE;
+			eval = sse.staticEval = unadjustedStaticEval = VALUE_NONE;
+			correctionValue = 0;
 		}
+
 		else
 		{
+			correctionValue = getCorrectionValue(board);
+
 			if (sse.ttHit)
 			{
-				eval = sse.staticEval = currentMoveEntry.getStaticEval();
+				unadjustedStaticEval = currentMoveEntry.getStaticEval();
+				eval = sse.staticEval = correctStaticEval(unadjustedStaticEval, correctionValue);
 
 				if (currentMoveEntry.getEvaluation() != VALUE_NONE)
 				{
@@ -437,13 +468,15 @@ public class AlphaBeta implements Runnable
 					}
 				}
 			}
+
 			else
 			{
-				eval = sse.staticEval = evaluate(board);
+				unadjustedStaticEval = evaluate(board);
+				eval = sse.staticEval = correctStaticEval(unadjustedStaticEval, correctionValue);
 
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 						TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_NONE, VALUE_NONE, null,
-						sse.staticEval);
+						unadjustedStaticEval);
 			}
 		}
 
@@ -740,20 +773,30 @@ public class AlphaBeta implements Runnable
 			if (alpha >= beta)
 			{
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
-						TranspositionTable.NODETYPE_LOWERBOUND, depth, bestValue, bestMove, sse.staticEval);
+						TranspositionTable.NODETYPE_LOWERBOUND, depth, bestValue, bestMove, unadjustedStaticEval);
 			}
 
 			else if (alpha == oldAlpha)
 			{
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
-						TranspositionTable.NODETYPE_UPPERBOUND, depth, bestValue, ttMove, sse.staticEval);
+						TranspositionTable.NODETYPE_UPPERBOUND, depth, bestValue, ttMove, unadjustedStaticEval);
 			}
 
 			else if (alpha > oldAlpha)
 			{
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
-						TranspositionTable.NODETYPE_EXACT, depth, bestValue, bestMove, sse.staticEval);
+						TranspositionTable.NODETYPE_EXACT, depth, bestValue, bestMove, unadjustedStaticEval);
 			}
+		}
+
+		if (!inCheck && !inSingularSearch && (bestMove == null || !board.isCapture(bestMove))
+				&& ((bestValue < sse.staticEval && bestValue < beta)
+						|| (bestValue > sse.staticEval && bestMove != null)))
+		{
+			final int bonus = clamp((bestValue - sse.staticEval) * depth / 8,
+					-CorrectionTable.CORRECTION_HISTORY_MAX / 4, CorrectionTable.CORRECTION_HISTORY_MAX / 4);
+
+			threadData.pawnCorrectionTable.register(board, bonus);
 		}
 
 		return bestValue;

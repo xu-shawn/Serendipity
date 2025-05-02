@@ -829,6 +829,7 @@ public class Board implements Cloneable
 		Arrays.fill(occupation, Piece.NONE);
 		backup.clear();
 		incrementalHashKey = 0;
+		pawnHashKey = 0;
 	}
 
 	/**
@@ -842,13 +843,16 @@ public class Board implements Cloneable
 	 */
 	public void setPiece(Piece piece, Square sq)
 	{
+		assert piece != Piece.NONE && sq != Square.NONE;
+
 		bitboard[piece.ordinal()] |= sq.getBitboard();
 		bbSide[piece.getPieceSide().ordinal()] |= sq.getBitboard();
 		occupation[sq.ordinal()] = piece;
+		incrementalHashKey ^= getPieceSquareKey(piece, sq);
 
-		if (piece != Piece.NONE && sq != Square.NONE)
+		if (PieceType.PAWN.equals(piece.getPieceType()))
 		{
-			incrementalHashKey ^= getPieceSquareKey(piece, sq);
+			pawnHashKey ^= getPieceSquareKey(piece, sq);
 		}
 	}
 
@@ -860,13 +864,16 @@ public class Board implements Cloneable
 	 */
 	public void unsetPiece(Piece piece, Square sq)
 	{
+		assert piece != Piece.NONE && sq != Square.NONE;
+
 		bitboard[piece.ordinal()] ^= sq.getBitboard();
 		bbSide[piece.getPieceSide().ordinal()] ^= sq.getBitboard();
 		occupation[sq.ordinal()] = Piece.NONE;
+		incrementalHashKey ^= getPieceSquareKey(piece, sq);
 
-		if (piece != Piece.NONE && sq != Square.NONE)
+		if (PieceType.PAWN.equals(piece.getPieceType()))
 		{
-			incrementalHashKey ^= getPieceSquareKey(piece, sq);
+			pawnHashKey ^= getPieceSquareKey(piece, sq);
 		}
 	}
 
@@ -985,6 +992,7 @@ public class Board implements Cloneable
 		}
 
 		incrementalHashKey = getZobristKey();
+		pawnHashKey = generatePawnHashKey();
 
 		if (updateHistory)
 		{
@@ -2098,28 +2106,56 @@ public class Board implements Cloneable
 	public long getZobristKey()
 	{
 		long hash = 0;
+
 		if (getCastleRight(Side.WHITE) != CastleRight.NONE)
 		{
 			hash ^= getCastleRightKey(Side.WHITE);
 		}
+
 		if (getCastleRight(Side.BLACK) != CastleRight.NONE)
 		{
 			hash ^= getCastleRightKey(Side.BLACK);
 		}
+
 		for (Square sq : Square.values())
 		{
 			Piece piece = getPiece(sq);
+
 			if (!Piece.NONE.equals(piece) && !Square.NONE.equals(sq))
 			{
 				hash ^= getPieceSquareKey(piece, sq);
 			}
 		}
+
 		hash ^= getSideKey(getSideToMove());
 
 		if (Square.NONE != getEnPassantTarget() && pawnCanBeCapturedEnPassant())
 		{
 			hash ^= getEnPassantKey(getEnPassantTarget());
 		}
+
+		return hash;
+	}
+
+	/**
+	 * Returns a Pawn hash code value for this board. 
+	 * 
+	 * @return a Pawn hash value for this board
+	 */
+	public long generatePawnHashKey()
+	{
+		long hash = 0;
+
+		for (Square sq : Square.values())
+		{
+			Piece piece = getPiece(sq);
+
+			if (PieceType.PAWN.equals(piece.getPieceType()) && !Square.NONE.equals(sq))
+			{
+				hash ^= getPieceSquareKey(piece, sq);
+			}
+		}
+
 		return hash;
 	}
 
