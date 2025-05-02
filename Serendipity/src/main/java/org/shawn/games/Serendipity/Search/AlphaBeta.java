@@ -124,7 +124,7 @@ public class AlphaBeta implements Runnable
 
 	private int getCorrectionValue(Board board)
 	{
-		return threadData.pawnCorrectionTable.get(board) * 40;
+		return threadData.pawnCorrectionTable.get(board) * 24;
 	}
 
 	private int correctStaticEval(int eval, int correction)
@@ -789,7 +789,7 @@ public class AlphaBeta implements Runnable
 			}
 		}
 
-		if (!inCheck && !inSingularSearch && (bestMove == null || !board.isCapture(bestMove))
+		if (!inCheck && !inSingularSearch && (bestMove == null || board.isQuiet(bestMove))
 				&& ((bestValue < sse.staticEval && bestValue < beta)
 						|| (bestValue > sse.staticEval && bestMove != null)))
 		{
