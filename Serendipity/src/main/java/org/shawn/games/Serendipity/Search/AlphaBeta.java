@@ -473,7 +473,7 @@ public class AlphaBeta implements Runnable
 			return beta > -MATE_IN_MAX_PLY ? beta + (eval - beta) / 3 : eval;
 		}
 
-		if (!inSingularSearch && ply > 0 && eval >= beta && beta < MATE_IN_MAX_PLY && !inCheck
+		if (!inSingularSearch && cutNode && ply > 0 && eval >= beta && beta < MATE_IN_MAX_PLY && !inCheck
 				&& (ss.get(-1).move == null || !ss.get(-1).move.equals(Constants.emptyMove))
 				&& board.hasNonPawnMaterial())
 		{
