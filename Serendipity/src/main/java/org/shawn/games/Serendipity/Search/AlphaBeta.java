@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
 import org.shawn.games.Serendipity.NNUE.*;
+import org.shawn.games.Serendipity.Search.Debug.Debugger;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -326,6 +327,7 @@ public class AlphaBeta implements Runnable
 		bestValue = MIN_EVAL;
 		bestMove = null;
 		sse.moveCount = 0;
+		sse.statScore = 0;
 		isPV = beta - alpha > 1;
 		inCheck = sse.inCheck = board.isKingAttacked();
 		inSingularSearch = sse.excludedMove != null;
@@ -468,7 +470,7 @@ public class AlphaBeta implements Runnable
 		}
 
 		if (!inSingularSearch && !isPV && !inCheck && (ttMove == null || ttCapture) && depth < 7 && eval >= beta
-				&& eval - depth * 70 >= beta)
+				&& eval - depth * 70 + ss.get(ply - 1).statScore / 1024 - 2 >= beta)
 		{
 			return beta > -MATE_IN_MAX_PLY ? beta + (eval - beta) / 3 : eval;
 		}
@@ -618,12 +620,16 @@ public class AlphaBeta implements Runnable
 						+ currentContinuationHistories[1].get(board, move)
 						+ currentContinuationHistories[3].get(board, move) + 6628;
 
+				sse.statScore = history;
+
 				r -= history / 10000;
 			}
 
 			else
 			{
 				final int history = threadData.captureHistory.get(board, move) - 6284;
+
+				sse.statScore = history;
 
 				r -= history / 9000;
 			}

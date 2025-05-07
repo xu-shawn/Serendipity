@@ -32,6 +32,7 @@ public class SearchStack
 		public boolean ttHit;
 		public int moveCount;
 		public int staticEval;
+		public int statScore;
 		public Move killer;
 		public Move move;
 		public Move excludedMove;
