@@ -451,14 +451,14 @@ public class AlphaBeta implements Runnable
 
 		if (!inCheck)
 		{
-			if (ss.get(-2).staticEval != VALUE_NONE)
+			if (ss.get(ply - 2).staticEval != VALUE_NONE)
 			{
-				improving = ss.get(-2).staticEval < sse.staticEval;
+				improving = ss.get(ply - 2).staticEval < sse.staticEval;
 			}
 
-			else if (ss.get(-4).staticEval != VALUE_NONE)
+			else if (ss.get(ply - 4).staticEval != VALUE_NONE)
 			{
-				improving = ss.get(-4).staticEval < sse.staticEval;
+				improving = ss.get(ply - 4).staticEval < sse.staticEval;
 			}
 
 			else
@@ -474,7 +474,7 @@ public class AlphaBeta implements Runnable
 		}
 
 		if (!inSingularSearch && cutNode && ply > 0 && eval >= beta && beta < MATE_IN_MAX_PLY && !inCheck
-				&& (ss.get(-1).move == null || !ss.get(-1).move.equals(Constants.emptyMove))
+				&& (ss.get(ply - 1).move == null || !ss.get(ply - 1).move.equals(Constants.emptyMove))
 				&& board.hasNonPawnMaterial())
 		{
 			int r = depth / 3 + 4 + Math.min((eval - beta) / 200, 3);
