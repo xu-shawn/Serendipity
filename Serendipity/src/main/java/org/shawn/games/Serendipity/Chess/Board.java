@@ -1221,7 +1221,7 @@ public class Board implements Cloneable
 				& ((getBitboard(Piece.make(side, PieceType.BISHOP)) | getBitboard(Piece.make(side, PieceType.QUEEN))));
 		result |= Bitboard.getRookAttacks(occ, square)
 				& ((getBitboard(Piece.make(side, PieceType.ROOK)) | getBitboard(Piece.make(side, PieceType.QUEEN))));
-		result |= Bitboard.getKingAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KING));
+		result |= Attacks.getKingAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KING));
 		return result;
 	}
 
@@ -1275,7 +1275,7 @@ public class Board implements Cloneable
 				result = Bitboard.getQueenAttacks(occ, square) & getBitboard(Piece.make(side, PieceType.QUEEN));
 				break;
 			case KING:
-				result |= Bitboard.getKingAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KING));
+				result |= Attacks.getKingAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KING));
 				break;
 			default:
 				break;
@@ -1479,7 +1479,7 @@ public class Board implements Cloneable
 			case QUEEN:
 				return 0L != (Bitboard.getQueenAttacks(occupied, from) & to.getBitboard());
 			case KING:
-				return 0L != Bitboard.getKingAttacks(from, to.getBitboard());
+				return 0L != Attacks.getKingAttacks(from, to.getBitboard());
 			default:
 				return false;
 		}
@@ -1655,7 +1655,7 @@ public class Board implements Cloneable
 				attacks = Bitboard.getQueenAttacks(getBitboard(), move.getFrom());
 				break;
 			case KING:
-				attacks = Bitboard.getKingAttacks(move.getFrom(), ~getBitboard(side));
+				attacks = Attacks.getKingAttacks(move.getFrom(), ~getBitboard(side));
 				break;
 			default:
 				break;

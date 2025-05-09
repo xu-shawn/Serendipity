@@ -632,21 +632,6 @@ public class Bitboard
 	}
 
 	/**
-	 * Returns the bitboard representing the king movement attacks, computed
-	 * applying the provided mask. It could either refer to the squares attacked by
-	 * a king placed on the input square, or conversely the kings that can attack
-	 * the square.
-	 *
-	 * @param square the square for which to calculate the king attacks
-	 * @param mask   the mask to apply to the king attacks
-	 * @return the bitboard of king movement attacks
-	 */
-	public static long getKingAttacks(Square square, long mask)
-	{
-		return adjacentSquares[square.ordinal()] & mask;
-	}
-
-	/**
 	 * Returns the list of squares that are set in the bitboard provided in input,
 	 * that is, the squares corresponding to the indexes set to 1 in the bitboard.
 	 *

@@ -360,7 +360,7 @@ public class MoveGenerator
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
-			long attacks = Bitboard.getKingAttacks(sqSource, mask);
+			long attacks = Attacks.getKingAttacks(sqSource, mask);
 
 			while (attacks != 0L)
 			{
