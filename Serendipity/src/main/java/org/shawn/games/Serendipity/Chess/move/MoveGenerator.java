@@ -147,7 +147,7 @@ public class MoveGenerator
 			int knightIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(knightIndex);
-			long attacks = Bitboard.getKnightAttacks(sqSource, mask);
+			long attacks = Attacks.getKnightAttacks(sqSource, mask);
 
 			while (attacks != 0L)
 			{

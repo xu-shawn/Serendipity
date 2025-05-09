@@ -123,30 +123,6 @@ public class Bitboard
 			sq2Bb(C8) | sq2Bb(D7) | sq2Bb(E6) | sq2Bb(F5) | sq2Bb(G4) | sq2Bb(H3),
 			sq2Bb(D8) | sq2Bb(E7) | sq2Bb(F6) | sq2Bb(G5) | sq2Bb(H4), sq2Bb(E8) | sq2Bb(F7) | sq2Bb(G6) | sq2Bb(H5),
 			sq2Bb(F8) | sq2Bb(G7) | sq2Bb(H6), sq2Bb(G8) | sq2Bb(H7), sq2Bb(H8) };
-
-	/**
-	 * The bitboards representing the squares attacked by a knight placed in any
-	 * given square on the board. Bitboard at index 0 identifies the squares
-	 * attacked by a knight placed at square {@code A1} (index 0), bitboard at index
-	 * 1 the squares attacked from square {@code B1} (index 1), etc.
-	 * <p>
-	 * Contextually, the bitboards can also represent the squares from which a
-	 * knight can attack the square.
-	 */
-	final static long[] knightAttacks = { 0x0000000000020400L, 0x0000000000050800L, 0x00000000000a1100L,
-			0x0000000000142200L, 0x0000000000284400L, 0x0000000000508800L, 0x0000000000a01000L, 0x0000000000402000L,
-			0x0000000002040004L, 0x0000000005080008L, 0x000000000a110011L, 0x0000000014220022L, 0x0000000028440044L,
-			0x0000000050880088L, 0x00000000a0100010L, 0x0000000040200020L, 0x0000000204000402L, 0x0000000508000805L,
-			0x0000000a1100110aL, 0x0000001422002214L, 0x0000002844004428L, 0x0000005088008850L, 0x000000a0100010a0L,
-			0x0000004020002040L, 0x0000020400040200L, 0x0000050800080500L, 0x00000a1100110a00L, 0x0000142200221400L,
-			0x0000284400442800L, 0x0000508800885000L, 0x0000a0100010a000L, 0x0000402000204000L, 0x0002040004020000L,
-			0x0005080008050000L, 0x000a1100110a0000L, 0x0014220022140000L, 0x0028440044280000L, 0x0050880088500000L,
-			0x00a0100010a00000L, 0x0040200020400000L, 0x0204000402000000L, 0x0508000805000000L, 0x0a1100110a000000L,
-			0x1422002214000000L, 0x2844004428000000L, 0x5088008850000000L, 0xa0100010a0000000L, 0x4020002040000000L,
-			0x0400040200000000L, 0x0800080500000000L, 0x1100110a00000000L, 0x2200221400000000L, 0x4400442800000000L,
-			0x8800885000000000L, 0x100010a000000000L, 0x2000204000000000L, 0x0004020000000000L, 0x0008050000000000L,
-			0x00110a0000000000L, 0x0022140000000000L, 0x0044280000000000L, 0x0088500000000000L, 0x0010a00000000000L,
-			0x0020400000000000L };
 	/**
 	 * The bitboards representing the squares attacked by a white pawn placed in any
 	 * given square on the board. Bitboard at index 8 identifies the squares
@@ -542,21 +518,6 @@ public class Bitboard
 	public static long getQueenAttacks(long mask, Square square)
 	{
 		return getRookAttacks(mask, square) | getBishopAttacks(mask, square);
-	}
-
-	/**
-	 * Returns the bitboard representing the knight movement attacks, computed
-	 * applying the provided mask. It could either refer to the squares attacked by
-	 * a knight placed on the input square, or conversely the knights that can
-	 * attack the square.
-	 *
-	 * @param square the square for which to calculate the knight attacks
-	 * @param mask   the mask to apply to the knight attacks
-	 * @return the bitboard of knight movement attacks
-	 */
-	public static long getKnightAttacks(Square square, long mask)
-	{
-		return knightAttacks[square.ordinal()] & mask;
 	}
 
 	/**

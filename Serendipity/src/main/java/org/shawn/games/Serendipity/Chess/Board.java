@@ -1216,7 +1216,7 @@ public class Board implements Cloneable
 	{
 		long result;
 		result = Bitboard.getPawnAttacks(side.flip(), square) & getBitboard(Piece.make(side, PieceType.PAWN)) & occ;
-		result |= Bitboard.getKnightAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KNIGHT));
+		result |= Attacks.getKnightAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KNIGHT));
 		result |= Bitboard.getBishopAttacks(occ, square)
 				& ((getBitboard(Piece.make(side, PieceType.BISHOP)) | getBitboard(Piece.make(side, PieceType.QUEEN))));
 		result |= Bitboard.getRookAttacks(occ, square)
@@ -1263,7 +1263,7 @@ public class Board implements Cloneable
 				result = Bitboard.getPawnAttacks(side.flip(), square) & getBitboard(Piece.make(side, PieceType.PAWN));
 				break;
 			case KNIGHT:
-				result = Bitboard.getKnightAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KNIGHT));
+				result = Attacks.getKnightAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KNIGHT));
 				break;
 			case BISHOP:
 				result = Bitboard.getBishopAttacks(occ, square) & getBitboard(Piece.make(side, PieceType.BISHOP));
@@ -1328,7 +1328,7 @@ public class Board implements Cloneable
 			case PAWN:
 				return 0L != (to & Bitboard.getPawnAttacks(getSideToMove(), from));
 			case KNIGHT:
-				return 0L != (to & Bitboard.getKnightAttacks(from, occ));
+				return 0L != (to & Attacks.getKnightAttacks(from, occ));
 			case BISHOP:
 				return 0L != (to & Bitboard.getBishopAttacks(occ, from));
 			case ROOK:
@@ -1471,7 +1471,7 @@ public class Board implements Cloneable
 				pawnThreats |= Bitboard.getPawnMoves(side, from, occupied) & to.getBitboard();
 				return 0L != pawnThreats;
 			case KNIGHT:
-				return 0L != Bitboard.getKnightAttacks(from, to.getBitboard());
+				return 0L != Attacks.getKnightAttacks(from, to.getBitboard());
 			case BISHOP:
 				return 0L != (Bitboard.getBishopAttacks(occupied, from) & to.getBitboard());
 			case ROOK:
@@ -1607,7 +1607,7 @@ public class Board implements Cloneable
 
 		long knights = (getBitboard(Piece.make(other, PieceType.KNIGHT))) & ~moveTo;
 
-		if (knights != 0L && (Bitboard.getKnightAttacks(kingSq, allPieces) & knights) != 0L)
+		if (knights != 0L && (Attacks.getKnightAttacks(kingSq, allPieces) & knights) != 0L)
 		{
 			return false;
 		}
@@ -1643,7 +1643,7 @@ public class Board implements Cloneable
 				}
 				break;
 			case KNIGHT:
-				attacks = Bitboard.getKnightAttacks(move.getFrom(), ~getBitboard(side));
+				attacks = Attacks.getKnightAttacks(move.getFrom(), ~getBitboard(side));
 				break;
 			case BISHOP:
 				attacks = Bitboard.getBishopAttacks(getBitboard(), move.getFrom());
