@@ -4,21 +4,24 @@ public class Attacks
 {
 	private final static long[] kingAttacks;
 	private final static long[] knightAttacks;
+	private final static long[] bishopMask;
+	private final static long[] rookMask;
 
 	static
 	{
-		kingAttacks = new long[64];
-
-		for (int i = 0; i < 64; i++)
-		{
-			kingAttacks[i] = generateKingAttacks(Square.values()[i]);
-		}
-
 		knightAttacks = new long[64];
+		kingAttacks = new long[64];
+		bishopMask = new long[64];
+		rookMask = new long[64];
 
-		for (int i = 0; i < 64; i++)
+		for (int sqIdx = 0; sqIdx < 64; sqIdx++)
 		{
-			knightAttacks[i] = generateKnightAttacks(Square.values()[i]);
+			final Square sq = Square.values()[sqIdx];
+
+			knightAttacks[sqIdx] = generateKnightAttacks(sq);
+			kingAttacks[sqIdx] = generateKingAttacks(sq);
+			bishopMask[sqIdx] = generateBishopMask(sq);
+			rookMask[sqIdx] = generateRookMask(sq);
 		}
 	}
 
@@ -57,6 +60,23 @@ public class Attacks
 		return bitboard;
 	}
 
+	private static long generateKnightAttacks(Square square)
+	{
+		long attacks = 0L;
+		long squareBB = square.getBitboard();
+
+		attacks |= shift(shift(squareBB, Direction.NORTH), Direction.NORTHEAST);
+		attacks |= shift(shift(squareBB, Direction.NORTH), Direction.NORTHWEST);
+		attacks |= shift(shift(squareBB, Direction.SOUTH), Direction.SOUTHEAST);
+		attacks |= shift(shift(squareBB, Direction.SOUTH), Direction.SOUTHWEST);
+		attacks |= shift(shift(squareBB, Direction.EAST), Direction.NORTHEAST);
+		attacks |= shift(shift(squareBB, Direction.EAST), Direction.SOUTHEAST);
+		attacks |= shift(shift(squareBB, Direction.WEST), Direction.NORTHWEST);
+		attacks |= shift(shift(squareBB, Direction.WEST), Direction.SOUTHWEST);
+
+		return attacks;
+	}
+
 	private static long generateKingAttacks(Square square)
 	{
 		long attacks = 0L;
@@ -74,21 +94,50 @@ public class Attacks
 		return attacks;
 	}
 
-	private static long generateKnightAttacks(Square square)
+	private static long generateRayMask(Square square, Direction direction)
 	{
-		long attacks = 0L;
-		long squareBB = square.getBitboard();
+		long mask = 0L;
+		long sqBB = square.getBitboard();
+		long nextBB = shift(sqBB, direction);
 
-		attacks |= shift(shift(squareBB, Direction.NORTH), Direction.NORTHEAST);
-		attacks |= shift(shift(squareBB, Direction.NORTH), Direction.NORTHWEST);
-		attacks |= shift(shift(squareBB, Direction.SOUTH), Direction.SOUTHEAST);
-		attacks |= shift(shift(squareBB, Direction.SOUTH), Direction.SOUTHWEST);
-		attacks |= shift(shift(squareBB, Direction.EAST), Direction.NORTHEAST);
-		attacks |= shift(shift(squareBB, Direction.EAST), Direction.SOUTHEAST);
-		attacks |= shift(shift(squareBB, Direction.WEST), Direction.NORTHWEST);
-		attacks |= shift(shift(squareBB, Direction.WEST), Direction.SOUTHWEST);
+		while (true)
+		{
+			sqBB = nextBB;
+			nextBB = shift(sqBB, direction);
 
-		return attacks;
+			if (0L == nextBB)
+			{
+				break;
+			}
+
+			mask |= nextBB;
+		}
+
+		return mask;
+	}
+
+	private static long generateBishopMask(Square square)
+	{
+		long mask = 0L;
+
+		mask |= generateRayMask(square, Direction.NORTHEAST);
+		mask |= generateRayMask(square, Direction.NORTHWEST);
+		mask |= generateRayMask(square, Direction.SOUTHEAST);
+		mask |= generateRayMask(square, Direction.SOUTHWEST);
+
+		return mask;
+	}
+
+	private static long generateRookMask(Square square)
+	{
+		long mask = 0L;
+
+		mask |= generateRayMask(square, Direction.NORTH);
+		mask |= generateRayMask(square, Direction.SOUTH);
+		mask |= generateRayMask(square, Direction.EAST);
+		mask |= generateRayMask(square, Direction.WEST);
+
+		return mask;
 	}
 
 	/**

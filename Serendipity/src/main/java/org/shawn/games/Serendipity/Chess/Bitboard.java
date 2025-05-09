@@ -37,7 +37,6 @@ import java.util.List;
  */
 public class Bitboard
 {
-
 	/**
 	 * The bitboard representing the light squares on a chessboard.
 	 */
