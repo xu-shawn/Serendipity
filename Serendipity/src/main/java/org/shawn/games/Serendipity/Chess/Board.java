@@ -1215,7 +1215,8 @@ public class Board implements Cloneable
 	public long squareAttackedBy(Square square, Side side, long occ)
 	{
 		long result;
-		result = Bitboard.getPawnAttacks(side.flip(), square) & getBitboard(Piece.make(side, PieceType.PAWN)) & occ;
+		result = Attacks.getPawnAttacks(side.flip(), square.getBitboard())
+				& getBitboard(Piece.make(side, PieceType.PAWN)) & occ;
 		result |= Attacks.getKnightAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KNIGHT));
 		result |= Bitboard.getBishopAttacks(occ, square)
 				& ((getBitboard(Piece.make(side, PieceType.BISHOP)) | getBitboard(Piece.make(side, PieceType.QUEEN))));
@@ -1260,7 +1261,8 @@ public class Board implements Cloneable
 		switch (type)
 		{
 			case PAWN:
-				result = Bitboard.getPawnAttacks(side.flip(), square) & getBitboard(Piece.make(side, PieceType.PAWN));
+				result = Attacks.getPawnAttacks(side.flip(), square.getBitboard())
+						& getBitboard(Piece.make(side, PieceType.PAWN));
 				break;
 			case KNIGHT:
 				result = Attacks.getKnightAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KNIGHT));
@@ -1326,7 +1328,7 @@ public class Board implements Cloneable
 		switch (pt)
 		{
 			case PAWN:
-				return 0L != (to & Bitboard.getPawnAttacks(getSideToMove(), from));
+				return 0L != (to & Attacks.getPawnAttacks(getSideToMove(), from.getBitboard()));
 			case KNIGHT:
 				return 0L != (to & Attacks.getKnightAttacks(from, occ));
 			case BISHOP:
@@ -1465,10 +1467,10 @@ public class Board implements Cloneable
 		switch (movedPieceType)
 		{
 			case PAWN:
-				long pawnThreats = Bitboard.getPawnCaptures(side, from,
+				long pawnThreats = Attacks.getPawnCaptures(side, from.getBitboard(),
 						to.getBitboard() & (getBitboard(side.flip()) | getEnPassant().getBitboard()), getEnPassant())
 						& to.getBitboard();
-				pawnThreats |= Bitboard.getPawnMoves(side, from, occupied) & to.getBitboard();
+				pawnThreats |= Attacks.getPawnMoves(side, from.getBitboard(), occupied) & to.getBitboard();
 				return 0L != pawnThreats;
 			case KNIGHT:
 				return 0L != Attacks.getKnightAttacks(from, to.getBitboard());
@@ -1614,7 +1616,7 @@ public class Board implements Cloneable
 
 		long pawns = (getBitboard(Piece.make(other, PieceType.PAWN))) & ~moveTo & ~ep;
 
-		return pawns == 0L || (Bitboard.getPawnAttacks(side, kingSq) & pawns) == 0L;
+		return pawns == 0L || (Attacks.getPawnAttacks(side, kingSq.getBitboard()) & pawns) == 0L;
 	}
 
 	/**
@@ -1635,11 +1637,12 @@ public class Board implements Cloneable
 			case PAWN:
 				if (!move.getFrom().getFile().equals(move.getTo().getFile()))
 				{
-					attacks = Bitboard.getPawnCaptures(side, move.getFrom(), getBitboard(), getEnPassantTarget());
+					attacks = Attacks.getPawnCaptures(side, move.getFrom().getBitboard(), getBitboard(),
+							getEnPassantTarget());
 				}
 				else
 				{
-					attacks = Bitboard.getPawnMoves(side, move.getFrom(), getBitboard());
+					attacks = Attacks.getPawnMoves(side, move.getFrom().getBitboard(), getBitboard());
 				}
 				break;
 			case KNIGHT:
@@ -2498,7 +2501,8 @@ public class Board implements Cloneable
 
 	private boolean verifyNotPinnedPiece(Side side, Square enPassant, Square target)
 	{
-		long pawns = Bitboard.getPawnAttacks(side, enPassant) & getBitboard(Piece.make(side.flip(), PieceType.PAWN));
+		long pawns = Attacks.getPawnAttacks(side, enPassant.getBitboard())
+				& getBitboard(Piece.make(side.flip(), PieceType.PAWN));
 		return pawns != 0 && verifyAllPins(pawns, side, enPassant, target);
 	}
 

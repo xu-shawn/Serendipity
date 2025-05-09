@@ -92,18 +92,72 @@ public class Attacks
 	}
 
 	/**
-	 * Returns the bitboard representing the king movement attacks, computed
-	 * applying the provided mask. It could either refer to the squares attacked by
-	 * a king placed on the input square, or conversely the kings that can attack
-	 * the square.
+	 * Returns the bitboard representing the squares attacked by a pawn placed on
+	 * the input square for a given side.
 	 *
-	 * @param square the square for which to calculate the king attacks
-	 * @param mask   the mask to apply to the king attacks
-	 * @return the bitboard of king movement attacks
+	 * @param side   the side to move
+	 * @param square the square the pawn is placed
+	 * @return the bitboard of the squares attacked by the pawn
 	 */
-	public static long getKingAttacks(Square square, long mask)
+	public static long getPawnAttacks(Side side, long pawnBB)
 	{
-		return kingAttacks[square.ordinal()] & mask;
+		if (side.equals(Side.WHITE))
+		{
+			return shift(pawnBB, Direction.NORTHEAST) | shift(pawnBB, Direction.NORTHWEST);
+		}
+
+		else
+		{
+			return shift(pawnBB, Direction.SOUTHEAST) | shift(pawnBB, Direction.SOUTHWEST);
+		}
+	}
+
+	/**
+	 * Returns the bitboard representing the possible captures by a pawn placed on
+	 * the input square for a given side. The method expects a bitboard of possible
+	 * targets, the occupied squares, and the square for which en passant is
+	 * playable ({@link Square#NONE} if en passant can not be played).
+	 *
+	 * @param side      the side to move
+	 * @param square    the square the pawn is placed
+	 * @param occupied  a bitboard of possible targets
+	 * @param enPassant the square in which en passant capture is possible,
+	 *                  {@link Square#NONE} otherwise
+	 * @return the bitboard of the squares where the pawn can move to capturing a
+	 *         piece
+	 */
+	public static long getPawnCaptures(Side side, long pawnBB, long occupied, Square enPassant)
+	{
+		long pawnAttacks = getPawnAttacks(side, pawnBB);
+
+		if (!enPassant.equals(Square.NONE))
+		{
+			long ep = enPassant.getBitboard();
+			occupied |= side.equals(Side.WHITE) ? ep << 8L : ep >> 8L;
+		}
+
+		return pawnAttacks & occupied;
+	}
+
+	/**
+	 * Returns the bitboard representing the possible moves, excluding captures, by
+	 * a pawn placed on the input square for a given side. The method expects a
+	 * bitboard of occupied squares where the pawn can not move to.
+	 *
+	 * @param side     the side to move
+	 * @param square   the square the pawn is placed
+	 * @param occupied a bitboard of occupied squares
+	 * @return the bitboard of the squares where the pawn can move to
+	 */
+	public static long getPawnMoves(Side side, long pawnBB, long occupied)
+	{
+		Direction pushDirection = side.equals(Side.WHITE) ? Direction.NORTH : Direction.SOUTH;
+		long doublePushMask = side.equals(Side.WHITE) ? Bitboard.rankBB[3] : Bitboard.rankBB[4];
+
+		long pawnPushes = shift(pawnBB, pushDirection) & ~occupied;
+		long pawnDoublePushes = shift(pawnPushes, pushDirection) & doublePushMask & ~occupied;
+
+		return pawnPushes | pawnDoublePushes;
 	}
 
 	/**
@@ -119,5 +173,20 @@ public class Attacks
 	public static long getKnightAttacks(Square square, long mask)
 	{
 		return knightAttacks[square.ordinal()] & mask;
+	}
+
+	/**
+	 * Returns the bitboard representing the king movement attacks, computed
+	 * applying the provided mask. It could either refer to the squares attacked by
+	 * a king placed on the input square, or conversely the kings that can attack
+	 * the square.
+	 *
+	 * @param square the square for which to calculate the king attacks
+	 * @param mask   the mask to apply to the king attacks
+	 * @return the bitboard of king movement attacks
+	 */
+	public static long getKingAttacks(Square square, long mask)
+	{
+		return kingAttacks[square.ordinal()] & mask;
 	}
 }
