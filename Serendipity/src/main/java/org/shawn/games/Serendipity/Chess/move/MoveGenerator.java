@@ -174,7 +174,6 @@ public class MoveGenerator
 	 */
 	public static void generateKnightMoves(Board board, List<Move> moves)
 	{
-
 		generateKnightMoves(board, moves, ~board.getBitboard(board.getSideToMove()));
 	}
 

@@ -42,4 +42,15 @@ public class XorShiftRandom
 		seed ^= seed >>> 27;
 		return seed * 0x2545F4914F6CDD1DL;
 	}
+
+	/**
+	 * Returns the next sparse pseudorandom long value from this random number
+	 * generator's sequence.
+	 *
+	 * @return the next sparse pseudorandom long value
+	 */
+	public long nextSparseLong()
+	{
+		return nextLong() & nextLong() & nextLong();
+	}
 }

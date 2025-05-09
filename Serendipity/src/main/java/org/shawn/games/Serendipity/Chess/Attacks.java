@@ -1,18 +1,26 @@
 package org.shawn.games.Serendipity.Chess;
 
+import java.util.ArrayList;
+
+import org.shawn.games.Serendipity.Chess.util.XorShiftRandom;
+
 public class Attacks
 {
 	private final static long[] kingAttacks;
 	private final static long[] knightAttacks;
 	private final static long[] bishopMask;
+	private final static long[] bishopMagic;
 	private final static long[] rookMask;
+	private final static long[] rookMagic;
 
 	static
 	{
 		knightAttacks = new long[64];
 		kingAttacks = new long[64];
 		bishopMask = new long[64];
+		bishopMagic = new long[64];
 		rookMask = new long[64];
+		rookMagic = new long[64];
 
 		for (int sqIdx = 0; sqIdx < 64; sqIdx++)
 		{
@@ -141,11 +149,11 @@ public class Attacks
 	}
 
 	/**
-	 * Returns the bitboard representing the squares attacked by a pawn placed on
-	 * the input square for a given side.
+	 * Returns the bitboard representing the squares attacked by pawns placed on a
+	 * set of locations for a given side.
 	 *
 	 * @param side   the side to move
-	 * @param square the square the pawn is placed
+	 * @param pawnBB the bitboard of pawns
 	 * @return the bitboard of the squares attacked by the pawn
 	 */
 	public static long getPawnAttacks(Side side, long pawnBB)
@@ -201,10 +209,10 @@ public class Attacks
 	public static long getPawnMoves(Side side, long pawnBB, long occupied)
 	{
 		Direction pushDirection = side.equals(Side.WHITE) ? Direction.NORTH : Direction.SOUTH;
-		long doublePushMask = side.equals(Side.WHITE) ? Bitboard.rankBB[3] : Bitboard.rankBB[4];
+		final long doublePushMask = side.equals(Side.WHITE) ? Bitboard.rankBB[3] : Bitboard.rankBB[4];
 
-		long pawnPushes = shift(pawnBB, pushDirection) & ~occupied;
-		long pawnDoublePushes = shift(pawnPushes, pushDirection) & doublePushMask & ~occupied;
+		final long pawnPushes = shift(pawnBB, pushDirection) & ~occupied;
+		final long pawnDoublePushes = shift(pawnPushes, pushDirection) & doublePushMask & ~occupied;
 
 		return pawnPushes | pawnDoublePushes;
 	}
