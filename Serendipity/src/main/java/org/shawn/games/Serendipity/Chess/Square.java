@@ -433,6 +433,14 @@ public enum Square
 		return bitboard[this.ordinal()];
 	}
 
+	public static Square fromBitboard(long bitboard)
+	{
+		assert bitboard != 0;
+		assert Bitboard.hasOnly1Bit(bitboard);
+
+		return Square.values()[Bitboard.bitScanForward(bitboard)];
+	}
+
 	/**
 	 * Returns whether this is a light-square or not (i.e. a dark-square).
 	 *

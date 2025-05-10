@@ -55,7 +55,7 @@ public class MoveGenerator
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
-			long attacks = Bitboard.getPawnCaptures(side, sqSource, board.getBitboard(), board.getEnPassantTarget())
+			long attacks = Attacks.getPawnCaptures(side, sqSource.getBitboard(), board.getBitboard(), board.getEnPassantTarget())
 					& ~board.getBitboard(side);
 			while (attacks != 0L)
 			{
@@ -88,7 +88,7 @@ public class MoveGenerator
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
-			long attacks = Bitboard.getPawnMoves(side, sqSource, board.getBitboard());
+			long attacks = Attacks.getPawnMoves(side, sqSource.getBitboard(), board.getBitboard());
 			while (attacks != 0L)
 			{
 				int targetIndex = bitScanForward(attacks);
@@ -147,7 +147,7 @@ public class MoveGenerator
 			int knightIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(knightIndex);
-			long attacks = Bitboard.getKnightAttacks(sqSource, mask);
+			long attacks = Attacks.getKnightAttacks(sqSource, mask);
 
 			while (attacks != 0L)
 			{
@@ -174,7 +174,6 @@ public class MoveGenerator
 	 */
 	public static void generateKnightMoves(Board board, List<Move> moves)
 	{
-
 		generateKnightMoves(board, moves, ~board.getBitboard(board.getSideToMove()));
 	}
 
@@ -201,7 +200,7 @@ public class MoveGenerator
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
-			long attacks = Bitboard.getBishopAttacks(board.getBitboard(), sqSource) & mask;
+			long attacks = Attacks.getBishopAttacks(board.getBitboard(), sqSource) & mask;
 			while (attacks != 0L)
 			{
 				int attackIndex = bitScanForward(attacks);
@@ -253,7 +252,7 @@ public class MoveGenerator
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
-			long attacks = Bitboard.getRookAttacks(board.getBitboard(), sqSource) & mask;
+			long attacks = Attacks.getRookAttacks(board.getBitboard(), sqSource) & mask;
 			while (attacks != 0L)
 			{
 				int attackIndex = bitScanForward(attacks);
@@ -306,7 +305,7 @@ public class MoveGenerator
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
-			long attacks = Bitboard.getQueenAttacks(board.getBitboard(), sqSource) & mask;
+			long attacks = Attacks.getQueenAttacks(board.getBitboard(), sqSource) & mask;
 
 			while (attacks != 0L)
 			{
@@ -360,7 +359,7 @@ public class MoveGenerator
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
-			long attacks = Bitboard.getKingAttacks(sqSource, mask);
+			long attacks = Attacks.getKingAttacks(sqSource, mask);
 
 			while (attacks != 0L)
 			{
