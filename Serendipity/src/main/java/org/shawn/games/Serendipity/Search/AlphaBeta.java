@@ -606,7 +606,11 @@ public class AlphaBeta implements Runnable
 				{
 					return singularValue;
 				}
+			}
 
+			if (extension == 0 && depth <= 4 && givesCheck && board.staticExchangeEvaluation(move, 0))
+			{
+				extension = 1;
 			}
 
 			newdepth += extension;
