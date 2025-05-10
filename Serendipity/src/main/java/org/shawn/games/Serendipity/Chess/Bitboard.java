@@ -16,10 +16,6 @@
 
 package org.shawn.games.Serendipity.Chess;
 
-import static org.shawn.games.Serendipity.Chess.DiagonalA1H8.*;
-import static org.shawn.games.Serendipity.Chess.DiagonalH1A8.*;
-import static org.shawn.games.Serendipity.Chess.Square.*;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -72,132 +68,6 @@ public class Bitboard
 	 */
 	final static long[][] bbTable = new long[64][64];
 
-	/**
-	 * Table of <i>right-pointing</i> diagonals accessed by square index. For
-	 * example, the diagonal looked up by index 1 is the diagonal {@code B1-H7}, the
-	 * diagonal the square {@code B1} (index 1) belongs to.
-	 */
-	static final DiagonalA1H8[] squareToDiagonalA1H8 = { H8_A1, B1_H7, C1_H6, D1_H5, E1_H4, F1_H3, G1_H2, H1_H1, G8_A2,
-			H8_A1, B1_H7, C1_H6, D1_H5, E1_H4, F1_H3, G1_H2, F8_A3, G8_A2, H8_A1, B1_H7, C1_H6, D1_H5, E1_H4, F1_H3,
-			E8_A4, F8_A3, G8_A2, H8_A1, B1_H7, C1_H6, D1_H5, E1_H4, D8_A5, E8_A4, F8_A3, G8_A2, H8_A1, B1_H7, C1_H6,
-			D1_H5, C8_A6, D8_A5, E8_A4, F8_A3, G8_A2, H8_A1, B1_H7, C1_H6, B8_A7, C8_A6, D8_A5, E8_A4, F8_A3, G8_A2,
-			H8_A1, B1_H7, A8_A8, B8_A7, C8_A6, D8_A5, E8_A4, F8_A3, G8_A2, H8_A1 };
-	/**
-	 * Table of <i>left-pointing</i> diagonals accessed by square index. For
-	 * example, the diagonal looked up by index 1 is the diagonal {@code B1-A2}, the
-	 * diagonal the square {@code B1} (index 1) belongs to.
-	 */
-	static final DiagonalH1A8[] squareToDiagonalH1A8 = { A1_A1, B1_A2, C1_A3, D1_A4, E1_A5, F1_A6, G1_A7, H1_A8, B1_A2,
-			C1_A3, D1_A4, E1_A5, F1_A6, G1_A7, H1_A8, B8_H2, C1_A3, D1_A4, E1_A5, F1_A6, G1_A7, H1_A8, B8_H2, C8_H3,
-			D1_A4, E1_A5, F1_A6, G1_A7, H1_A8, B8_H2, C8_H3, D8_H4, E1_A5, F1_A6, G1_A7, H1_A8, B8_H2, C8_H3, D8_H4,
-			E8_H5, F1_A6, G1_A7, H1_A8, B8_H2, C8_H3, D8_H4, E8_H5, F8_H6, G1_A7, H1_A8, B8_H2, C8_H3, D8_H4, E8_H5,
-			F8_H6, G8_H7, H1_A8, B8_H2, C8_H3, D8_H4, E8_H5, F8_H6, G8_H7, H8_H8 };
-	/**
-	 * The bitboards representing the <i>right-pointing</i> diagonals on a
-	 * chessboard. For example, the bitboard at index 0 identifies the
-	 * <i>right-pointing</i> diagonal at position 0, as defined by
-	 * {@link DiagonalA1H8}.
-	 */
-	final static long[] diagonalA1H8BB = { sq2Bb(A8), sq2Bb(B8) | sq2Bb(A7), sq2Bb(C8) | sq2Bb(B7) | sq2Bb(A6),
-			sq2Bb(D8) | sq2Bb(C7) | sq2Bb(B6) | sq2Bb(A5), sq2Bb(E8) | sq2Bb(D7) | sq2Bb(C6) | sq2Bb(B5) | sq2Bb(A4),
-			sq2Bb(F8) | sq2Bb(E7) | sq2Bb(D6) | sq2Bb(C5) | sq2Bb(B4) | sq2Bb(A3),
-			sq2Bb(G8) | sq2Bb(F7) | sq2Bb(E6) | sq2Bb(D5) | sq2Bb(C4) | sq2Bb(B3) | sq2Bb(A2),
-			sq2Bb(H8) | sq2Bb(G7) | sq2Bb(F6) | sq2Bb(E5) | sq2Bb(D4) | sq2Bb(C3) | sq2Bb(B2) | sq2Bb(A1),
-			sq2Bb(B1) | sq2Bb(C2) | sq2Bb(D3) | sq2Bb(E4) | sq2Bb(F5) | sq2Bb(G6) | sq2Bb(H7),
-			sq2Bb(C1) | sq2Bb(D2) | sq2Bb(E3) | sq2Bb(F4) | sq2Bb(G5) | sq2Bb(H6),
-			sq2Bb(D1) | sq2Bb(E2) | sq2Bb(F3) | sq2Bb(G4) | sq2Bb(H5), sq2Bb(E1) | sq2Bb(F2) | sq2Bb(G3) | sq2Bb(H4),
-			sq2Bb(F1) | sq2Bb(G2) | sq2Bb(H3), sq2Bb(G1) | sq2Bb(H2), sq2Bb(H1) };
-	/**
-	 * The bitboards representing the <i>left-pointing</i> diagonals on a
-	 * chessboard. For example, the bitboard at index 0 identifies the
-	 * <i>left-pointing</i> diagonal at position 0, as defined by
-	 * {@link DiagonalH1A8}.
-	 */
-	final static long[] diagonalH1A8BB = { sq2Bb(A1), sq2Bb(B1) | sq2Bb(A2), sq2Bb(C1) | sq2Bb(B2) | sq2Bb(A3),
-			sq2Bb(D1) | sq2Bb(C2) | sq2Bb(B3) | sq2Bb(A4), sq2Bb(E1) | sq2Bb(D2) | sq2Bb(C3) | sq2Bb(B4) | sq2Bb(A5),
-			sq2Bb(F1) | sq2Bb(E2) | sq2Bb(D3) | sq2Bb(C4) | sq2Bb(B5) | sq2Bb(A6),
-			sq2Bb(G1) | sq2Bb(F2) | sq2Bb(E3) | sq2Bb(D4) | sq2Bb(C5) | sq2Bb(B6) | sq2Bb(A7),
-			sq2Bb(H1) | sq2Bb(G2) | sq2Bb(F3) | sq2Bb(E4) | sq2Bb(D5) | sq2Bb(C6) | sq2Bb(B7) | sq2Bb(A8),
-			sq2Bb(B8) | sq2Bb(C7) | sq2Bb(D6) | sq2Bb(E5) | sq2Bb(F4) | sq2Bb(G3) | sq2Bb(H2),
-			sq2Bb(C8) | sq2Bb(D7) | sq2Bb(E6) | sq2Bb(F5) | sq2Bb(G4) | sq2Bb(H3),
-			sq2Bb(D8) | sq2Bb(E7) | sq2Bb(F6) | sq2Bb(G5) | sq2Bb(H4), sq2Bb(E8) | sq2Bb(F7) | sq2Bb(G6) | sq2Bb(H5),
-			sq2Bb(F8) | sq2Bb(G7) | sq2Bb(H6), sq2Bb(G8) | sq2Bb(H7), sq2Bb(H8) };
-
-	/**
-	 * The bitboards representing the squares a piece that moves horizontally can
-	 * attack from any given square on the board. For example, bitboard at index 0
-	 * identifies the squares on the same rank attacked from square {@code A1}
-	 * (index 0), that is, all squares of the 1st rank except the square {@code A1}
-	 * itself (i.e. {@code B1}, {@code C1}, etc.).
-	 * <p>
-	 * Contextually, the bitboards can also represent the squares from which a piece
-	 * on the same rank can attack the square.
-	 */
-	final static long[] rankAttacks = { sq2RA(A1), sq2RA(B1), sq2RA(C1), sq2RA(D1), sq2RA(E1), sq2RA(F1), sq2RA(G1),
-			sq2RA(H1), sq2RA(A2), sq2RA(B2), sq2RA(C2), sq2RA(D2), sq2RA(E2), sq2RA(F2), sq2RA(G2), sq2RA(H2),
-			sq2RA(A3), sq2RA(B3), sq2RA(C3), sq2RA(D3), sq2RA(E3), sq2RA(F3), sq2RA(G3), sq2RA(H3), sq2RA(A4),
-			sq2RA(B4), sq2RA(C4), sq2RA(D4), sq2RA(E4), sq2RA(F4), sq2RA(G4), sq2RA(H4), sq2RA(A5), sq2RA(B5),
-			sq2RA(C5), sq2RA(D5), sq2RA(E5), sq2RA(F5), sq2RA(G5), sq2RA(H5), sq2RA(A6), sq2RA(B6), sq2RA(C6),
-			sq2RA(D6), sq2RA(E6), sq2RA(F6), sq2RA(G6), sq2RA(H6), sq2RA(A7), sq2RA(B7), sq2RA(C7), sq2RA(D7),
-			sq2RA(E7), sq2RA(F7), sq2RA(G7), sq2RA(H7), sq2RA(A8), sq2RA(B8), sq2RA(C8), sq2RA(D8), sq2RA(E8),
-			sq2RA(F8), sq2RA(G8), sq2RA(H8) };
-	/**
-	 * The bitboards representing the squares a piece that moves vertically can
-	 * attack from any given square on the board. For example, bitboard at index 0
-	 * identifies the squares on the same file attacked from square {@code A1}
-	 * (index 0), that is, all squares of the 1st file except the square {@code A1}
-	 * itself (i.e. {@code A2}, {@code A3}, etc.).
-	 * <p>
-	 * Contextually, the bitboards can also represent the squares from which a piece
-	 * on the same file can attack the square.
-	 */
-	final static long[] fileAttacks = { sq2FA(A1), sq2FA(B1), sq2FA(C1), sq2FA(D1), sq2FA(E1), sq2FA(F1), sq2FA(G1),
-			sq2FA(H1), sq2FA(A2), sq2FA(B2), sq2FA(C2), sq2FA(D2), sq2FA(E2), sq2FA(F2), sq2FA(G2), sq2FA(H2),
-			sq2FA(A3), sq2FA(B3), sq2FA(C3), sq2FA(D3), sq2FA(E3), sq2FA(F3), sq2FA(G3), sq2FA(H3), sq2FA(A4),
-			sq2FA(B4), sq2FA(C4), sq2FA(D4), sq2FA(E4), sq2FA(F4), sq2FA(G4), sq2FA(H4), sq2FA(A5), sq2FA(B5),
-			sq2FA(C5), sq2FA(D5), sq2FA(E5), sq2FA(F5), sq2FA(G5), sq2FA(H5), sq2FA(A6), sq2FA(B6), sq2FA(C6),
-			sq2FA(D6), sq2FA(E6), sq2FA(F6), sq2FA(G6), sq2FA(H6), sq2FA(A7), sq2FA(B7), sq2FA(C7), sq2FA(D7),
-			sq2FA(E7), sq2FA(F7), sq2FA(G7), sq2FA(H7), sq2FA(A8), sq2FA(B8), sq2FA(C8), sq2FA(D8), sq2FA(E8),
-			sq2FA(F8), sq2FA(G8), sq2FA(H8) };
-	/**
-	 * The bitboards representing the squares a piece that moves diagonally can
-	 * attack on the same <i>right-pointing</i> diagonal from any given square on
-	 * the board. For example, bitboard at index 1 identifies the squares on the
-	 * same diagonal attacked from square {@code B1} (index 1), that is, all squares
-	 * of the B1-H7 diagonal (as defined by {@link DiagonalA1H8}) except the square
-	 * {@code B1} itself (i.e. {@code B2}, {@code C3}, etc.).
-	 * <p>
-	 * Contextually, the bitboards can also represent the squares from which a piece
-	 * on the same <i>right-pointing</i> diagonal can attack the square.
-	 */
-	final static long[] diagA1H8Attacks = { sq2A1(A1), sq2A1(B1), sq2A1(C1), sq2A1(D1), sq2A1(E1), sq2A1(F1), sq2A1(G1),
-			sq2A1(H1), sq2A1(A2), sq2A1(B2), sq2A1(C2), sq2A1(D2), sq2A1(E2), sq2A1(F2), sq2A1(G2), sq2A1(H2),
-			sq2A1(A3), sq2A1(B3), sq2A1(C3), sq2A1(D3), sq2A1(E3), sq2A1(F3), sq2A1(G3), sq2A1(H3), sq2A1(A4),
-			sq2A1(B4), sq2A1(C4), sq2A1(D4), sq2A1(E4), sq2A1(F4), sq2A1(G4), sq2A1(H4), sq2A1(A5), sq2A1(B5),
-			sq2A1(C5), sq2A1(D5), sq2A1(E5), sq2A1(F5), sq2A1(G5), sq2A1(H5), sq2A1(A6), sq2A1(B6), sq2A1(C6),
-			sq2A1(D6), sq2A1(E6), sq2A1(F6), sq2A1(G6), sq2A1(H6), sq2A1(A7), sq2A1(B7), sq2A1(C7), sq2A1(D7),
-			sq2A1(E7), sq2A1(F7), sq2A1(G7), sq2A1(H7), sq2A1(A8), sq2A1(B8), sq2A1(C8), sq2A1(D8), sq2A1(E8),
-			sq2A1(F8), sq2A1(G8), sq2A1(H8) };
-	/**
-	 * The bitboards representing the squares a piece that moves diagonally can
-	 * attack on the same <i>left-pointing</i> diagonal from any given square on the
-	 * board. For example, bitboard at index 1 identifies the squares on the same
-	 * diagonal attacked from square {@code B1} (index 1), that is, all squares of
-	 * the B1-A2 diagonal (as defined by {@link DiagonalH1A8}) except the square
-	 * {@code B1} itself (i.e. only square {@code A2}).
-	 * <p>
-	 * Contextually, the bitboards can also represent the squares from which a piece
-	 * on the same <i>left-pointing</i> diagonal can attack the square.
-	 */
-	final static long[] diagH1A8Attacks = { sq2H1(A1), sq2H1(B1), sq2H1(C1), sq2H1(D1), sq2H1(E1), sq2H1(F1), sq2H1(G1),
-			sq2H1(H1), sq2H1(A2), sq2H1(B2), sq2H1(C2), sq2H1(D2), sq2H1(E2), sq2H1(F2), sq2H1(G2), sq2H1(H2),
-			sq2H1(A3), sq2H1(B3), sq2H1(C3), sq2H1(D3), sq2H1(E3), sq2H1(F3), sq2H1(G3), sq2H1(H3), sq2H1(A4),
-			sq2H1(B4), sq2H1(C4), sq2H1(D4), sq2H1(E4), sq2H1(F4), sq2H1(G4), sq2H1(H4), sq2H1(A5), sq2H1(B5),
-			sq2H1(C5), sq2H1(D5), sq2H1(E5), sq2H1(F5), sq2H1(G5), sq2H1(H5), sq2H1(A6), sq2H1(B6), sq2H1(C6),
-			sq2H1(D6), sq2H1(E6), sq2H1(F6), sq2H1(G6), sq2H1(H6), sq2H1(A7), sq2H1(B7), sq2H1(C7), sq2H1(D7),
-			sq2H1(E7), sq2H1(F7), sq2H1(G7), sq2H1(H7), sq2H1(A8), sq2H1(B8), sq2H1(C8), sq2H1(D8), sq2H1(E8),
-			sq2H1(F8), sq2H1(G8), sq2H1(H8) };
-
 	static
 	{
 		for (int x = 0; x < 64; x++)
@@ -218,66 +88,6 @@ public class Bitboard
 	static long sq2Bb(Square sq)
 	{
 		return sq.getBitboard();
-	}
-
-	/**
-	 * Returns the bitboard representing the squares on the same rank attacked from
-	 * the square provided in input. For example, the bitboard of square {@code A1}
-	 * includes all squares of the 1st rank except the square {@code A1} itself
-	 * (i.e. {@code B1}, {@code C1}, etc.).
-	 *
-	 * @param x the square for which the bitboard must be returned
-	 * @return the bitboard representation of the attacked squares on the same rank
-	 */
-	static long sq2RA(Square x)
-	{
-		return (rankBB[x.getRank().ordinal()] ^ sq2Bb(x));
-	}
-
-	/**
-	 * Returns the bitboard representing the squares on the same file attacked from
-	 * the square provided in input. For example, the bitboard of square {@code A1}
-	 * includes all squares of the 1st file except the square {@code A1} itself
-	 * (i.e. {@code A2}, {@code A3}, etc.).
-	 *
-	 * @param x the square for which the bitboard must be returned
-	 * @return the bitboard representation of the attacked squares on the same file
-	 */
-	static long sq2FA(Square x)
-	{
-		return (fileBB[x.getFile().ordinal()] ^ x.getBitboard());
-	}
-
-	/**
-	 * Returns the bitboard representing the squares on the same
-	 * <i>right-pointing</i> diagonal attacked from the square provided in input.
-	 * For example, the bitboard of square {@code B1} includes all squares of the
-	 * B1-H7 diagonal (as defined by {@link DiagonalA1H8}) except the square
-	 * {@code B1} itself (i.e. {@code B2}, {@code C3}, etc.).
-	 *
-	 * @param x the square for which the bitboard must be returned
-	 * @return the bitboard representation of the attacked squares on the same
-	 *         <i>right-pointing</i> diagonal
-	 */
-	static long sq2A1(Square x)
-	{
-		return (diagonalA1H8BB[squareToDiagonalA1H8[x.ordinal()].ordinal()] ^ sq2Bb(x));
-	}
-
-	/**
-	 * Returns the bitboard representing the squares on the same
-	 * <i>left-pointing</i> diagonal attacked from the square provided in input. For
-	 * example, the bitboard of square {@code B1} includes all squares of the B1-A2
-	 * diagonal (as defined by {@link DiagonalH1A8}) except the square {@code B1}
-	 * itself (i.e. only the square {@code A2}).
-	 *
-	 * @param x the square for which the bitboard must be returned
-	 * @return the bitboard representation of the attacked squares on the same
-	 *         <i>left-pointing</i> diagonal
-	 */
-	static long sq2H1(Square x)
-	{
-		return (diagonalH1A8BB[squareToDiagonalH1A8[x.ordinal()].ordinal()] ^ sq2Bb(x));
 	}
 
 	/**
@@ -356,68 +166,6 @@ public class Bitboard
 	public static long getBbtable(Square sq)
 	{
 		return 1L << sq.ordinal();
-	}
-
-	/**
-	 * Returns the bitboard representing the bishop movement attacks, computed
-	 * applying the provided mask. It could either refer to the squares attacked by
-	 * a bishop placed on the input square, or conversely the bishops that can
-	 * attack the square.
-	 *
-	 * @param square the square for which to calculate the bishop attacks
-	 * @param mask   the mask to apply to the bishop attacks
-	 * @return the bitboard of bishop movement attacks
-	 */
-	public static long getBishopAttacks(long mask, Square square)
-	{
-		return getSliderAttacks(diagA1H8Attacks[square.ordinal()], mask, square.ordinal())
-				| getSliderAttacks(diagH1A8Attacks[square.ordinal()], mask, square.ordinal());
-	}
-
-	/**
-	 * Returns the bitboard representing the rook movement attacks, computed
-	 * applying the provided mask. It could either refer to the squares attacked by
-	 * a rook placed on the input square, or conversely the rooks that can attack
-	 * the square.
-	 *
-	 * @param square the square for which to calculate the rook attacks
-	 * @param mask   the mask to apply to the rook attacks
-	 * @return the bitboard of rook movement attacks
-	 */
-	public static long getRookAttacks(long mask, Square square)
-	{
-		return getSliderAttacks(fileAttacks[square.ordinal()], mask, square.ordinal())
-				| getSliderAttacks(rankAttacks[square.ordinal()], mask, square.ordinal());
-	}
-
-	private static long getSliderAttacks(long attacks, long mask, int index)
-	{
-		long occ = mask & attacks;
-		if (occ == 0L)
-		{
-			return attacks;
-		}
-		long m = (1L << index) - 1L;
-		long lowerMask = occ & m;
-		long upperMask = occ & ~m;
-		int minor = lowerMask == 0L ? 0 : bitScanReverse(lowerMask);
-		int major = upperMask == 0L ? 63 : bitScanForward(upperMask);
-		return bitsBetween(attacks, minor, major);
-	}
-
-	/**
-	 * Returns the bitboard representing the queen movement attacks, computed
-	 * applying the provided mask. It could either refer to the squares attacked by
-	 * a queen placed on the input square, or conversely the queens that can attack
-	 * the square.
-	 *
-	 * @param square the square for which to calculate the queen attacks
-	 * @param mask   the mask to apply to the queen attacks
-	 * @return the bitboard of queen movement attacks
-	 */
-	public static long getQueenAttacks(long mask, Square square)
-	{
-		return getRookAttacks(mask, square) | getBishopAttacks(mask, square);
 	}
 
 	/**
