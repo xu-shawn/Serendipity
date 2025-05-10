@@ -1218,9 +1218,9 @@ public class Board implements Cloneable
 		result = Attacks.getPawnAttacks(side.flip(), square.getBitboard())
 				& getBitboard(Piece.make(side, PieceType.PAWN)) & occ;
 		result |= Attacks.getKnightAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KNIGHT));
-		result |= Bitboard.getBishopAttacks(occ, square)
+		result |= Attacks.getBishopAttacks(occ, square)
 				& ((getBitboard(Piece.make(side, PieceType.BISHOP)) | getBitboard(Piece.make(side, PieceType.QUEEN))));
-		result |= Bitboard.getRookAttacks(occ, square)
+		result |= Attacks.getRookAttacks(occ, square)
 				& ((getBitboard(Piece.make(side, PieceType.ROOK)) | getBitboard(Piece.make(side, PieceType.QUEEN))));
 		result |= Attacks.getKingAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KING));
 		return result;
@@ -1268,13 +1268,13 @@ public class Board implements Cloneable
 				result = Attacks.getKnightAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KNIGHT));
 				break;
 			case BISHOP:
-				result = Bitboard.getBishopAttacks(occ, square) & getBitboard(Piece.make(side, PieceType.BISHOP));
+				result = Attacks.getBishopAttacks(occ, square) & getBitboard(Piece.make(side, PieceType.BISHOP));
 				break;
 			case ROOK:
-				result = Bitboard.getRookAttacks(occ, square) & getBitboard(Piece.make(side, PieceType.ROOK));
+				result = Attacks.getRookAttacks(occ, square) & getBitboard(Piece.make(side, PieceType.ROOK));
 				break;
 			case QUEEN:
-				result = Bitboard.getQueenAttacks(occ, square) & getBitboard(Piece.make(side, PieceType.QUEEN));
+				result = Attacks.getQueenAttacks(occ, square) & getBitboard(Piece.make(side, PieceType.QUEEN));
 				break;
 			case KING:
 				result |= Attacks.getKingAttacks(square, occ) & getBitboard(Piece.make(side, PieceType.KING));
@@ -1332,11 +1332,11 @@ public class Board implements Cloneable
 			case KNIGHT:
 				return 0L != (to & Attacks.getKnightAttacks(from, occ));
 			case BISHOP:
-				return 0L != (to & Bitboard.getBishopAttacks(occ, from));
+				return 0L != (to & Attacks.getBishopAttacks(occ, from));
 			case ROOK:
-				return 0L != (to & Bitboard.getRookAttacks(occ, from));
+				return 0L != (to & Attacks.getRookAttacks(occ, from));
 			case QUEEN:
-				return 0L != (to & Bitboard.getQueenAttacks(occ, from));
+				return 0L != (to & Attacks.getQueenAttacks(occ, from));
 			default:
 				return false;
 		}
@@ -1362,8 +1362,8 @@ public class Board implements Cloneable
 		Square kingSquare = Square.squareAt(Bitboard.bitScanForward(king));
 
 		long newOcc = (occ ^ move.getFrom().getBitboard()) | move.getTo().getBitboard();
-		long newBishopAttacks = Bitboard.getBishopAttacks(newOcc, kingSquare);
-		long newRookAttacks = Bitboard.getRookAttacks(newOcc, kingSquare);
+		long newBishopAttacks = Attacks.getBishopAttacks(newOcc, kingSquare);
+		long newRookAttacks = Attacks.getRookAttacks(newOcc, kingSquare);
 
 		long bishops = getBitboard(Piece.make(getSideToMove(), PieceType.BISHOP));
 		long rooks = getBitboard(Piece.make(getSideToMove(), PieceType.ROOK));
@@ -1475,11 +1475,11 @@ public class Board implements Cloneable
 			case KNIGHT:
 				return 0L != Attacks.getKnightAttacks(from, to.getBitboard());
 			case BISHOP:
-				return 0L != (Bitboard.getBishopAttacks(occupied, from) & to.getBitboard());
+				return 0L != (Attacks.getBishopAttacks(occupied, from) & to.getBitboard());
 			case ROOK:
-				return 0L != (Bitboard.getRookAttacks(occupied, from) & to.getBitboard());
+				return 0L != (Attacks.getRookAttacks(occupied, from) & to.getBitboard());
 			case QUEEN:
-				return 0L != (Bitboard.getQueenAttacks(occupied, from) & to.getBitboard());
+				return 0L != (Attacks.getQueenAttacks(occupied, from) & to.getBitboard());
 			case KING:
 				return 0L != Attacks.getKingAttacks(from, to.getBitboard());
 			default:
@@ -1594,7 +1594,7 @@ public class Board implements Cloneable
 		long bishopAndQueens = ((getBitboard(Piece.make(other, PieceType.BISHOP))
 				| getBitboard(Piece.make(other, PieceType.QUEEN)))) & ~moveTo;
 
-		if (bishopAndQueens != 0L && (Bitboard.getBishopAttacks(allPieces, kingSq) & bishopAndQueens) != 0L)
+		if (bishopAndQueens != 0L && (Attacks.getBishopAttacks(allPieces, kingSq) & bishopAndQueens) != 0L)
 		{
 			return false;
 		}
@@ -1602,7 +1602,7 @@ public class Board implements Cloneable
 		long rookAndQueens = ((getBitboard(Piece.make(other, PieceType.ROOK))
 				| getBitboard(Piece.make(other, PieceType.QUEEN)))) & ~moveTo;
 
-		if (rookAndQueens != 0L && (Bitboard.getRookAttacks(allPieces, kingSq) & rookAndQueens) != 0L)
+		if (rookAndQueens != 0L && (Attacks.getRookAttacks(allPieces, kingSq) & rookAndQueens) != 0L)
 		{
 			return false;
 		}
@@ -1649,13 +1649,13 @@ public class Board implements Cloneable
 				attacks = Attacks.getKnightAttacks(move.getFrom(), ~getBitboard(side));
 				break;
 			case BISHOP:
-				attacks = Bitboard.getBishopAttacks(getBitboard(), move.getFrom());
+				attacks = Attacks.getBishopAttacks(getBitboard(), move.getFrom());
 				break;
 			case ROOK:
-				attacks = Bitboard.getRookAttacks(getBitboard(), move.getFrom());
+				attacks = Attacks.getRookAttacks(getBitboard(), move.getFrom());
 				break;
 			case QUEEN:
-				attacks = Bitboard.getQueenAttacks(getBitboard(), move.getFrom());
+				attacks = Attacks.getQueenAttacks(getBitboard(), move.getFrom());
 				break;
 			case KING:
 				attacks = Attacks.getKingAttacks(move.getFrom(), ~getBitboard(side));
@@ -2426,11 +2426,11 @@ public class Board implements Cloneable
 			// A diagonal move may reveal bishop or queen attackers
 			if (nextVictim.equals(PieceType.PAWN) || nextVictim.equals(PieceType.BISHOP)
 					|| nextVictim.equals(PieceType.QUEEN))
-				attackers |= Bitboard.getBishopAttacks(occupied, to) & bishops;
+				attackers |= Attacks.getBishopAttacks(occupied, to) & bishops;
 
 			// A vertical or horizontal move may reveal rook or queen attackers
 			if (nextVictim.equals(PieceType.ROOK) || nextVictim.equals(PieceType.QUEEN))
-				attackers |= Bitboard.getRookAttacks(occupied, to) & rooks;
+				attackers |= Attacks.getRookAttacks(occupied, to) & rooks;
 
 			// Make sure we did not add any already used attacks
 			attackers &= occupied;

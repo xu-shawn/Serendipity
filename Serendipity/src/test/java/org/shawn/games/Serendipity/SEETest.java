@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import org.shawn.games.Serendipity.Chess.Attacks;
 import org.shawn.games.Serendipity.Chess.Bitboard;
 import org.shawn.games.Serendipity.Chess.Board;
 import org.shawn.games.Serendipity.Chess.Piece;
@@ -235,11 +236,11 @@ public class SEETest
 				// A diagonal move may reveal bishop or queen attackers
 				if (nextVictim.equals(PieceType.PAWN) || nextVictim.equals(PieceType.BISHOP)
 						|| nextVictim.equals(PieceType.QUEEN))
-					attackers |= Bitboard.getBishopAttacks(occupied, to) & bishops;
+					attackers |= Attacks.getBishopAttacks(occupied, to) & bishops;
 
 				// A vertical or horizontal move may reveal rook or queen attackers
 				if (nextVictim.equals(PieceType.ROOK) || nextVictim.equals(PieceType.QUEEN))
-					attackers |= Bitboard.getRookAttacks(occupied, to) & rooks;
+					attackers |= Attacks.getRookAttacks(occupied, to) & rooks;
 
 				// Make sure we did not add any already used attacks
 				attackers &= occupied;
