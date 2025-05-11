@@ -2,6 +2,10 @@ package org.shawn.games.Serendipity.Chess;
 
 public class Attacks
 {
+	private Attacks()
+	{
+	}
+
 	private static final long[] kingAttacks;
 	private static final long[] knightAttacks;
 	private static final long[] bishopMask;

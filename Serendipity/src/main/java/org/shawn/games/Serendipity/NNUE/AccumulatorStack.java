@@ -193,7 +193,6 @@ public class AccumulatorStack
 				}
 
 				this.addSub(prev, NNUE.getIndex(to, moved, this.color), NNUE.getIndex(from, moved, this.color));
-
 			}
 
 			else
