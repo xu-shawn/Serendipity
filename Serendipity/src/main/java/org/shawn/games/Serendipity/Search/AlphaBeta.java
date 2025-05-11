@@ -643,6 +643,11 @@ public class AlphaBeta implements Runnable
 				r += cutNode ? 1 : 0;
 
 				int d = Math.min(newdepth, newdepth - r);
+				
+				if (isPV && d <= 0)
+				{
+					d = 1;
+				}
 
 				thisMoveEval = -mainSearch(board, d, -(alpha + 1), -alpha, ply + 1, true);
 
