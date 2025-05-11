@@ -29,22 +29,22 @@ public class NNUE
 	private static final int COLOR_STRIDE = 64 * 6;
 	private static final int PIECE_STRIDE = 64;
 
-	static final int HIDDEN_SIZE = 1536;
+	static final int HIDDEN_SIZE = 1024;
 	static final int FEATURE_SIZE = 768;
-	private static final int OUTPUT_BUCKETS = 8;
+	private static final int OUTPUT_BUCKETS = 1;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
-	private static final int INPUT_BUCKET_SIZE = 7;
+	private static final int INPUT_BUCKET_SIZE = 8;
 	// @formatter:off
 	private static final int[] INPUT_BUCKETS = new int[]
 	{
-			0, 0, 1, 1, 2, 2, 3, 3,
-			4, 4, 4, 4, 5, 5, 5, 5,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
-			6, 6, 6, 6, 6, 6, 6, 6,
+			0, 1, 2, 3, 3, 2, 1, 0,
+            4, 4, 5, 5, 5, 5, 4, 4,
+            6, 6, 6, 6, 6, 6, 6, 6,
+            6, 6, 6, 6, 6, 6, 6, 6,
+            6, 6, 6, 6, 6, 6, 6, 6,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
 	};
 	// @formatter:on
 

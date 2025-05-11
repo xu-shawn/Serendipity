@@ -145,8 +145,6 @@ public class AlphaBeta implements Runnable
 
 	private int quiesce(Board board, int alpha, int beta, int ply) throws TimeOutException
 	{
-		this.threadData.nodes.incrementAndGet();
-
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
 		SearchStack.SearchState sse = ss.get(ply);
@@ -270,6 +268,7 @@ public class AlphaBeta implements Runnable
 
 			accumulators.push(board, move);
 			board.doMove(move);
+			this.threadData.nodes.incrementAndGet();
 			sse.move = move;
 			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
 
@@ -312,7 +311,6 @@ public class AlphaBeta implements Runnable
 	private int mainSearch(Board board, int depth, int alpha, int beta, int ply, boolean cutNode)
 			throws TimeOutException
 	{
-		this.threadData.nodes.incrementAndGet();
 		this.ss.get(ply + 2).killer = null;
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
@@ -363,7 +361,6 @@ public class AlphaBeta implements Runnable
 
 		if (depth <= 0 || ply >= MAX_PLY)
 		{
-			this.threadData.nodes.decrementAndGet();
 			return quiesce(board, alpha, beta, ply);
 		}
 
@@ -480,6 +477,7 @@ public class AlphaBeta implements Runnable
 			int r = depth / 3 + 4 + Math.min((eval - beta) / 200, 3);
 
 			board.doNullMove();
+			this.threadData.nodes.incrementAndGet();
 			sse.move = Constants.emptyMove;
 			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
 			int nullEval = -mainSearch(board, depth - r, -beta, -beta + 1, ply + 1, !cutNode);
@@ -629,6 +627,7 @@ public class AlphaBeta implements Runnable
 			}
 
 			accumulators.push(board, move);
+			this.threadData.nodes.incrementAndGet();
 			board.doMove(move);
 			sse.move = move;
 			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
