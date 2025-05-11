@@ -25,7 +25,7 @@ public class InferenceChooser
 {
 	public static Inference chooseInference()
 	{
-		if (ShortVector.SPECIES_PREFERRED.vectorBitSize() >= 256)
+		if (ShortVector.SPECIES_PREFERRED.vectorBitSize() >= 0)
 		{
 			return new SIMDInference();
 		}
