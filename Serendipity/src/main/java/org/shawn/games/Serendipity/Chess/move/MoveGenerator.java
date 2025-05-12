@@ -55,24 +55,15 @@ public class MoveGenerator
 		final long promotionRank = side.equals(Side.WHITE) ? Bitboard.getRankbb(Rank.RANK_8)
 				: Bitboard.getRankbb(Rank.RANK_1);
 		final long pieces = board.getBitboard(Piece.make(side, PieceType.PAWN));
-		final long attackable = board.getBitboard(side.flip());
+		final long enPasssantBB = Attacks.shift(board.getEnPassantTarget().getBitboard(), pushDirection);
+		final long attackable = board.getBitboard(side.flip()) | enPasssantBB;
 		final long eastAttacks = Attacks.shift(Attacks.shift(pieces, pushDirection), Direction.EAST) & attackable;
 		final long westAttacks = Attacks.shift(Attacks.shift(pieces, pushDirection), Direction.WEST) & attackable;
-		final long enPassantAttack = (eastAttacks | westAttacks) & board.getEnPassant().getBitboard();
 
 		long eastNonPromoAttacks = eastAttacks & ~promotionRank;
 		long westNonPromoAttacks = westAttacks & ~promotionRank;
 		long eastPromoAttacks = eastAttacks & promotionRank;
 		long westPromoAttacks = westAttacks & promotionRank;
-
-		if (0L != enPassantAttack)
-		{
-			int targetIndex = bitScanForward(enPassantAttack);
-			Square sqTarget = board.getEnPassantTarget();
-			Square sqSource = Attacks.shift(Attacks.shift(Square.squareAt(targetIndex), Direction.WEST),
-					reverseDirection);
-			moves.add(new Move(sqSource, sqTarget, Piece.NONE));
-		}
 
 		while (eastNonPromoAttacks != 0L)
 		{
