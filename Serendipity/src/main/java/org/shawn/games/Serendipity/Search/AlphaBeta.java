@@ -796,7 +796,8 @@ public class AlphaBeta implements Runnable
 
 				while (true)
 				{
-					int newScore = mainSearch(this.internalBoard, rootDepth - failHighCount, alpha, beta, 0, false);
+					int newScore = mainSearch(this.internalBoard, rootDepth - Math.min(failHighCount, 3), alpha, beta,
+							0, false);
 
 					if (newScore > alpha && newScore < beta)
 					{
