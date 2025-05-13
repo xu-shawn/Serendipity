@@ -39,18 +39,20 @@ public class TranspositionTableTest
 
 		assertFalse(tt.probe(0).hit());
 
-		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_EXACT, 12, 2, null, 0);
+		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_EXACT, 12, 2, null, 0, true);
 		assertEquals(12, tt.probe(board.getIncrementalHashKey()).getDepth());
 		assertEquals(2, tt.probe(board.getIncrementalHashKey()).getEvaluation());
 		assertTrue(tt.probe(board.getIncrementalHashKey()).verifySignature(board.getIncrementalHashKey()));
+		assertTrue(tt.probe(board.getIncrementalHashKey()).wasPV());
 
 		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_QS,
-				-6900, new Move(Square.E2, Square.E4), -200);
+				-6900, new Move(Square.E2, Square.E4), -200, false);
 		assertEquals(TranspositionTable.NODETYPE_NONE, tt.probe(board.getIncrementalHashKey()).getNodeType());
 		assertEquals(TranspositionTable.DEPTH_QS, tt.probe(board.getIncrementalHashKey()).getDepth());
 		assertEquals(-6900, tt.probe(board.getIncrementalHashKey()).getEvaluation());
 		assertEquals(-200, tt.probe(board.getIncrementalHashKey()).getStaticEval());
 		assertTrue(tt.probe(board.getIncrementalHashKey()).getMove().equals(new Move(Square.E2, Square.E4)));
 		assertTrue(tt.probe(board.getIncrementalHashKey()).verifySignature(board.getIncrementalHashKey()));
+		assertFalse(tt.probe(board.getIncrementalHashKey()).wasPV());
 	}
 }
