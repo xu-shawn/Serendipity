@@ -31,7 +31,8 @@ public class TranspositionTable
 	public static final int NODETYPE_UPPERBOUND = 0b10;
 	public static final int NODETYPE_EXACT = 0b11;
 
-	public static final int DEPTH_NONE = -7;
+	private static final int DEPTH_OFFSET = -4;
+	public static final int DEPTH_NONE = -3;
 	public static final int DEPTH_QS = -1;
 
 	public class Entry
@@ -42,16 +43,18 @@ public class TranspositionTable
 		private final int evaluation;
 		private final int staticEval;
 		private final Move move;
+		private final boolean ttPV;
 		private final boolean hit;
 
 		public Entry(short fragment1, long fragment2)
 		{
-			this(fragment1 & 0b11, fragment1 >> 2, (int) (fragment2 & 0xFFFF), (int) ((fragment2 & 0xFFF0000) >> 16),
-					(short) ((fragment2 & 0xFFFF0000000L) >> 28), (int) (fragment2 >> 44),
-					(fragment1 != 0) && (fragment2 != 0));
+			this(fragment1 & 0b11, (fragment1 >>> 8) + DEPTH_OFFSET, (int) (fragment2 & 0xFFFF),
+					(int) ((fragment2 & 0xFFF0000) >> 16), (short) ((fragment2 & 0xFFFF0000000L) >> 28),
+					(int) (fragment2 >> 44), (fragment1 & 0b100) != 0, (fragment1 != 0) && (fragment2 != 0));
 		}
 
-		public Entry(int nodeType, int depth, int signature, int move, int staticEval, int evaluation, boolean hit)
+		public Entry(int nodeType, int depth, int signature, int move, int staticEval, int evaluation, boolean ttPV,
+				boolean hit)
 		{
 			this.signature = signature;
 			this.depth = depth;
@@ -59,6 +62,7 @@ public class TranspositionTable
 			this.move = move == 0 ? null : new Move(Square.squareAt(move >> 6), Square.squareAt(move & 0b111111));
 			this.evaluation = evaluation;
 			this.staticEval = staticEval;
+			this.ttPV = ttPV;
 			this.hit = hit;
 		}
 
@@ -97,6 +101,11 @@ public class TranspositionTable
 			return move;
 		}
 
+		public boolean wasPV()
+		{
+			return ttPV;
+		}
+
 		public boolean hit()
 		{
 			return hit;
@@ -107,16 +116,18 @@ public class TranspositionTable
 	private int mask;
 
 	// depth: (0-255) 8 bits
-	// NodeType: 2 bits
+	// unused: 5 bits
+	// ttPV: 1 bit
+	// nodeType: 2 bits
 
 	private short[] data1;
 
 	// evaluation: 16 bits
 	// staticEval: 16 bits
-	// Move: 12 bits
-	// Square: 6 bits
-	// Square: 6 bits
-	// Signature: 16 bits
+	// move: 12 bits
+	// square: 6 bits
+	// square: 6 bits
+	// signature: 16 bits
 
 	private long[] data2;
 
@@ -140,12 +151,13 @@ public class TranspositionTable
 		return new Entry(fragment1, fragment2);
 	}
 
-	public void write(Entry entry, long hash, int nodeType, int depth, int evaluation, Move move, int staticEval)
+	public void write(Entry entry, long hash, int nodeType, int depth, int evaluation, Move move, int staticEval, boolean ttPV)
 	{
 		if (entry == null || !entry.hit() || nodeType == NODETYPE_EXACT || !entry.verifySignature(hash)
 				|| depth > entry.getDepth() - 4)
 		{
-			final short fragment1 = (short) (nodeType | (depth << 2));
+			final int writtenDepth = depth - DEPTH_OFFSET;
+			final short fragment1 = (short) (nodeType | (ttPV ? 0b100 : 0b000) | (writtenDepth << 8));
 			final long fragment2 = ((hash >>> 48)
 					| (((move == null) ? 0 : ((move.getFrom().ordinal() << 6) | move.getTo().ordinal())) << 16)
 					| ((staticEval & 0xFFFFL) << 28) | ((long) evaluation << 44));
