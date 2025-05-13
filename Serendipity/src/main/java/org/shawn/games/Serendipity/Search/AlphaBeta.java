@@ -38,7 +38,7 @@ public class AlphaBeta implements Runnable
 	public static final int MIN_EVAL = -32767;
 	public static final int MATE_EVAL = 32700;
 	public static final int DRAW_EVAL = 0;
-	public static final int MAX_PLY = 256;
+	public static final int MAX_PLY = 245;
 
 	public static final int MATE_IN_MAX_PLY = MATE_EVAL - MAX_PLY;
 
@@ -173,7 +173,8 @@ public class AlphaBeta implements Runnable
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 		boolean ttHit = currentMoveEntry.hit() && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
-		Move ttMove = ttHit ? currentMoveEntry.getMove() : null;
+		final boolean ttPV = isPV | (currentMoveEntry.hit() && currentMoveEntry.wasPV());
+		final Move ttMove = ttHit ? currentMoveEntry.getMove() : null;
 
 		if (!isPV && ttHit && currentMoveEntry.getNodeType() != TranspositionTable.NODETYPE_NONE)
 		{
@@ -233,7 +234,7 @@ public class AlphaBeta implements Runnable
 				bestScore = sse.staticEval = evaluate(board);
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 						TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_NONE, VALUE_NONE, null,
-						sse.staticEval);
+						sse.staticEval, ttPV);
 			}
 
 			alpha = Math.max(alpha, sse.staticEval);
@@ -296,14 +297,14 @@ public class AlphaBeta implements Runnable
 		{
 			sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 					TranspositionTable.NODETYPE_LOWERBOUND, TranspositionTable.DEPTH_QS, bestScore, bestMove,
-					sse.staticEval);
+					sse.staticEval, ttPV);
 		}
 
 		else
 		{
 			sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 					TranspositionTable.NODETYPE_UPPERBOUND, TranspositionTable.DEPTH_QS, bestScore, ttMove,
-					sse.staticEval);
+					sse.staticEval, ttPV);
 		}
 
 		return bestScore;
@@ -316,7 +317,8 @@ public class AlphaBeta implements Runnable
 		this.ss.get(ply + 2).killer = null;
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
-		boolean improving, isPV, inCheck, inSingularSearch, ttCapture;
+		boolean improving, isPV, inCheck, inSingularSearch;
+		boolean ttPV, ttCapture;
 		Move bestMove, ttMove;
 		int bestValue;
 		int eval;
@@ -402,6 +404,7 @@ public class AlphaBeta implements Runnable
 
 		ttMove = sse.ttHit ? currentMoveEntry.getMove() : null;
 		ttCapture = ttMove != null && !board.isQuiet(ttMove);
+		ttPV = isPV | (currentMoveEntry.hit() && currentMoveEntry.wasPV());
 
 		if (inCheck)
 		{
@@ -443,7 +446,7 @@ public class AlphaBeta implements Runnable
 
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 						TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_NONE, VALUE_NONE, null,
-						sse.staticEval);
+						sse.staticEval, ttPV);
 			}
 		}
 
@@ -638,6 +641,7 @@ public class AlphaBeta implements Runnable
 			if (sse.moveCount > 1 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
 				r -= isPV ? 1 : 0;
+				r -= ttPV ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
 				r -= !isQuiet ? 1 : 0;
 				r += cutNode ? 1 : 0;
@@ -740,19 +744,19 @@ public class AlphaBeta implements Runnable
 			if (alpha >= beta)
 			{
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
-						TranspositionTable.NODETYPE_LOWERBOUND, depth, bestValue, bestMove, sse.staticEval);
+						TranspositionTable.NODETYPE_LOWERBOUND, depth, bestValue, bestMove, sse.staticEval, ttPV);
 			}
 
 			else if (alpha == oldAlpha)
 			{
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
-						TranspositionTable.NODETYPE_UPPERBOUND, depth, bestValue, ttMove, sse.staticEval);
+						TranspositionTable.NODETYPE_UPPERBOUND, depth, bestValue, ttMove, sse.staticEval, ttPV);
 			}
 
 			else if (alpha > oldAlpha)
 			{
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
-						TranspositionTable.NODETYPE_EXACT, depth, bestValue, bestMove, sse.staticEval);
+						TranspositionTable.NODETYPE_EXACT, depth, bestValue, bestMove, sse.staticEval, ttPV);
 			}
 		}
 
