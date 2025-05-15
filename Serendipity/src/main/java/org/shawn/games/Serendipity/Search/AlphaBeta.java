@@ -268,8 +268,8 @@ public class AlphaBeta implements Runnable
 				continue;
 			}
 
-			accumulators.push(board, move);
-			board.doMove(move);
+			AccumulatorDiff diff = board.doMove(move);
+			accumulators.push(board, move, diff);
 			sse.move = move;
 			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
 
@@ -628,8 +628,8 @@ public class AlphaBeta implements Runnable
 				r -= history / 9000;
 			}
 
-			accumulators.push(board, move);
-			board.doMove(move);
+			AccumulatorDiff diff = board.doMove(move);
+			accumulators.push(board, move, diff);
 			sse.move = move;
 			sse.continuationHistory = threadData.continuationHistories.get(board, sse.move);
 
