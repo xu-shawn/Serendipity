@@ -773,31 +773,28 @@ public class AlphaBeta implements Runnable
 
 		try
 		{
-			for (int rootDepth = 1; rootDepth < MAX_PLY; rootDepth++)
+			for (int i = 1; i < MAX_PLY; i++)
 			{
-				if (this.threadData.id == 0 && (rootDepth > this.threadData.mainThreadData.limits.getDepth()
+				if (this.threadData.id == 0 && (i > this.threadData.mainThreadData.limits.getDepth()
 						|| this.timeManager.shouldStopIterativeDeepening()))
 				{
 					break;
 				}
 
-				threadData.rootDepth = rootDepth;
+				threadData.rootDepth = i;
 				threadData.selDepth = 0;
 				this.bestMove = null;
 
-				if (rootDepth > 3)
+				if (i > 3)
 				{
 					delta = 25;
 					alpha = Math.max(currentScore - delta, MIN_EVAL);
 					beta = Math.min(currentScore + delta, MAX_EVAL);
 				}
 
-				int failHighCount = 0;
-
 				while (true)
 				{
-					int newScore = mainSearch(this.internalBoard, rootDepth - Math.min(failHighCount, 3), alpha, beta,
-							0, false);
+					int newScore = mainSearch(this.internalBoard, i, alpha, beta, 0, false);
 
 					if (newScore > alpha && newScore < beta)
 					{
@@ -813,7 +810,7 @@ public class AlphaBeta implements Runnable
 								totalNodes += thread.getNodesCount();
 							}
 
-							SearchReport report = new SearchReport(rootDepth, threadData.selDepth, totalNodes,
+							SearchReport report = new SearchReport(i, threadData.selDepth, totalNodes,
 									sharedThreadData.tt.hashfull(), currentScore, this.timeManager.timePassed(),
 									this.internalBoard, lastCompletePV);
 
@@ -828,14 +825,12 @@ public class AlphaBeta implements Runnable
 
 					else if (newScore <= alpha)
 					{
-						failHighCount = 0;
 						beta = (alpha + beta) / 2;
 						alpha = Math.max(alpha - delta, MIN_EVAL);
 					}
 
 					else
 					{
-						failHighCount++;
 						beta = Math.min(beta + delta, MAX_EVAL);
 					}
 
