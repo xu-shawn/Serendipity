@@ -31,9 +31,9 @@ public class NNUE
 
 	static final int HIDDEN_SIZE = 1536;
 	static final int FEATURE_SIZE = 768;
-	private static final int OUTPUT_BUCKETS = 8;
+	static final int OUTPUT_BUCKETS = 8;
 	private static final int DIVISOR = (32 + OUTPUT_BUCKETS - 1) / OUTPUT_BUCKETS;
-	private static final int INPUT_BUCKET_SIZE = 7;
+	static final int INPUT_BUCKET_SIZE = 7;
 	// @formatter:off
 	private static final int[] INPUT_BUCKETS = new int[]
 	{

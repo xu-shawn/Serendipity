@@ -594,6 +594,19 @@ public class Board implements Cloneable
 	}
 
 	/**
+	 * Returns the bitboard that represents all the pieces of a given side and type
+	 * present on the board.
+	 *
+	 * @param side the side for which the bitboard must be returned
+	 * @param pieceType the piece type for which the bitboard must be returned
+	 * @return the bitboard of the given piece definition
+	 */
+	public long getBitboard(Side side, PieceType pieceType)
+	{
+		return bitboard[Piece.make(side, pieceType).ordinal()];
+	}
+
+	/**
 	 * Returns the bitboard that represents all the pieces of a given type present
 	 * on the board.
 	 *

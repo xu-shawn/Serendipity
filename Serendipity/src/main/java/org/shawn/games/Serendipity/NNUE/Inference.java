@@ -27,6 +27,8 @@ public interface Inference
 
 	void add(short[] to, final short[] from, final short[] added);
 
+	void sub(short[] to, final short[] from, final short[] removed);
+
 	void addSub(short[] to, final short[] from, final short[] added, final short[] subtracted);
 
 	void addSubSub(short[] to, final short[] from, final short[] added, final short[] subtracted1,

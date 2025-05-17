@@ -72,6 +72,15 @@ public class ScalarInference implements Inference
 	}
 
 	@Override
+	public void sub(short[] to, final short[] from, final short[] removed)
+	{
+		for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
+		{
+			to[i] = (short) (from[i] - removed[i]);
+		}
+	}
+
+	@Override
 	public void addSub(short[] to, final short[] from, final short[] added, final short[] subtracted)
 	{
 		for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)

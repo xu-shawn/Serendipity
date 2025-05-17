@@ -94,6 +94,18 @@ public class SIMDInference implements Inference
 	}
 
 	@Override
+	public void sub(short[] to, final short[] from, final short[] removed)
+	{
+		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
+		{
+			final ShortVector fromVector = ShortVector.fromArray(SHORT_SPECIES, from, i);
+			final ShortVector subVector = ShortVector.fromArray(SHORT_SPECIES, removed, i);
+
+			fromVector.sub(subVector).intoArray(to, i);
+		}
+	}
+
+	@Override
 	public void addSub(short[] to, final short[] from, final short[] added, final short[] subtracted)
 	{
 		for (int i = 0; i < UPPERBOUND; i += SHORT_SPECIES.length())
