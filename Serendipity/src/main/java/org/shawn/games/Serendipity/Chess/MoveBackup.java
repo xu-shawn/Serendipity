@@ -80,7 +80,6 @@ public class MoveBackup
 	 */
 	public void makeBackup(Board board, Move move)
 	{
-
 		setIncrementalHashKey(board.getIncrementalHashKey());
 		setSideToMove(board.getSideToMove());
 		setEnPassantTarget(board.getEnPassantTarget());
@@ -153,6 +152,7 @@ public class MoveBackup
 				board.setPiece(getCapturedPiece(), getCapturedSquare());
 			}
 		}
+
 		board.setIncrementalHashKey(getIncrementalHashKey());
 	}
 

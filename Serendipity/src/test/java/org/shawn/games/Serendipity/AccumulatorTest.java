@@ -71,15 +71,15 @@ public class AccumulatorTest
 
 		for (Move move : testGame)
 		{
-			accumulators.push(board, move);
-			board.doMove(move);
+			AccumulatorDiff diff = board.doMove(move);
+			accumulators.push(board, move, diff);
 		}
 
-		int incrementallyUpdatedEvaluation = evaluate(board);
+		final int incrementallyUpdatedEvaluation = evaluate(board);
 
 		accumulators.init(board);
 
-		int fullUpdatedEvaluation = evaluate(board);
+		final int fullUpdatedEvaluation = evaluate(board);
 
 		assertEquals(incrementallyUpdatedEvaluation, fullUpdatedEvaluation);
 	}
