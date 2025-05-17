@@ -136,4 +136,9 @@ public class NNUE
 				: (piece.getPieceSide().ordinal() ^ 1) * COLOR_STRIDE + piece.getPieceType().ordinal() * PIECE_STRIDE
 						+ (square.ordinal() ^ 0b111000);
 	}
+
+	public static int getIndex(final AccumulatorDiff.DiffInfo diff, Side perspective)
+	{
+		return getIndex(diff.square, diff.piece, perspective);
+	}
 }

@@ -20,9 +20,8 @@
 package org.shawn.games.Serendipity.NNUE;
 
 import org.shawn.games.Serendipity.Search.AlphaBeta;
-
+import org.shawn.games.Serendipity.Chess.AccumulatorDiff;
 import org.shawn.games.Serendipity.Chess.Board;
-import org.shawn.games.Serendipity.Chess.CastleRight;
 import org.shawn.games.Serendipity.Chess.Piece;
 import org.shawn.games.Serendipity.Chess.PieceType;
 import org.shawn.games.Serendipity.Chess.Side;
@@ -117,97 +116,38 @@ public class AccumulatorStack
 					network.L1Weights[featureIndexToSubtract2]);
 		}
 
-		private void efficientlyUpdate(Accumulator prev, Board board, Move move)
+		private void efficientlyUpdate(Accumulator prev, Board board, final AccumulatorDiff diff)
 		{
-			if (board.getContext().isKingSideCastle(move)
-					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_SIDE)
-							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
+			final int addedCount = diff.getAddedCount();
+			final int removedCount = diff.getRemovedCount();
+
+			if (addedCount == 1 && removedCount == 1)
 			{
-				this.addAddSubSub(prev,
-						NNUE.getIndex(board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE)
-								.getTo(), Piece.make(board.getSideToMove(), PieceType.ROOK), this.color),
+				final int addedIndex = NNUE.getIndex(diff.getAdded(0), this.color);
+				final int removedIndex = NNUE.getIndex(diff.getRemoved(0), this.color);
 
-						NNUE.getIndex(board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE)
-								.getTo(), Piece.make(board.getSideToMove(), PieceType.KING), this.color),
-
-						NNUE.getIndex(board.getContext().getRookCastleMove(board.getSideToMove(), CastleRight.KING_SIDE)
-								.getFrom(), Piece.make(board.getSideToMove(), PieceType.ROOK), this.color),
-
-						NNUE.getIndex(board.getContext().getKingCastleMove(board.getSideToMove(), CastleRight.KING_SIDE)
-								.getFrom(), Piece.make(board.getSideToMove(), PieceType.KING), this.color));
-
-				return;
+				this.addSub(prev, addedIndex, removedIndex);
 			}
 
-			if (board.getContext().isQueenSideCastle(move)
-					&& (board.getCastleRight(board.getSideToMove()).equals(CastleRight.QUEEN_SIDE)
-							|| board.getCastleRight(board.getSideToMove()).equals(CastleRight.KING_AND_QUEEN_SIDE)))
+			else if (addedCount == 1 && removedCount == 2)
 			{
-				this.addAddSubSub(prev,
-						NNUE.getIndex(board.getContext()
-								.getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
-								Piece.make(board.getSideToMove(), PieceType.ROOK), this.color),
+				final int addedIndex = NNUE.getIndex(diff.getAdded(0), this.color);
+				final int removedIndex0 = NNUE.getIndex(diff.getRemoved(0), this.color);
+				final int removedIndex1 = NNUE.getIndex(diff.getRemoved(1), this.color);
 
-						NNUE.getIndex(board.getContext()
-								.getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getTo(),
-								Piece.make(board.getSideToMove(), PieceType.KING), this.color),
-
-						NNUE.getIndex(board.getContext()
-								.getRookCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
-								Piece.make(board.getSideToMove(), PieceType.ROOK), this.color),
-
-						NNUE.getIndex(board.getContext()
-								.getKingCastleMove(board.getSideToMove(), CastleRight.QUEEN_SIDE).getFrom(),
-								Piece.make(board.getSideToMove(), PieceType.KING), this.color));
-
-				return;
-			}
-
-			Square from = move.getFrom();
-			Square to = move.getTo();
-
-			Piece promoted = move.getPromotion();
-			Piece moved = board.getPiece(from);
-			Piece captured = board.getPiece(to);
-
-			if (promoted.equals(Piece.NONE))
-			{
-				if (!captured.equals(Piece.NONE))
-				{
-					this.addSubSub(prev, NNUE.getIndex(to, moved, this.color), NNUE.getIndex(from, moved, this.color),
-							NNUE.getIndex(to, captured, this.color));
-					return;
-				}
-
-				if (move.getTo().equals(board.getEnPassant()) && moved.getPieceType().equals(PieceType.PAWN))
-				{
-					// @formatter:off
-					this.addSubSub(prev,
-							NNUE.getIndex(to, moved, this.color),
-							NNUE.getIndex(from, moved, this.color),
-							NNUE.getIndex(board.getEnPassantTarget(), board.getPiece(board.getEnPassantTarget()),
-									this.color));
-					// @formatter:on
-
-					return;
-				}
-
-				this.addSub(prev, NNUE.getIndex(to, moved, this.color), NNUE.getIndex(from, moved, this.color));
-
+				this.addSubSub(prev, addedIndex, removedIndex0, removedIndex1);
 			}
 
 			else
 			{
-				if (!captured.equals(Piece.NONE))
-				{
-					this.addSubSub(prev, NNUE.getIndex(to, promoted, this.color),
-							NNUE.getIndex(from, moved, this.color), NNUE.getIndex(to, captured, this.color));
+				assert addedCount == 2 && removedCount == 2;
 
-					return;
-				}
+				final int addedIndex0 = NNUE.getIndex(diff.getAdded(0), this.color);
+				final int addedIndex1 = NNUE.getIndex(diff.getAdded(1), this.color);
+				final int removedIndex0 = NNUE.getIndex(diff.getRemoved(0), this.color);
+				final int removedIndex1 = NNUE.getIndex(diff.getRemoved(1), this.color);
 
-				this.addSub(prev, NNUE.getIndex(to, promoted, this.color), NNUE.getIndex(from, moved, this.color));
-
+				this.addAddSubSub(prev, addedIndex0, addedIndex1, removedIndex0, removedIndex1);
 			}
 		}
 
@@ -223,20 +163,18 @@ public class AccumulatorStack
 			}
 		}
 
-		private void makeMove(Accumulator prev, Board board, Move move)
+		private void makeMove(Accumulator prev, Board board, Move move, final AccumulatorDiff diff)
 		{
-			if (board.getSideToMove().equals(this.color)
-					&& board.getPiece(move.getFrom()).equals(Piece.make(this.color, PieceType.KING))
+			if (board.getPiece(move.getTo()).equals(Piece.make(this.color, PieceType.KING))
 					&& this.kingBucket != NNUE.chooseInputBucket(move.getTo(), this.color))
 			{
 				this.changeKingBucket(NNUE.chooseInputBucket(move.getTo(), this.color));
 				fullAccumulatorUpdate(board);
-				efficientlyUpdate(this, board, move);
 			}
 
 			else
 			{
-				efficientlyUpdate(prev, board, move);
+				efficientlyUpdate(prev, board, diff);
 			}
 		}
 
@@ -274,10 +212,10 @@ public class AccumulatorStack
 			this.accumulators[1].loadAttributesFrom(prev.accumulators[1]);
 		}
 
-		public void makeMove(AccumulatorPair prev, Board board, Move move)
+		public void makeMove(AccumulatorPair prev, Board board, Move move, final AccumulatorDiff diff)
 		{
-			this.accumulators[0].makeMove(prev.accumulators[0], board, move);
-			this.accumulators[1].makeMove(prev.accumulators[1], board, move);
+			this.accumulators[0].makeMove(prev.accumulators[0], board, move, diff);
+			this.accumulators[1].makeMove(prev.accumulators[1], board, move, diff);
 		}
 	}
 
@@ -297,11 +235,11 @@ public class AccumulatorStack
 		top--;
 	}
 
-	public void push(Board board, Move move)
+	public void push(Board board, Move move, final AccumulatorDiff diff)
 	{
 		top++;
 		this.stack[top].loadFrom(this.stack[top - 1]);
-		this.stack[top].makeMove(this.stack[top - 1], board, move);
+		this.stack[top].makeMove(this.stack[top - 1], board, move, diff);
 	}
 
 	public void init(Board board)

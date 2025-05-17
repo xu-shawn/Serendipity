@@ -197,12 +197,14 @@ public class Board implements Cloneable
 	 * position obtained after the move does not violate any chess constraint.
 	 *
 	 * @param move the move to execute
+	 * @return the changes to be applied onto the accumulator
 	 */
-	public void doMove(final Move move)
+	public AccumulatorDiff doMove(final Move move)
 	{
 		assert isMoveLegal(move, true);
 		assert isMovePseudoLegal(move);
 
+		AccumulatorDiff diff = new AccumulatorDiff();
 		Piece movingPiece = getPiece(move.getFrom());
 		Side side = getSideToMove();
 
@@ -220,17 +222,13 @@ public class Board implements Cloneable
 		{
 			if (isCastle)
 			{
-				if (context.hasCastleRight(move, getCastleRight(side)))
-				{
-					CastleRight c = context.isKingSideCastle(move) ? CastleRight.KING_SIDE : CastleRight.QUEEN_SIDE;
-					Move rookMove = context.getRookCastleMove(side, c);
-					movePiece(rookMove, backupMove);
-				}
+				assert context.hasCastleRight(move, getCastleRight(side));
 
-				else
-				{
-					assert false;
-				}
+				CastleRight c = context.isKingSideCastle(move) ? CastleRight.KING_SIDE : CastleRight.QUEEN_SIDE;
+				Move rookMove = context.getRookCastleMove(side, c);
+				diff.removePiece(Piece.make(side, PieceType.ROOK), rookMove.getFrom());
+				diff.addPiece(Piece.make(side, PieceType.ROOK), rookMove.getTo());
+				movePiece(rookMove, backupMove);
 			}
 
 			if (getCastleRight(side) != CastleRight.NONE)
@@ -275,7 +273,30 @@ public class Board implements Cloneable
 			}
 		}
 
+		diff.removePiece(movingPiece, move.getFrom());
+
+		if (move.isPromotion())
+		{
+			diff.addPiece(move.getPromotion(), move.getTo());
+		}
+		else
+		{
+			diff.addPiece(movingPiece, move.getTo());
+		}
+
 		Piece capturedPiece = movePiece(move, backupMove);
+
+		if (!Piece.NONE.equals(capturedPiece))
+		{
+			Square captureSquare = move.getTo();
+
+			if (movingPiece.getPieceType().equals(PieceType.PAWN) && move.getTo() == getEnPassant())
+			{
+				captureSquare = getEnPassantTarget();
+			}
+
+			diff.removePiece(capturedPiece, captureSquare);
+		}
 
 		if (PieceType.ROOK == capturedPiece.getPieceType())
 		{
@@ -360,6 +381,8 @@ public class Board implements Cloneable
 		}
 
 		backup.add(backupMove);
+
+		return diff;
 	}
 
 	/**
