@@ -59,6 +59,7 @@ public enum PieceType
 	NONE("NONE");
 
 	private static final Map<String, PieceType> sanToType = new HashMap<>(7);
+	private static final PieceType[] validValues = new PieceType[] { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 
 	static
 	{
@@ -130,5 +131,15 @@ public enum PieceType
 	public String value()
 	{
 		return name();
+	}
+
+	/**
+	 * Returns an array of valid piece types.
+	 *
+	 * @return the array of valid piece types
+	 */
+	public static PieceType[] validValues()
+	{
+		return validValues;
 	}
 }

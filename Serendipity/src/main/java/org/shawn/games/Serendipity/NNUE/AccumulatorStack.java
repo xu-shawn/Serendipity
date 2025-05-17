@@ -20,7 +20,9 @@
 package org.shawn.games.Serendipity.NNUE;
 
 import org.shawn.games.Serendipity.Search.AlphaBeta;
+
 import org.shawn.games.Serendipity.Chess.AccumulatorDiff;
+import org.shawn.games.Serendipity.Chess.Bitboard;
 import org.shawn.games.Serendipity.Chess.Board;
 import org.shawn.games.Serendipity.Chess.Piece;
 import org.shawn.games.Serendipity.Chess.PieceType;
@@ -30,17 +32,10 @@ import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class AccumulatorStack
 {
-	NNUE network;
-
-	private final AccumulatorPair[] stack;
-	private int top;
-
-	private static final Inference INFERENCE = InferenceChooser.chooseInference();
-
 	public class Accumulator
 	{
-		short[] values;
 		Side color;
+		short[] values;
 		boolean needsRefresh;
 		int kingBucket;
 
@@ -56,7 +51,7 @@ public class AccumulatorStack
 			this.needsRefresh = false;
 		}
 
-		public void changeKingBucket(int i)
+		public void setKingBucket(int i)
 		{
 			this.kingBucket = i;
 			needsRefresh = true;
@@ -151,16 +146,48 @@ public class AccumulatorStack
 			}
 		}
 
-		private void fullAccumulatorUpdate(Board board)
+		private void updateFromCache(Board board)
 		{
-			System.arraycopy(network.L1Biases, 0, this.values, 0, NNUE.HIDDEN_SIZE);
-			for (Square sq : Square.values())
+			AccumulatorCache.Entry entry = cache.get(this.color, NNUE.chooseInputBucket(board, this.color));
+
+			for (final Side side : Side.values())
 			{
-				if (!board.getPiece(sq).equals(Piece.NONE))
+				for (final PieceType pieceType : PieceType.validValues())
 				{
-					this.add(NNUE.getIndex(sq, board.getPiece(sq), this.color));
+					final Piece piece = Piece.make(side, pieceType);
+					final long oldBB = entry.getBitboard(side, pieceType);
+					final long newBB = board.getBitboard(side, pieceType);
+
+					long removed = oldBB & ~newBB;
+					long added = newBB & ~oldBB;
+
+					while (removed != 0L)
+					{
+						final Square sq = Square.squareAt(Bitboard.bitScanForward(removed));
+						final int featureIndex = NNUE.getIndex(sq, piece, this.color) + kingBucket * NNUE.FEATURE_SIZE;
+
+						INFERENCE.sub(entry.storedAccumulator, entry.storedAccumulator,
+								network.L1Weights[featureIndex]);
+
+						removed = Bitboard.extractLsb(removed);
+					}
+
+					while (added != 0L)
+					{
+						final Square sq = Square.squareAt(Bitboard.bitScanForward(added));
+						final int featureIndex = NNUE.getIndex(sq, piece, this.color) + kingBucket * NNUE.FEATURE_SIZE;
+
+						INFERENCE.add(entry.storedAccumulator, entry.storedAccumulator,
+								network.L1Weights[featureIndex]);
+
+						added = Bitboard.extractLsb(added);
+					}
 				}
 			}
+
+			System.arraycopy(entry.storedAccumulator, 0, values, 0, NNUE.HIDDEN_SIZE);
+
+			entry.update(board);
 		}
 
 		private void makeMove(Accumulator prev, Board board, Move move, final AccumulatorDiff diff)
@@ -168,8 +195,8 @@ public class AccumulatorStack
 			if (board.getPiece(move.getTo()).equals(Piece.make(this.color, PieceType.KING))
 					&& this.kingBucket != NNUE.chooseInputBucket(move.getTo(), this.color))
 			{
-				this.changeKingBucket(NNUE.chooseInputBucket(move.getTo(), this.color));
-				fullAccumulatorUpdate(board);
+				this.setKingBucket(NNUE.chooseInputBucket(move.getTo(), this.color));
+				updateFromCache(board);
 			}
 
 			else
@@ -180,8 +207,8 @@ public class AccumulatorStack
 
 		private void loadFromBoard(Board board)
 		{
-			this.changeKingBucket(NNUE.chooseInputBucket(board, this.color));
-			fullAccumulatorUpdate(board);
+			this.setKingBucket(NNUE.chooseInputBucket(board, this.color));
+			updateFromCache(board);
 		}
 	}
 
@@ -219,10 +246,17 @@ public class AccumulatorStack
 		}
 	}
 
+	private static final Inference INFERENCE = InferenceChooser.chooseInference();
+	private final NNUE network;
+	private final AccumulatorPair[] stack;
+	private final AccumulatorCache cache;
+	private int top;
+
 	public AccumulatorStack(NNUE network)
 	{
 		this.network = network;
 		this.stack = new AccumulatorPair[AlphaBeta.MAX_PLY + 1];
+		this.cache = new AccumulatorCache(network);
 
 		for (int i = 0; i < this.stack.length; i++)
 		{
