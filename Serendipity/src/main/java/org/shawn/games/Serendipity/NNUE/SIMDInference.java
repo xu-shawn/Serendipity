@@ -101,7 +101,7 @@ public class SIMDInference implements Inference
 			final ShortVector fromVector = ShortVector.fromArray(SHORT_SPECIES, from, i);
 			final ShortVector subVector = ShortVector.fromArray(SHORT_SPECIES, removed, i);
 
-			fromVector.add(subVector).intoArray(to, i);
+			fromVector.sub(subVector).intoArray(to, i);
 		}
 	}
 
