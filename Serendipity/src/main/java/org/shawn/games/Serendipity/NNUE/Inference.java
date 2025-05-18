@@ -23,7 +23,7 @@ import org.shawn.games.Serendipity.Chess.Side;
 
 public interface Inference
 {
-	int forward(final AccumulatorStack accumulators, Side side, final short[] weights, final short bias);
+	int forward(AccumulatorStack.AccumulatorPair accumulators, Side side, final short[] weights, final short bias);
 
 	void add(short[] to, final short[] from, final short[] added);
 

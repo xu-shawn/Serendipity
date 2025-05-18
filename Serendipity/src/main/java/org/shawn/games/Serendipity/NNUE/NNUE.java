@@ -111,10 +111,12 @@ public class NNUE
 		return (Long.bitCount(board.getBitboard()) - 2) / DIVISOR;
 	}
 
-	public static int evaluate(NNUE network, AccumulatorStack accumulators, Side side, int chosenBucket)
+	public static int evaluate(Board board, NNUE network, AccumulatorStack accumulators)
 	{
-		return INFERENCE.forward(accumulators, side, network.L2Weights[chosenBucket],
-				network.outputBiases[chosenBucket]);
+		final int chosenBucket = chooseOutputBucket(board);
+
+		return INFERENCE.forward(accumulators.refreshAndGet(board), board.getSideToMove(),
+				network.L2Weights[chosenBucket], network.outputBiases[chosenBucket]);
 	}
 
 	public static int chooseInputBucket(Board board, Side side)
@@ -140,5 +142,27 @@ public class NNUE
 	public static int getIndex(final AccumulatorDiff.DiffInfo diff, Side perspective)
 	{
 		return getIndex(diff.square, diff.piece, perspective);
+	}
+
+	public static boolean requiresRefresh(final AccumulatorDiff diff, Side perspective)
+	{
+		assert diff.getAddedCount() <= 1 || !diff.getAdded(1).piece.getPieceType().equals(PieceType.KING);
+
+		if (!diff.getAdded(0).piece.getPieceType().equals(PieceType.KING))
+		{
+			return false;
+		}
+
+		if (!diff.getAdded(0).piece.getPieceSide().equals(perspective))
+		{
+			return false;
+		}
+
+		assert diff.getRemoved(0).piece.getPieceType().equals(PieceType.KING);
+
+		final Square prevKing = diff.getRemoved(0).square;
+		final Square currKing = diff.getAdded(0).square;
+
+		return chooseInputBucket(prevKing, perspective) != chooseInputBucket(currKing, perspective);
 	}
 }

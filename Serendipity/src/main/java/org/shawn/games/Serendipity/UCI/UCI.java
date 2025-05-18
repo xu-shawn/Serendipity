@@ -239,11 +239,7 @@ public class UCI
 					acc.init(internalBoard);
 
 					System.out.println(internalBoard);
-					System.out.println(NNUE.evaluate(network, acc, internalBoard.getSideToMove(),
-							NNUE.chooseOutputBucket(internalBoard)));
-					acc.init(internalBoard);
-					System.out.println(NNUE.evaluate(network, acc, internalBoard.getSideToMove(),
-							NNUE.chooseOutputBucket(internalBoard)));
+					System.out.println(NNUE.evaluate(internalBoard, network, acc));
 					break;
 				case "go":
 					Limits limits = new Limits();

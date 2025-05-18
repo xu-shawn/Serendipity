@@ -218,6 +218,17 @@ public class Board implements Cloneable
 			incrementalHashKey ^= getEnPassantKey(getEnPassantTarget());
 		}
 
+		diff.removePiece(movingPiece, move.getFrom());
+
+		if (move.isPromotion())
+		{
+			diff.addPiece(move.getPromotion(), move.getTo());
+		}
+		else
+		{
+			diff.addPiece(movingPiece, move.getTo());
+		}
+
 		if (PieceType.KING.equals(movingPiece.getPieceType()))
 		{
 			if (isCastle)
@@ -271,17 +282,6 @@ public class Board implements Cloneable
 					getCastleRight().put(side, CastleRight.NONE);
 				}
 			}
-		}
-
-		diff.removePiece(movingPiece, move.getFrom());
-
-		if (move.isPromotion())
-		{
-			diff.addPiece(move.getPromotion(), move.getTo());
-		}
-		else
-		{
-			diff.addPiece(movingPiece, move.getTo());
 		}
 
 		Piece capturedPiece = movePiece(move, backupMove);

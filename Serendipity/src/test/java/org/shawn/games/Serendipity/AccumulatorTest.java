@@ -46,7 +46,7 @@ public class AccumulatorTest
 
 	public int evaluate(Board board)
 	{
-		int v = NNUE.evaluate(network, accumulators, board.getSideToMove(), NNUE.chooseOutputBucket(board));
+		int v = NNUE.evaluate(board, network, accumulators);
 
 		return v;
 	}

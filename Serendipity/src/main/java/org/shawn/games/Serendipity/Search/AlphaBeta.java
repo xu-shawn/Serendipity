@@ -108,8 +108,7 @@ public class AlphaBeta implements Runnable
 
 	public int evaluate(Board board)
 	{
-		int v = NNUE.evaluate(sharedThreadData.network, accumulators, board.getSideToMove(),
-				NNUE.chooseOutputBucket(board));
+		int v = NNUE.evaluate(board, sharedThreadData.network, accumulators);
 
 		final int material = Long
 				.bitCount(board.getBitboard(Piece.WHITE_BISHOP) | board.getBitboard(Piece.BLACK_BISHOP)) * 3
