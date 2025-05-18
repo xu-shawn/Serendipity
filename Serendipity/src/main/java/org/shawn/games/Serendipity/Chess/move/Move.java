@@ -193,7 +193,7 @@ public class Move
 
 	public int asBytes()
 	{
-		int promotionBits = isPromotion() ? (0b1000 | (promotion.ordinal() - 1)) : 0;
+		int promotionBits = 0; // isPromotion() ? (0b1000 | (promotion.ordinal() - 1)) : 0;
 		return (promotionBits << 12) | (getFrom().ordinal() << 6) | getTo().ordinal();
 	}
 
@@ -203,7 +203,7 @@ public class Move
 
 		if (bytes >> 12 != 0)
 		{
-			promotion = PieceType.values()[(bytes >> 12 & 0b11) + 1];
+			promotion = PieceType.values()[(bytes >> 12 & 0b111) + 1];
 		}
 
 		return new Move(Square.squareAt((bytes & 0b111111000000) >> 6), Square.squareAt(bytes & 0b111111), promotion);
