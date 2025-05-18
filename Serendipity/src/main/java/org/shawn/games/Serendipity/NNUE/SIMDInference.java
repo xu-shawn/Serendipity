@@ -35,10 +35,10 @@ public class SIMDInference implements Inference
 	private static final int UPPERBOUND = SHORT_SPECIES.loopBound(NNUE.HIDDEN_SIZE);
 
 	@Override
-	public int forward(AccumulatorStack accumulators, Side side, short[] weights, short bias)
+	public int forward(AccumulatorStack.AccumulatorPair accumulators, Side side, short[] weights, short bias)
 	{
-		AccumulatorStack.Accumulator us = accumulators.getAccumulator(side);
-		AccumulatorStack.Accumulator them = accumulators.getAccumulator(side.flip());
+		AccumulatorStack.Accumulator us = accumulators.get(side);
+		AccumulatorStack.Accumulator them = accumulators.get(side.flip());
 
 		IntVector sum = IntVector.zero(SHORT_SPECIES.vectorShape().withLanes(int.class));
 

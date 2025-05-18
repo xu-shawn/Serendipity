@@ -40,12 +40,12 @@ public class ScalarInference implements Inference
 	}
 
 	@Override
-	public int forward(AccumulatorStack accumulators, Side side, short[] weights, short bias)
+	public int forward(AccumulatorStack.AccumulatorPair accumulators, Side side, short[] weights, short bias)
 	{
 		int eval = 0;
 
-		AccumulatorStack.Accumulator us = accumulators.getAccumulator(side);
-		AccumulatorStack.Accumulator them = accumulators.getAccumulator(side.flip());
+		AccumulatorStack.Accumulator us = accumulators.get(side);
+		AccumulatorStack.Accumulator them = accumulators.get(side.flip());
 
 		for (int i = 0; i < NNUE.HIDDEN_SIZE; i++)
 		{
