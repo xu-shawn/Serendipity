@@ -193,7 +193,7 @@ public class Move
 
 	public int asBytes()
 	{
-		int promotionBits = 0; // isPromotion() ? (0b1000 | (promotion.ordinal() - 1)) : 0;
+		int promotionBits = isPromotion() ? (0b1000 | (promotion.ordinal() - 1)) : 0;
 		return (promotionBits << 12) | (getFrom().ordinal() << 6) | getTo().ordinal();
 	}
 

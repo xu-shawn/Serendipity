@@ -597,7 +597,7 @@ public class AlphaBeta implements Runnable
 				{
 					extension = 1;
 
-					if (!isPV)
+					if (!isPV && !ttMove.isPromotion())
 					{
 						extension = 2;
 					}
