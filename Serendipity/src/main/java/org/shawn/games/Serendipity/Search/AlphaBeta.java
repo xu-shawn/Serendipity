@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
 import org.shawn.games.Serendipity.NNUE.*;
+import org.shawn.games.Serendipity.Search.Debug.Debugger;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -38,7 +39,7 @@ public class AlphaBeta implements Runnable
 	public static final int MIN_EVAL = -32767;
 	public static final int MATE_EVAL = 32700;
 	public static final int DRAW_EVAL = 0;
-	public static final int MAX_PLY = 256;
+	public static final int MAX_PLY = 245;
 
 	public static final int MATE_IN_MAX_PLY = MATE_EVAL - MAX_PLY;
 
@@ -172,7 +173,7 @@ public class AlphaBeta implements Runnable
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 		boolean ttHit = currentMoveEntry.hit() && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
-		Move ttMove = ttHit ? currentMoveEntry.getMove() : null;
+		final Move ttMove = ttHit ? currentMoveEntry.getMove() : null;
 
 		if (!isPV && ttHit && currentMoveEntry.getNodeType() != TranspositionTable.NODETYPE_NONE)
 		{
@@ -315,7 +316,8 @@ public class AlphaBeta implements Runnable
 		this.ss.get(ply + 2).killer = null;
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
-		boolean improving, isPV, inCheck, inSingularSearch, ttCapture;
+		boolean improving, isPV, inCheck, inSingularSearch;
+		boolean ttPV, ttCapture;
 		Move bestMove, ttMove;
 		int bestValue;
 		int eval;

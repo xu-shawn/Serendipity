@@ -126,7 +126,8 @@ public class MoveBackup
 		board.setEnPassant(getEnPassant());
 		board.setMoveCounter(getMoveCounter());
 		board.setHalfMoveCounter(getHalfMoveCounter());
-		Piece movingPiece = move.getPromotion() == Piece.NONE ? getMovingPiece() : move.getPromotion();
+		Piece movingPiece = move.getPromotion() == PieceType.NONE ? getMovingPiece()
+				: Piece.make(getSideToMove(), move.getPromotion());
 		board.getCastleRight().put(Side.WHITE, getCastleRight().get(Side.WHITE));
 		board.getCastleRight().put(Side.BLACK, getCastleRight().get(Side.BLACK));
 
@@ -139,7 +140,7 @@ public class MoveBackup
 				board.undoMovePiece(getRookCastleMove());
 			}
 			board.unsetPiece(movingPiece, getMove().getTo());
-			if (Piece.NONE.equals(getMove().getPromotion()))
+			if (PieceType.NONE.equals(getMove().getPromotion()))
 			{
 				board.setPiece(movingPiece, getMove().getFrom());
 			}

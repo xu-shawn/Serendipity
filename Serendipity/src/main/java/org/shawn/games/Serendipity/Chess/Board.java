@@ -222,7 +222,7 @@ public class Board implements Cloneable
 
 		if (move.isPromotion())
 		{
-			diff.addPiece(move.getPromotion(), move.getTo());
+			diff.addPiece(Piece.make(getSideToMove(), move.getPromotion()), move.getTo());
 		}
 		else
 		{
@@ -458,7 +458,7 @@ public class Board implements Cloneable
 	 */
 	protected Piece movePiece(Move move, MoveBackup backup)
 	{
-		return movePiece(move.getFrom(), move.getTo(), move.getPromotion(), backup);
+		return movePiece(move.getFrom(), move.getTo(), Piece.make(getSideToMove(), move.getPromotion()), backup);
 	}
 
 	/**
@@ -521,7 +521,7 @@ public class Board implements Cloneable
 	{
 		Square from = move.getFrom();
 		Square to = move.getTo();
-		Piece promotion = move.getPromotion();
+		Piece promotion = Piece.make(getSideToMove(), move.getPromotion());
 		Piece movingPiece = getPiece(to);
 
 		unsetPiece(movingPiece, to);
@@ -597,7 +597,7 @@ public class Board implements Cloneable
 	 * Returns the bitboard that represents all the pieces of a given side and type
 	 * present on the board.
 	 *
-	 * @param side the side for which the bitboard must be returned
+	 * @param side      the side for which the bitboard must be returned
 	 * @param pieceType the piece type for which the bitboard must be returned
 	 * @return the bitboard of the given piece definition
 	 */
@@ -1415,9 +1415,9 @@ public class Board implements Cloneable
 			return true;
 		}
 
-		if (!move.getPromotion().equals(Piece.NONE))
+		if (!move.getPromotion().equals(PieceType.NONE))
 		{
-			return isAttackedByPiece(move.getTo(), king, move.getPromotion().getPieceType(), newOcc);
+			return isAttackedByPiece(move.getTo(), king, move.getPromotion(), newOcc);
 		}
 
 		if (PieceType.KING.equals(moved))
@@ -1573,7 +1573,7 @@ public class Board implements Cloneable
 			}
 
 			boolean pawnPromoting = fromPiece.getPieceType().equals(PieceType.PAWN) && isPromoRank(side, move);
-			boolean hasPromoPiece = !move.getPromotion().equals(Piece.NONE);
+			boolean hasPromoPiece = !move.getPromotion().equals(PieceType.NONE);
 
 			if (hasPromoPiece != pawnPromoting)
 			{
@@ -2340,9 +2340,8 @@ public class Board implements Cloneable
 				: 0;
 
 		// Factor in the new piece's value and remove our promoted pawn
-		if (!Piece.NONE.equals(move.getPromotion()))
-			value += SEEPieceValues[move.getPromotion().getPieceType().ordinal()]
-					- SEEPieceValues[PieceType.PAWN.ordinal()];
+		if (move.isPromotion())
+			value += SEEPieceValues[move.getPromotion().ordinal()] - SEEPieceValues[PieceType.PAWN.ordinal()];
 
 		// Target square is encoded as empty for enpass moves
 		else if (PieceType.PAWN.equals(getPiece(move.getFrom()).getPieceType()) && getEnPassant().equals(move.getTo()))
@@ -2373,11 +2372,11 @@ public class Board implements Cloneable
 		from = move.getFrom();
 		to = move.getTo();
 
-		isPromotion = !Piece.NONE.equals(move.getPromotion());
+		isPromotion = move.isPromotion();
 		isEnPassant = PieceType.PAWN.equals(getPiece(from).getPieceType()) && getEnPassant().equals(to);
 
 		// Next victim is moved piece or promotion type
-		nextVictim = !isPromotion ? getPiece(from).getPieceType() : move.getPromotion().getPieceType();
+		nextVictim = !isPromotion ? getPiece(from).getPieceType() : move.getPromotion();
 
 		// Balance is the value of the move minus threshold. Function
 		// call takes care for Enpass, Promotion and Castling moves.

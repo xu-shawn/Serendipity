@@ -116,9 +116,9 @@ public class MovePicker
 
 	private int scoreMove(Move move)
 	{
-		if (!move.getPromotion().equals(Piece.NONE))
+		if (move.isPromotion())
 		{
-			return promoValue[move.getPromotion().getPieceType().ordinal()];
+			return promoValue[move.getPromotion().ordinal()];
 		}
 
 		if (!board.isQuiet(move))
