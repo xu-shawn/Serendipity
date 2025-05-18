@@ -17,6 +17,7 @@
 package org.shawn.games.Serendipity.Chess.move;
 
 import org.shawn.games.Serendipity.Chess.Piece;
+import org.shawn.games.Serendipity.Chess.PieceType;
 import org.shawn.games.Serendipity.Chess.Side;
 import org.shawn.games.Serendipity.Chess.Square;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +31,7 @@ public class Move
 {
 	private final Square from;
 	private final Square to;
-	private final Piece promotion;
+	private final PieceType promotion;
 	private int score;
 
 	/**
@@ -43,7 +44,7 @@ public class Move
 	 */
 	public Move(Square from, Square to)
 	{
-		this(from, to, Piece.NONE);
+		this(from, to, PieceType.NONE);
 	}
 
 	/**
@@ -54,7 +55,7 @@ public class Move
 	 * @param to        the destination square
 	 * @param promotion the promotion piece
 	 */
-	public Move(Square from, Square to, Piece promotion)
+	public Move(Square from, Square to, PieceType promotion)
 	{
 		this.promotion = promotion;
 		this.from = from;
@@ -76,9 +77,10 @@ public class Move
 	public Move(String move, Side side)
 	{
 		this(Square.valueOf(move.substring(0, 2).toUpperCase()), Square.valueOf(move.substring(2, 4).toUpperCase()),
-				move.length() < 5 ? Piece.NONE
-						: Side.WHITE.equals(side) ? Piece.fromFenSymbol(move.substring(4, 5).toUpperCase())
-								: Piece.fromFenSymbol(move.substring(4, 5).toLowerCase()));
+				move.length() < 5 ? PieceType.NONE
+						: Side.WHITE.equals(side)
+								? Piece.fromFenSymbol(move.substring(4, 5).toUpperCase()).getPieceType()
+								: Piece.fromFenSymbol(move.substring(4, 5).toLowerCase()).getPieceType());
 	}
 
 	/**
@@ -106,7 +108,7 @@ public class Move
 	 *
 	 * @return the promotion piece, or {@link Piece#NONE} if move is not a promotion
 	 */
-	public Piece getPromotion()
+	public PieceType getPromotion()
 	{
 		return promotion;
 	}
@@ -118,7 +120,7 @@ public class Move
 	 */
 	public boolean isPromotion()
 	{
-		return !Piece.NONE.equals(getPromotion());
+		return !PieceType.NONE.equals(getPromotion());
 	}
 
 	/**
@@ -160,10 +162,12 @@ public class Move
 	public String toString()
 	{
 		String promo = StringUtils.EMPTY;
-		if (!Piece.NONE.equals(promotion))
+
+		if (!PieceType.NONE.equals(promotion))
 		{
-			promo = promotion.getFenSymbol();
+			promo = promotion.getSanSymbol().toLowerCase();
 		}
+
 		return from.toString().toLowerCase() + to.toString().toLowerCase() + promo.toLowerCase();
 	}
 
@@ -185,5 +189,23 @@ public class Move
 	public void setScore(int score)
 	{
 		this.score = score;
+	}
+
+	public int asBytes()
+	{
+		int promotionBits = isPromotion() ? (0b1000 | (promotion.ordinal() - 1)) : 0;
+		return (promotionBits << 12) | (getFrom().ordinal() << 6) | getTo().ordinal();
+	}
+
+	public static Move fromBytes(int bytes)
+	{
+		PieceType promotion = PieceType.NONE;
+
+		if (bytes >> 12 != 0)
+		{
+			promotion = PieceType.values()[(bytes >> 12 & 0b11) + 1];
+		}
+
+		return new Move(Square.squareAt((bytes & 0b111111000000) >> 6), Square.squareAt(bytes & 0b111111), promotion);
 	}
 }

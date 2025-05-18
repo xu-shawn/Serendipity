@@ -22,6 +22,7 @@ package org.shawn.games.Serendipity;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 import org.shawn.games.Serendipity.Search.TranspositionTable;
@@ -39,20 +40,25 @@ public class TranspositionTableTest
 
 		assertFalse(tt.probe(0).hit());
 
-		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_EXACT, 12, 2, null, 0, true);
+		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_EXACT, 12, 2, null, 0);
+		assertNull(tt.probe(board.getIncrementalHashKey()).getMove());
 		assertEquals(12, tt.probe(board.getIncrementalHashKey()).getDepth());
 		assertEquals(2, tt.probe(board.getIncrementalHashKey()).getEvaluation());
 		assertTrue(tt.probe(board.getIncrementalHashKey()).verifySignature(board.getIncrementalHashKey()));
-		assertTrue(tt.probe(board.getIncrementalHashKey()).wasPV());
 
 		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_QS,
-				-6900, new Move(Square.E2, Square.E4), -200, false);
+				-6900, new Move(Square.E2, Square.E4), -200);
+		assertEquals(new Move(Square.E2, Square.E4), tt.probe(board.getIncrementalHashKey()).getMove());
 		assertEquals(TranspositionTable.NODETYPE_NONE, tt.probe(board.getIncrementalHashKey()).getNodeType());
 		assertEquals(TranspositionTable.DEPTH_QS, tt.probe(board.getIncrementalHashKey()).getDepth());
 		assertEquals(-6900, tt.probe(board.getIncrementalHashKey()).getEvaluation());
 		assertEquals(-200, tt.probe(board.getIncrementalHashKey()).getStaticEval());
 		assertTrue(tt.probe(board.getIncrementalHashKey()).getMove().equals(new Move(Square.E2, Square.E4)));
 		assertTrue(tt.probe(board.getIncrementalHashKey()).verifySignature(board.getIncrementalHashKey()));
-		assertFalse(tt.probe(board.getIncrementalHashKey()).wasPV());
+
+		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_QS,
+				-6900, new Move(Square.A7, Square.A8, PieceType.KNIGHT), -200);
+		assertEquals(new Move(Square.A7, Square.A8, PieceType.KNIGHT),
+				tt.probe(board.getIncrementalHashKey()).getMove());
 	}
 }

@@ -119,9 +119,8 @@ public class SEETest
 					: 0;
 
 			// Factor in the new piece's value and remove our promoted pawn
-			if (!Piece.NONE.equals(move.getPromotion()))
-				value += SEEPieceValues[move.getPromotion().getPieceType().ordinal()]
-						- SEEPieceValues[PieceType.PAWN.ordinal()];
+			if (move.isPromotion())
+				value += SEEPieceValues[move.getPromotion().ordinal()] - SEEPieceValues[PieceType.PAWN.ordinal()];
 
 			// Target square is encoded as empty for enpass moves
 			else if (PieceType.PAWN.equals(board.getPiece(move.getFrom()).getPieceType())
@@ -144,11 +143,11 @@ public class SEETest
 			from = move.getFrom();
 			to = move.getTo();
 
-			isPromotion = !Piece.NONE.equals(move.getPromotion());
+			isPromotion = move.isPromotion();
 			isEnPassant = PieceType.PAWN.equals(board.getPiece(from).getPieceType()) && board.getEnPassant().equals(to);
 
 			// Next victim is moved piece or promotion type
-			nextVictim = !isPromotion ? board.getPiece(from).getPieceType() : move.getPromotion().getPieceType();
+			nextVictim = !isPromotion ? board.getPiece(from).getPieceType() : move.getPromotion();
 
 			// Balance is the value of the move minus threshold. Function
 			// call takes care for Enpass, Promotion and Castling moves.

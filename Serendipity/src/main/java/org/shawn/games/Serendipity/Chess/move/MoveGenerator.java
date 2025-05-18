@@ -55,8 +55,8 @@ public class MoveGenerator
 			int sourceIndex = bitScanForward(pieces);
 			pieces = extractLsb(pieces);
 			Square sqSource = Square.squareAt(sourceIndex);
-			long attacks = Attacks.getPawnCaptures(side, sqSource.getBitboard(), board.getBitboard(), board.getEnPassantTarget())
-					& ~board.getBitboard(side);
+			long attacks = Attacks.getPawnCaptures(side, sqSource.getBitboard(), board.getBitboard(),
+					board.getEnPassantTarget()) & ~board.getBitboard(side);
 			while (attacks != 0L)
 			{
 				int targetIndex = bitScanForward(attacks);
@@ -101,25 +101,18 @@ public class MoveGenerator
 
 	private static void addPromotions(List<Move> moves, Side side, Square sqTarget, Square sqSource)
 	{
-		if (Side.WHITE.equals(side) && Rank.RANK_8.equals(sqTarget.getRank()))
+		if ((Side.WHITE.equals(side) && Rank.RANK_8.equals(sqTarget.getRank()))
+				|| (Side.BLACK.equals(side) && Rank.RANK_1.equals(sqTarget.getRank())))
 		{
-			moves.add(new Move(sqSource, sqTarget, Piece.WHITE_QUEEN));
-			moves.add(new Move(sqSource, sqTarget, Piece.WHITE_ROOK));
-			moves.add(new Move(sqSource, sqTarget, Piece.WHITE_BISHOP));
-			moves.add(new Move(sqSource, sqTarget, Piece.WHITE_KNIGHT));
-		}
-
-		else if (Side.BLACK.equals(side) && Rank.RANK_1.equals(sqTarget.getRank()))
-		{
-			moves.add(new Move(sqSource, sqTarget, Piece.BLACK_QUEEN));
-			moves.add(new Move(sqSource, sqTarget, Piece.BLACK_ROOK));
-			moves.add(new Move(sqSource, sqTarget, Piece.BLACK_BISHOP));
-			moves.add(new Move(sqSource, sqTarget, Piece.BLACK_KNIGHT));
+			moves.add(new Move(sqSource, sqTarget, PieceType.QUEEN));
+			moves.add(new Move(sqSource, sqTarget, PieceType.ROOK));
+			moves.add(new Move(sqSource, sqTarget, PieceType.BISHOP));
+			moves.add(new Move(sqSource, sqTarget, PieceType.KNIGHT));
 		}
 
 		else
 		{
-			moves.add(new Move(sqSource, sqTarget, Piece.NONE));
+			moves.add(new Move(sqSource, sqTarget, PieceType.NONE));
 		}
 	}
 
@@ -154,7 +147,7 @@ public class MoveGenerator
 				int attackIndex = bitScanForward(attacks);
 				attacks = extractLsb(attacks);
 				Square sqTarget = Square.squareAt(attackIndex);
-				moves.add(new Move(sqSource, sqTarget, Piece.NONE));
+				moves.add(new Move(sqSource, sqTarget, PieceType.NONE));
 			}
 		}
 	}
@@ -206,7 +199,7 @@ public class MoveGenerator
 				int attackIndex = bitScanForward(attacks);
 				attacks = extractLsb(attacks);
 				Square sqTarget = Square.squareAt(attackIndex);
-				moves.add(new Move(sqSource, sqTarget, Piece.NONE));
+				moves.add(new Move(sqSource, sqTarget, PieceType.NONE));
 			}
 		}
 	}
@@ -258,7 +251,7 @@ public class MoveGenerator
 				int attackIndex = bitScanForward(attacks);
 				attacks = extractLsb(attacks);
 				Square sqTarget = Square.squareAt(attackIndex);
-				moves.add(new Move(sqSource, sqTarget, Piece.NONE));
+				moves.add(new Move(sqSource, sqTarget, PieceType.NONE));
 			}
 		}
 	}
@@ -312,7 +305,7 @@ public class MoveGenerator
 				int attackIndex = bitScanForward(attacks);
 				attacks = extractLsb(attacks);
 				Square sqTarget = Square.squareAt(attackIndex);
-				moves.add(new Move(sqSource, sqTarget, Piece.NONE));
+				moves.add(new Move(sqSource, sqTarget, PieceType.NONE));
 			}
 		}
 	}
@@ -366,7 +359,7 @@ public class MoveGenerator
 				int attackIndex = bitScanForward(attacks);
 				attacks = extractLsb(attacks);
 				Square sqTarget = Square.squareAt(attackIndex);
-				moves.add(new Move(sqSource, sqTarget, Piece.NONE));
+				moves.add(new Move(sqSource, sqTarget, PieceType.NONE));
 			}
 		}
 	}
@@ -451,8 +444,7 @@ public class MoveGenerator
 	}
 
 	/**
-	 * Generates all possible pseudo-legal captures for the given
-	 * position.
+	 * Generates all possible pseudo-legal captures for the given position.
 	 * <p>
 	 * A move is considered a pseudo-legal capture when it takes an enemy piece and
 	 * it is legal according to the standard rules of chess piece movements, but the
@@ -474,8 +466,8 @@ public class MoveGenerator
 	}
 
 	/**
-	 * Generates all possible legal moves for the position according to
-	 * the standard rules of chess.
+	 * Generates all possible legal moves for the position according to the standard
+	 * rules of chess.
 	 *
 	 * @param board the board from which to generate the legal moves
 	 * @param moves the list to write generated moves to

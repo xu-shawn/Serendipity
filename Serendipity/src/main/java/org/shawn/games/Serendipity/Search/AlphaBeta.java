@@ -173,7 +173,6 @@ public class AlphaBeta implements Runnable
 
 		TranspositionTable.Entry currentMoveEntry = sharedThreadData.tt.probe(board.getIncrementalHashKey());
 		boolean ttHit = currentMoveEntry.hit() && currentMoveEntry.verifySignature(board.getIncrementalHashKey());
-		final boolean ttPV = isPV | (currentMoveEntry.hit() && currentMoveEntry.wasPV());
 		final Move ttMove = ttHit ? currentMoveEntry.getMove() : null;
 
 		if (!isPV && ttHit && currentMoveEntry.getNodeType() != TranspositionTable.NODETYPE_NONE)
@@ -234,7 +233,7 @@ public class AlphaBeta implements Runnable
 				bestScore = sse.staticEval = evaluate(board);
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 						TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_NONE, VALUE_NONE, null,
-						sse.staticEval, ttPV);
+						sse.staticEval);
 			}
 
 			alpha = Math.max(alpha, sse.staticEval);
@@ -297,14 +296,14 @@ public class AlphaBeta implements Runnable
 		{
 			sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 					TranspositionTable.NODETYPE_LOWERBOUND, TranspositionTable.DEPTH_QS, bestScore, bestMove,
-					sse.staticEval, ttPV);
+					sse.staticEval);
 		}
 
 		else
 		{
 			sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 					TranspositionTable.NODETYPE_UPPERBOUND, TranspositionTable.DEPTH_QS, bestScore, ttMove,
-					sse.staticEval, ttPV);
+					sse.staticEval);
 		}
 
 		return bestScore;
@@ -404,7 +403,6 @@ public class AlphaBeta implements Runnable
 
 		ttMove = sse.ttHit ? currentMoveEntry.getMove() : null;
 		ttCapture = ttMove != null && !board.isQuiet(ttMove);
-		ttPV = isPV | (currentMoveEntry.hit() && currentMoveEntry.wasPV());
 
 		if (inCheck)
 		{
@@ -446,7 +444,7 @@ public class AlphaBeta implements Runnable
 
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
 						TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_NONE, VALUE_NONE, null,
-						sse.staticEval, ttPV);
+						sse.staticEval);
 			}
 		}
 
@@ -641,7 +639,6 @@ public class AlphaBeta implements Runnable
 			if (sse.moveCount > 1 + (ply == 0 ? 1 : 0) && depth > 2)
 			{
 				r -= isPV ? 1 : 0;
-				r -= (ttPV && depth >= 6) ? 1 : 0;
 				r -= givesCheck ? 1 : 0;
 				r -= !isQuiet ? 1 : 0;
 				r += cutNode ? 1 : 0;
@@ -744,19 +741,19 @@ public class AlphaBeta implements Runnable
 			if (alpha >= beta)
 			{
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
-						TranspositionTable.NODETYPE_LOWERBOUND, depth, bestValue, bestMove, sse.staticEval, ttPV);
+						TranspositionTable.NODETYPE_LOWERBOUND, depth, bestValue, bestMove, sse.staticEval);
 			}
 
 			else if (alpha == oldAlpha)
 			{
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
-						TranspositionTable.NODETYPE_UPPERBOUND, depth, bestValue, ttMove, sse.staticEval, ttPV);
+						TranspositionTable.NODETYPE_UPPERBOUND, depth, bestValue, ttMove, sse.staticEval);
 			}
 
 			else if (alpha > oldAlpha)
 			{
 				sharedThreadData.tt.write(currentMoveEntry, board.getIncrementalHashKey(),
-						TranspositionTable.NODETYPE_EXACT, depth, bestValue, bestMove, sse.staticEval, ttPV);
+						TranspositionTable.NODETYPE_EXACT, depth, bestValue, bestMove, sse.staticEval);
 			}
 		}
 

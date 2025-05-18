@@ -211,10 +211,10 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 			san.append("x");
 		}
 		san.append(move.getTo().toString().toLowerCase());
-		if (!move.getPromotion().equals(Piece.NONE))
+		if (!move.getPromotion().equals(PieceType.NONE))
 		{
 			san.append("=");
-			san.append(notation.apply(move.getPromotion()));
+			san.append(notation.apply(Piece.make(board.getSideToMove(), move.getPromotion())));
 		}
 		addCheckFlag(board, san);
 		return san.toString();
@@ -236,7 +236,7 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 		}
 	}
 
-	private static long findLegalSquares(Board board, Square to, Piece promotion, long pieces)
+	private static long findLegalSquares(Board board, Square to, PieceType promotion, long pieces)
 	{
 		long result = 0L;
 
@@ -753,9 +753,9 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 		{
 			throw new MoveConversionException("Couldn't parse destination square[" + san + "]: " + san.toUpperCase());
 		}
-		Piece promotion = StringUtils.isEmpty(strPromotion) ? Piece.NONE
-				: Piece.fromFenSymbol(
-						side.equals(Side.WHITE) ? strPromotion.toUpperCase() : strPromotion.toLowerCase());
+		PieceType promotion = StringUtils.isEmpty(strPromotion) ? PieceType.NONE
+				: Piece.fromFenSymbol(side.equals(Side.WHITE) ? strPromotion.toUpperCase() : strPromotion.toLowerCase())
+						.getPieceType();
 
 		if (san.length() == 2)
 		{ // is pawn move
@@ -860,6 +860,7 @@ public class MoveList extends LinkedList<Move> implements List<Move>
 		{
 			throw new MoveConversionException("Couldn't parse 'from' square " + san + " to setup: " + board.getFen());
 		}
+
 		return new Move(from, to, promotion);
 	}
 
