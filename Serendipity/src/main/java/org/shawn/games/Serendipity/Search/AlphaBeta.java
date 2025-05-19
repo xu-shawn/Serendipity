@@ -578,7 +578,7 @@ public class AlphaBeta implements Runnable
 
 			int extension = 0;
 
-			if (!inSingularSearch && ply > 0 && sse.ttHit && move.equals(ttMove) && depth >= 4
+			if (!inSingularSearch && ply > 0 && sse.ttHit && move.equals(ttMove) && !ttMove.isPromotion() && depth >= 4
 					&& Math.abs(currentMoveEntry.getEvaluation()) < MATE_IN_MAX_PLY
 					&& (currentMoveEntry.getNodeType() == TranspositionTable.NODETYPE_EXACT
 							|| currentMoveEntry.getNodeType() == TranspositionTable.NODETYPE_LOWERBOUND)
@@ -597,7 +597,7 @@ public class AlphaBeta implements Runnable
 				{
 					extension = 1;
 
-					if (!isPV && !ttMove.isPromotion())
+					if (!isPV)
 					{
 						extension = 2;
 					}
