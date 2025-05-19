@@ -23,7 +23,6 @@ import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
 import org.shawn.games.Serendipity.NNUE.*;
-import org.shawn.games.Serendipity.Search.Debug.Debugger;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -317,7 +316,7 @@ public class AlphaBeta implements Runnable
 		this.threadData.selDepth = Math.max(this.threadData.selDepth, ply);
 
 		boolean improving, isPV, inCheck, inSingularSearch;
-		boolean ttPV, ttCapture;
+		boolean ttCapture;
 		Move bestMove, ttMove;
 		int bestValue;
 		int eval;
