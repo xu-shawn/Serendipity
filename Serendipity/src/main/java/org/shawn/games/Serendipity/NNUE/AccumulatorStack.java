@@ -137,6 +137,23 @@ public class AccumulatorStack
 					long removed = oldBB & ~newBB;
 					long added = newBB & ~oldBB;
 
+					while (added != 0L && removed != 0L)
+					{
+						final Square sqRemoved = Square.squareAt(Bitboard.bitScanForward(removed));
+						final int removedIndex = NNUE.getIndex(sqRemoved, piece, this.color)
+								+ kingBucket * NNUE.FEATURE_SIZE;
+
+						final Square sqAdded = Square.squareAt(Bitboard.bitScanForward(added));
+						final int addedIndex = NNUE.getIndex(sqAdded, piece, this.color)
+								+ kingBucket * NNUE.FEATURE_SIZE;
+
+						INFERENCE.addSub(entry.storedAccumulator, entry.storedAccumulator,
+								network.L1Weights[addedIndex], network.L1Weights[removedIndex]);
+
+						removed = Bitboard.extractLsb(removed);
+						added = Bitboard.extractLsb(added);
+					}
+
 					while (removed != 0L)
 					{
 						final Square sq = Square.squareAt(Bitboard.bitScanForward(removed));
