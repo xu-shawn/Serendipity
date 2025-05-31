@@ -58,7 +58,7 @@ public class TranspositionTableTest
 
 		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_QS,
 				-6900, new Move(Square.A7, Square.A8, PieceType.KNIGHT), -200);
-		// assertEquals(new Move(Square.A7, Square.A8, PieceType.KNIGHT),
-		// tt.probe(board.getIncrementalHashKey()).getMove());
+		assertEquals(new Move(Square.A7, Square.A8, PieceType.KNIGHT),
+				tt.probe(board.getIncrementalHashKey()).getMove());
 	}
 }
