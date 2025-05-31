@@ -24,11 +24,11 @@ import org.shawn.games.Serendipity.Chess.Piece;
 
 public class WDLModel
 {
-	private final static double[] as = { -117.29796837, 388.52982654, -512.96172771, 477.99147478 };
-	private final static double[] bs = { -47.75093113, 118.81734426, -33.05800930, 94.01690687 };
+	private final static double[] as = { -278.87388531, 792.92105507, -790.09312301, 502.89054650 };
+	private final static double[] bs = { -84.42811086, 271.38296047, -230.42218354, 118.07436762 };
 
 	@SuppressWarnings("unused")
-	private final static int NormalizeToPawnValue = 236;
+	private final static int NormalizeToPawnValue = 227;
 
 	private final static int PAWN_VALUE = 1;
 	private final static int KNIGHT_VALUE = 3;
