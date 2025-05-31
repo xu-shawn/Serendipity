@@ -48,8 +48,6 @@ public class MovePicker
 	private static final int STAGE_QSEARCH_TT = 2;
 	private static final int STAGE_QSEARCH_CAPTURE = 3;
 
-	private static final int[] promoValue = { -2000000001, 2000000000, -2000000001, -2000000001, 2000000001 };
-
 	public MovePicker(Board board, Move ttMove)
 	{
 		this(board, ttMove, null, null, null, null);
@@ -116,11 +114,6 @@ public class MovePicker
 
 	private int scoreMove(Move move)
 	{
-		if (move.isPromotion())
-		{
-			return promoValue[move.getPromotion().ordinal()];
-		}
-
 		if (!board.isQuiet(move))
 		{
 			int score = board.staticExchangeEvaluation(move, -20) ? 900000000 : -1000000;
