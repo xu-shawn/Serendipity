@@ -56,9 +56,29 @@ public class TranspositionTableTest
 		assertTrue(tt.probe(board.getIncrementalHashKey()).getMove().equals(new Move(Square.E2, Square.E4)));
 		assertTrue(tt.probe(board.getIncrementalHashKey()).verifySignature(board.getIncrementalHashKey()));
 
+		for (int i = 0; i < 32; i++)
+		{
+			assertEquals(TranspositionTable.AGE_INCREMENT * i,
+					tt.probe(board.getIncrementalHashKey()).getRelativeAge());
+			tt.incrementAge();
+		}
+
+		tt.incrementAge();
+		tt.incrementAge();
+
 		tt.write(null, board.getIncrementalHashKey(), TranspositionTable.NODETYPE_NONE, TranspositionTable.DEPTH_QS,
 				-6900, new Move(Square.A7, Square.A8, PieceType.KNIGHT), -200);
 		assertEquals(new Move(Square.A7, Square.A8, PieceType.KNIGHT),
 				tt.probe(board.getIncrementalHashKey()).getMove());
+
+		for (int i = 0; i < 5; i++)
+			tt.incrementAge();
+
+		assertEquals(TranspositionTable.AGE_INCREMENT * 5, tt.probe(board.getIncrementalHashKey()).getRelativeAge());
+
+		for (int i = 0; i < 15; i++)
+			tt.incrementAge();
+
+		assertEquals(TranspositionTable.AGE_INCREMENT * 20, tt.probe(board.getIncrementalHashKey()).getRelativeAge());
 	}
 }

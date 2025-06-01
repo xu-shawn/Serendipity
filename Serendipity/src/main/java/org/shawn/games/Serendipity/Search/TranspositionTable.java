@@ -21,8 +21,7 @@ package org.shawn.games.Serendipity.Search;
 
 import java.util.Arrays;
 
-import org.shawn.games.Serendipity.Chess.Square;
-import org.shawn.games.Serendipity.Chess.move.*;
+import org.shawn.games.Serendipity.Chess.move.Move;
 
 public class TranspositionTable
 {
@@ -35,6 +34,10 @@ public class TranspositionTable
 	public static final int DEPTH_NONE = -3;
 	public static final int DEPTH_QS = -1;
 
+	public static final byte AGE_INCREMENT = 1 << 3;
+	public static final int GENERATION_CYCLE = 1 << 8;
+	public static final int GENERATION_MASK = GENERATION_CYCLE - 1;
+
 	public class Entry
 	{
 		private final int signature;
@@ -42,6 +45,7 @@ public class TranspositionTable
 		private final int type;
 		private final int evaluation;
 		private final int staticEval;
+		private final int relativeAge;
 		private final Move move;
 		private final boolean hit;
 
@@ -49,10 +53,11 @@ public class TranspositionTable
 		{
 			this(fragment1 & 0b11, (fragment1 >>> 8) + DEPTH_OFFSET, (int) (fragment2 & 0xFFFF),
 					(int) (fragment2 & 0xFFFF0000) >> 16, (short) ((fragment2 & 0xFFFF00000000L) >>> 32),
-					(int) (fragment2 >> 48), (fragment1 != 0) && (fragment2 != 0));
+					(byte) (fragment1 & 0b11111000), (int) (fragment2 >> 48), (fragment1 != 0) && (fragment2 != 0));
 		}
 
-		public Entry(int nodeType, int depth, int signature, int move, int staticEval, int evaluation, boolean hit)
+		public Entry(int nodeType, int depth, int signature, int move, int staticEval, byte ttAge, int evaluation,
+				boolean hit)
 		{
 			this.signature = signature;
 			this.depth = depth;
@@ -60,6 +65,7 @@ public class TranspositionTable
 			this.move = move == 0 ? null : Move.fromBytes(move);
 			this.evaluation = evaluation;
 			this.staticEval = staticEval;
+			this.relativeAge = (age - ttAge + GENERATION_CYCLE) & GENERATION_MASK;
 			this.hit = hit;
 		}
 
@@ -93,6 +99,11 @@ public class TranspositionTable
 			return staticEval;
 		}
 
+		public int getRelativeAge()
+		{
+			return relativeAge;
+		}
+
 		public Move getMove()
 		{
 			return move;
@@ -108,8 +119,8 @@ public class TranspositionTable
 	private int mask;
 
 	// depth (0-255): 8 bits
-	// unused: 5 bits
-	// ttPV: 1 bit
+	// age: 5 bits
+	// unused: 1 bit
 	// nodeType: 2 bits
 
 	private short[] data1;
@@ -120,6 +131,8 @@ public class TranspositionTable
 	// signature: 16 bits
 
 	private long[] data2;
+
+	private byte age = 0;
 
 	private static final int ENTRY_SIZE = 10;
 
@@ -144,10 +157,10 @@ public class TranspositionTable
 	public void write(Entry entry, long hash, int nodeType, int depth, int evaluation, Move move, int staticEval)
 	{
 		if (entry == null || !entry.hit() || nodeType == NODETYPE_EXACT || !entry.verifySignature(hash)
-				|| depth > entry.getDepth() - 4)
+				|| depth > entry.getDepth() - 4 || entry.getRelativeAge() != 0)
 		{
 			final int writtenDepth = depth - DEPTH_OFFSET;
-			final short fragment1 = (short) (nodeType | (writtenDepth << 8));
+			final short fragment1 = (short) (nodeType | age | (writtenDepth << 8));
 			final long fragment2 = (hash >>> 48) | ((move == null) ? 0 : move.asBytes() << 16)
 					| ((staticEval & 0xFFFFL) << 32) | ((long) evaluation << 48);
 
@@ -169,6 +182,11 @@ public class TranspositionTable
 		this.mask = this.size - 1;
 		this.data1 = new short[this.size];
 		this.data2 = new long[this.size];
+	}
+
+	public void incrementAge()
+	{
+		this.age += AGE_INCREMENT;
 	}
 
 	public int hashfull()
