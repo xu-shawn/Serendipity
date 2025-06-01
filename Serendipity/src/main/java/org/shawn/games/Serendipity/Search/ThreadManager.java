@@ -123,6 +123,7 @@ public class ThreadManager
 			return;
 		}
 
+		tt.incrementAge();
 		initThreads(board, limits);
 
 		try
