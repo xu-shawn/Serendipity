@@ -2,7 +2,7 @@ name: Serendipity
 
 on:
   push:
-	  branches:
+		branches:
 			- master
 			- ci
 	pull_request:
