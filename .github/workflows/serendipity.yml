@@ -11,4 +11,4 @@ on:
 
 jobs:
   Build:
-    uses: ./github/workflow/serendipity/build.yml
+    uses: ./github/workflow/build.yml
