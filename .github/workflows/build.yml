@@ -22,10 +22,10 @@ jobs:
           cache: maven
 
       - name: Check Java version
-        run: java -v
+        run: java --version
 
       - name: Check Maven version
-        run: mvn -v
+        run: mvn --version
 
       - name: Build
         run: make
