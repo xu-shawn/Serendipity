@@ -1,25 +1,25 @@
 name: Build
 
 on:
-	workflow_call:
+  workflow_call:
 
 jobs:
-	build:
-		strategy:
-			fail-fast: false
-		runs-on: ubuntu-latest
-		steps:
-			- name: Checkout repo
-				uses: actions/checkout@v4
-					with:
-						persist-credentials: false
+  build:
+    strategy:
+      fail-fast: false
+      runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+          with:
+            persist-credentials: false
 
-			- name: Set up Java
-			- uses: actions/setup-java@v4
-				with:
-					distribution: 'temurin'
-					java-version: '21'
-					cache: maven
+      - name: Set up Java
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
 
-			- name: Build
-				run: make
+      - name: Build
+        run: make
