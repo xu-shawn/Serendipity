@@ -9,6 +9,6 @@ on:
     branches:
       - master
 
-job:
+jobs:
   Build:
     - uses: ./github/workflow/serendipity/build.yml
