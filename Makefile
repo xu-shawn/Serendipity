@@ -39,3 +39,4 @@ ifdef EVALFILE
 	cp $(EVALFILE) $(EMBEDDED_NET_LOCATION)
 else
 	wget -O $(EMBEDDED_NET_LOCATION) https://github.com/xu-shawn/Serendipity-Networks/raw/main/$(NET_NAME)
+endif
