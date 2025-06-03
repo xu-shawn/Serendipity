@@ -1,0 +1,14 @@
+name: Serendipity
+
+on:
+  push:
+	  branches:
+			- master
+			- ci
+	pull_request:
+    branches:
+			- master
+
+job:
+	Build:
+		- uses: ./github/workflow/serendipity/build.yml
