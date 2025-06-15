@@ -36,7 +36,7 @@ public class TranspositionTable
 
 	public static final byte AGE_INCREMENT = 1 << 3;
 	public static final int GENERATION_CYCLE = 1 << 8;
-	public static final int GENERATION_MASK = GENERATION_CYCLE - 1;
+	public static final int GENERATION_MASK = GENERATION_CYCLE - 1 & ~(AGE_INCREMENT - 1);
 
 	public class Entry
 	{
@@ -160,7 +160,7 @@ public class TranspositionTable
 				|| depth > entry.getDepth() - 4 || entry.getRelativeAge() != 0)
 		{
 			final int writtenDepth = depth - DEPTH_OFFSET;
-			final short fragment1 = (short) (nodeType | age | (writtenDepth << 8));
+			final short fragment1 = (short) ((writtenDepth << 8) | nodeType | age);
 			final long fragment2 = (hash >>> 48) | ((move == null) ? 0 : move.asBytes() << 16)
 					| ((staticEval & 0xFFFFL) << 32) | ((long) evaluation << 48);
 
