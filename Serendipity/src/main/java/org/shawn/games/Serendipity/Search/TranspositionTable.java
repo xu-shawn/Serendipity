@@ -46,6 +46,7 @@ public class TranspositionTable
 		private final int evaluation;
 		private final int staticEval;
 		private final int relativeAge;
+		private final byte age;
 		private final Move move;
 		private final boolean hit;
 
@@ -66,6 +67,7 @@ public class TranspositionTable
 			this.move = move == 0 ? null : Move.fromBytes(move);
 			this.evaluation = evaluation;
 			this.staticEval = staticEval;
+			this.age = ttAge;
 			this.relativeAge = (age - ttAge + GENERATION_CYCLE) & GENERATION_MASK;
 			this.hit = hit;
 		}
@@ -158,7 +160,7 @@ public class TranspositionTable
 	public void write(Entry entry, long hash, int nodeType, int depth, int evaluation, Move move, int staticEval)
 	{
 		if (entry == null || !entry.hit() || nodeType == NODETYPE_EXACT || !entry.verifySignature(hash)
-				|| depth > entry.getDepth() - 4 || entry.getRelativeAge() != 0)
+				|| depth > entry.getDepth() - 4)
 		{
 			final int writtenDepth = depth - DEPTH_OFFSET;
 			final short fragment1 = (short) ((writtenDepth << 8) | nodeType | age);
