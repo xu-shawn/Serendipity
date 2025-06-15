@@ -53,7 +53,8 @@ public class TranspositionTable
 		{
 			this(fragment1 & 0b11, (fragment1 >>> 8) + DEPTH_OFFSET, (int) (fragment2 & 0xFFFF),
 					(int) (fragment2 & 0xFFFF0000) >> 16, (short) ((fragment2 & 0xFFFF00000000L) >>> 32),
-					(byte) (fragment1 & 0b11111000), (int) (fragment2 >> 48), (fragment1 != 0) && (fragment2 != 0));
+					(byte) (fragment1 & GENERATION_MASK), (int) (fragment2 >> 48),
+					(fragment1 != 0) && (fragment2 != 0));
 		}
 
 		public Entry(int nodeType, int depth, int signature, int move, int staticEval, byte ttAge, int evaluation,
