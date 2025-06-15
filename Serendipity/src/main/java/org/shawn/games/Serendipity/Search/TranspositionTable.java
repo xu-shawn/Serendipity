@@ -36,7 +36,7 @@ public class TranspositionTable
 
 	public static final byte AGE_INCREMENT = 1 << 3;
 	public static final int GENERATION_CYCLE = 1 << 8;
-	public static final int GENERATION_MASK = GENERATION_CYCLE - 1 & ~(AGE_INCREMENT - 1);
+	public static final int GENERATION_MASK = (GENERATION_CYCLE - 1) & ~(AGE_INCREMENT - 1);
 
 	public class Entry
 	{
