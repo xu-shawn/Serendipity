@@ -135,7 +135,7 @@ Serendipity depends on the following libraries:
 
 Serendipity's neural network is trained using [bullet][bullet_url] and on open data generously provided by the [Leela Chess Zero][lc0_url] project.
 
-Testing Serendipity requires thosands of hours of compute, so thanks to everyone on our [OpenBench instance][furybench_url] for their contributions, however big or small.
+Testing Serendipity requires thousands of hours of compute, so thanks to everyone on our [OpenBench instance][furybench_url] for their contributions, however big or small.
 The names of these people are listed below, by alphabetical order:
 - [ArjunBasandrai][ArjunBasandrai]
 - [aronpetko][aronpetko]
