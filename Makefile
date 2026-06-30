@@ -17,7 +17,7 @@
 
 EXE ?= Serendipity-Dev
 EMBEDDED_NET_LOCATION := ./Serendipity/src/main/resources/embedded.nnue
-NET_NAME := net1.nnue
+NET_NAME := net2_candidate_7.nnue
 MAVEN_EXE ?= mvn
 
 MAVEN_COMMAND_PREFIX :=
