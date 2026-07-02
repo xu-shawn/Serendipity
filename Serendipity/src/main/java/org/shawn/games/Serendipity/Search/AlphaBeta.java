@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
 import org.shawn.games.Serendipity.NNUE.*;
+import org.shawn.games.Serendipity.PeSTO.*;
 import org.shawn.games.Serendipity.Search.History.History;
 import org.shawn.games.Serendipity.Search.Listener.FinalReport;
 import org.shawn.games.Serendipity.Search.Listener.ISearchListener;
@@ -108,7 +109,7 @@ public class AlphaBeta implements Runnable
 
 	public int evaluate(Board board)
 	{
-		int v = NNUE.evaluate(board, sharedThreadData.network, accumulators);
+		int v = PeSTO.evaluate(board);
 
 		final int material = Long
 				.bitCount(board.getBitboard(Piece.WHITE_BISHOP) | board.getBitboard(Piece.BLACK_BISHOP)) * 3

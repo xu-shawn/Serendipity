@@ -375,7 +375,7 @@ public class PeSTO
 	public static int evaluate(Board board)
 	{
 		int gamePhase = Math.min(MAX_PHASE, gamePhase(board));
-		return middleGameEval(board) * gamePhase + endGameEval(board) * (MAX_PHASE - gamePhase)
-				+ bishopPairAdjustment(board) + TEMPO * MAX_PHASE;
+		return (middleGameEval(board) * gamePhase + endGameEval(board) * (MAX_PHASE - gamePhase)
+				+ bishopPairAdjustment(board) + TEMPO * MAX_PHASE) / MAX_PHASE;
 	}
 }
